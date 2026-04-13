@@ -9,7 +9,10 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as folders from "../folders.js";
+import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
+import type * as tweets from "../tweets.js";
 import type * as users from "../users.js";
 
 import type {
@@ -28,7 +31,10 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  folders: typeof folders;
+  helpers: typeof helpers;
   http: typeof http;
+  tweets: typeof tweets;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
