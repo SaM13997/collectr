@@ -89,7 +89,7 @@ export function LoginForm({
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="flex flex-col items-center gap-2 font-medium">
-              <div className="flex size-8 items-center justify-center rounded-md">
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-brand text-brand-foreground shadow-sm">
                 <FolderTree className="size-6" />
               </div>
               <span className="sr-only">Collectr</span>
@@ -129,7 +129,7 @@ export function LoginForm({
             />
           </Field>
           {errorMessage ? (
-            <FieldDescription className="text-center text-sm text-red-300">
+            <FieldDescription className="text-center text-sm text-destructive">
               {errorMessage}
             </FieldDescription>
           ) : null}
@@ -147,7 +147,7 @@ export function LoginForm({
             {mode === "signIn" ? "Need an account?" : "Already have an account?"}{" "}
             <button
               type="button"
-              className="font-medium text-sky-400 transition hover:text-sky-300"
+              className="font-medium text-brand transition hover:text-brand/80"
               onClick={() => {
                 setMode(mode === "signIn" ? "signUp" : "signIn");
                 setErrorMessage(null);

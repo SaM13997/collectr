@@ -18,7 +18,7 @@ export function UserButton() {
 
   if (isPending) {
     return (
-      <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
+      <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
     );
   }
 
@@ -44,10 +44,15 @@ export function UserButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+        <Button
+          variant="ghost"
+          className="relative h-10 w-10 rounded-full border border-border/70 bg-background/70 p-0 shadow-sm"
+        >
           <Avatar className="h-10 w-10">
             <AvatarImage src={user.image ?? ""} alt={user.name ?? "User"} />
-            <AvatarFallback>{initials}</AvatarFallback>
+            <AvatarFallback className="bg-brand/12 text-brand">
+              {initials}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -61,7 +66,11 @@ export function UserButton() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          variant="destructive"
+          className="cursor-pointer"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

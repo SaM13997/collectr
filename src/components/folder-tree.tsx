@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ChevronDown,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FolderNode {
   _id: Id<"folders">;
@@ -37,7 +38,30 @@ function buildTree(folders: FolderNode[]) {
   return children;
 }
 
-export function FolderTree({ currentFolderId }: { currentFolderId?: string }) {
+function branchContainsFolder(
+  tree: Map<string | null, FolderNode[]>,
+  folderId: string,
+  targetFolderId?: string
+): boolean {
+  if (!targetFolderId) {
+    return false;
+  }
+
+  if (folderId === targetFolderId) {
+    return true;
+  }
+
+  const children = tree.get(folderId) ?? [];
+  return children.some((child) => branchContainsFolder(tree, child._id, targetFolderId));
+}
+
+export function FolderTree({
+  currentFolderId,
+  onNavigate,
+}: {
+  currentFolderId?: string;
+  onNavigate?: () => void;
+}) {
   const data = useQuery(api.folders.listTree);
   const createFolder = useMutation(api.folders.create);
 
@@ -46,11 +70,11 @@ export function FolderTree({ currentFolderId }: { currentFolderId?: string }) {
 
   if (!data) {
     return (
-      <div className="space-y-2">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-8 animate-pulse rounded bg-white/5" />
-        ))}
-      </div>
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+          <div key={i} className="h-8 animate-pulse rounded bg-muted" />
+          ))}
+        </div>
     );
   }
 
@@ -68,16 +92,25 @@ export function FolderTree({ currentFolderId }: { currentFolderId?: string }) {
     <nav className="space-y-1">
       <Link
         to="/"
-        className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
+        className={cn(
+          "flex min-h-11 items-center gap-2 rounded-[1rem] px-3 py-2 text-sm transition",
           !currentFolderId
-            ? "bg-white/10 text-white"
-            : "text-zinc-400 hover:bg-white/5 hover:text-white"
-        }`}
+            ? "bg-brand text-brand-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+        )}
+        onClick={onNavigate}
       >
         <Inbox className="size-4" />
         <span className="flex-1">Inbox</span>
         {inboxCount > 0 ? (
-          <span className="text-xs tabular-nums text-zinc-500">{inboxCount}</span>
+          <span
+            className={cn(
+              "text-xs tabular-nums",
+              !currentFolderId ? "text-brand-foreground/75" : "text-muted-foreground"
+            )}
+          >
+            {inboxCount}
+          </span>
         ) : null}
       </Link>
 
@@ -87,6 +120,7 @@ export function FolderTree({ currentFolderId }: { currentFolderId?: string }) {
           folder={folder}
           tree={tree}
           currentFolderId={currentFolderId}
+          onNavigate={onNavigate}
           depth={0}
         />
       ))}
@@ -119,7 +153,7 @@ export function FolderTree({ currentFolderId }: { currentFolderId?: string }) {
       ) : (
         <button
           onClick={() => setIsCreating(true)}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-500 transition hover:bg-white/5 hover:text-zinc-300"
+          className="flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
         >
           <Plus className="size-4" />
           <span>New folder</span>
@@ -133,11 +167,13 @@ function FolderItem({
   folder,
   tree,
   currentFolderId,
+  onNavigate,
   depth,
 }: {
   folder: FolderNode;
   tree: Map<string | null, FolderNode[]>;
   currentFolderId?: string;
+  onNavigate?: () => void;
   depth: number;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -150,6 +186,10 @@ function FolderItem({
   const children = tree.get(folder._id) ?? [];
   const isActive = currentFolderId === folder._id;
   const hasChildren = children.length > 0;
+  const containsActiveChild = children.some((child) =>
+    branchContainsFolder(tree, child._id, currentFolderId)
+  );
+  const isExpanded = expanded || containsActiveChild;
 
   const handleRename = async () => {
     if (!renameValue.trim() || renameValue.trim() === folder.name) {
@@ -164,19 +204,23 @@ function FolderItem({
   return (
     <div>
       <div
-        className={`group flex items-center gap-1 rounded-lg px-3 py-2 text-sm transition ${
+        className={cn(
+          "group flex min-h-11 items-center gap-1 rounded-[1rem] px-3 py-2 text-sm transition",
           isActive
-            ? "bg-white/10 text-white"
-            : "text-zinc-400 hover:bg-white/5 hover:text-white"
-        }`}
+            ? "bg-brand text-brand-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+        )}
         style={{ paddingLeft: `${(depth + 1) * 12 + 12}px` }}
       >
         {hasChildren ? (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="shrink-0 text-zinc-500 hover:text-white"
+            className={cn(
+              "shrink-0 transition",
+              isActive ? "text-brand-foreground/80" : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            {expanded ? (
+            {isExpanded ? (
               <ChevronDown className="size-3" />
             ) : (
               <ChevronRight className="size-3" />
@@ -187,9 +231,9 @@ function FolderItem({
         )}
 
         {isActive ? (
-          <FolderOpen className="size-4 shrink-0 text-sky-400" />
+          <FolderOpen className="size-4 shrink-0 text-brand-foreground" />
         ) : (
-          <Folder className="size-4 shrink-0" />
+          <Folder className="size-4 shrink-0 text-brand" />
         )}
 
         {isRenaming ? (
@@ -219,14 +263,20 @@ function FolderItem({
             to="/folders/$folderId"
             params={{ folderId: folder._id }}
             className="min-w-0 flex-1 truncate"
+            onClick={onNavigate}
           >
             {folder.name}
           </Link>
         )}
 
-        <span className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+        <span className="flex items-center gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
           {folder.tweetCount > 0 ? (
-            <span className="text-xs tabular-nums text-zinc-500">
+            <span
+              className={cn(
+                "text-xs tabular-nums",
+                isActive ? "text-brand-foreground/75" : "text-muted-foreground"
+              )}
+            >
               {folder.tweetCount}
             </span>
           ) : null}
@@ -235,14 +285,22 @@ function FolderItem({
               setRenameValue(folder.name);
               setIsRenaming(true);
             }}
-            className="text-zinc-500 hover:text-white"
+            className={cn(
+              "transition",
+              isActive
+                ? "text-brand-foreground/75 hover:text-brand-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
             title="Rename"
           >
             <Pencil className="size-3" />
           </button>
           <button
             onClick={() => deleteFolder({ folderId: folder._id })}
-            className="text-zinc-500 hover:text-red-400"
+            className={cn(
+              "transition hover:text-destructive",
+              isActive ? "text-brand-foreground/75" : "text-muted-foreground"
+            )}
             title="Delete (if empty)"
           >
             <Trash2 className="size-3" />
@@ -250,7 +308,7 @@ function FolderItem({
         </span>
       </div>
 
-      {expanded && children.length > 0 ? (
+      {isExpanded && children.length > 0 ? (
         <div>
           {children.map((child) => (
             <FolderItem
@@ -258,6 +316,7 @@ function FolderItem({
               folder={child}
               tree={tree}
               currentFolderId={currentFolderId}
+              onNavigate={onNavigate}
               depth={depth + 1}
             />
           ))}

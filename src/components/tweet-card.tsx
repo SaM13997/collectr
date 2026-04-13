@@ -18,12 +18,12 @@ export function TweetCard({
   const removeTweet = useMutation(api.tweets.remove);
 
   return (
-    <div className="group relative rounded-xl border border-white/10 bg-white/[0.02] p-4">
-      <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition group-hover:opacity-100">
+    <div className="group relative overflow-hidden rounded-[1.5rem] border border-border/70 bg-card/78 p-4 shadow-sm">
+      <div className="absolute right-2 top-2 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
         <Button
           variant="ghost"
           size="icon"
-          className="size-7"
+          className="size-8 rounded-full border border-border/70 bg-background/80"
           onClick={() => onMove(tweet._id)}
           title="Move to folder"
         >
@@ -32,7 +32,7 @@ export function TweetCard({
         <Button
           variant="ghost"
           size="icon"
-          className="size-7 text-red-400 hover:text-red-300"
+          className="size-8 rounded-full border border-border/70 bg-background/80 text-destructive hover:text-destructive"
           onClick={() => removeTweet({ tweetId: tweet._id })}
           title="Remove"
         >

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTheme } from "@/components/theme-provider";
 
 declare global {
   interface Window {
@@ -50,6 +51,7 @@ export function TweetEmbed({
   onFail?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +67,7 @@ export function TweetEmbed({
 
       try {
         await window.twttr.widgets.createTweet(tweetId, containerRef.current, {
-          theme: "dark",
+          theme: resolvedTheme,
           align: "center",
         });
         if (!cancelled) onReady?.();
@@ -79,7 +81,7 @@ export function TweetEmbed({
     return () => {
       cancelled = true;
     };
-  }, [tweetId, onReady, onFail]);
+  }, [tweetId, onReady, onFail, resolvedTheme]);
 
   return (
     <div

@@ -4,9 +4,8 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { authClient } from "@/lib/auth-client";
-import { UserButton } from "@/components/User-button";
 import { AddTweetForm } from "@/components/add-tweet-form";
-import { FolderTree } from "@/components/folder-tree";
+import { AppShell } from "@/components/app-shell";
 import { TweetCard } from "@/components/tweet-card";
 import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
@@ -67,162 +66,139 @@ function FolderView() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      {/* Sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-white/[0.02] p-4 md:block">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="text-sm font-semibold text-white hover:text-zinc-300">
-            Collectr
+    <AppShell currentFolderId={typedFolderId}>
+      <section className="app-panel overflow-hidden rounded-[1.85rem] p-4 sm:p-5">
+        <nav className="mb-4 flex items-center gap-1 text-sm text-muted-foreground">
+          <Link to="/" className="transition hover:text-foreground">
+            Home
           </Link>
-          <UserButton />
-        </div>
-        <div className="mt-4">
-          <FolderTree currentFolderId={typedFolderId} />
-        </div>
-      </aside>
+          <ChevronRight className="size-3" />
+          <span className="text-foreground">{currentFolder?.name ?? "Folder"}</span>
+        </nav>
 
-      {/* Main content */}
-      <main className="flex-1">
-        <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-          {/* Mobile header */}
-          <div className="mb-4 flex items-center justify-between md:hidden">
-            <h1 className="text-lg font-semibold">Collectr</h1>
-            <UserButton />
-          </div>
-
-          {/* Mobile folder nav */}
-          <div className="mb-4 md:hidden">
-            <details className="rounded-lg border border-white/10 bg-white/[0.02] p-3 [&[open]]:pb-1">
-              <summary className="cursor-pointer text-sm font-medium text-zinc-300">
-                Folders
-              </summary>
-              <div className="mt-2">
-                <FolderTree currentFolderId={typedFolderId} />
-              </div>
-            </details>
-          </div>
-
-          {/* Breadcrumb */}
-          <nav className="mb-4 flex items-center gap-1 text-sm text-zinc-500">
-            <Link to="/" className="hover:text-white">
-              Home
-            </Link>
-            <ChevronRight className="size-3" />
-            <span className="text-white">
-              {currentFolder?.name ?? "Folder"}
-            </span>
-          </nav>
-
-          {/* Folder header */}
-          <div className="mb-4 flex items-center gap-2">
-            <FolderOpen className="size-5 text-sky-400" />
-            <h2 className="text-lg font-semibold">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <FolderOpen className="size-5 text-brand" />
+              <p className="text-sm font-medium text-brand">Folder</p>
+            </div>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
               {currentFolder?.name ?? "Loading..."}
-            </h2>
-            {tweets ? (
-              <span className="text-xs text-zinc-500">{tweets.length} tweets</span>
-            ) : null}
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+              Add fresh tweet links here, then branch into subfolders when this
+              collection grows legs.
+            </p>
           </div>
 
-          {/* Add tweet form */}
-          <div className="mb-6">
-            <AddTweetForm folderId={typedFolderId} />
+          <div className="rounded-[1.3rem] bg-accent/80 px-4 py-3 text-right">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Saved here
+            </p>
+            <p className="mt-1 text-2xl font-semibold tracking-tight">
+              {tweets?.length ?? "..."}
+            </p>
           </div>
-
-          {/* Child folders */}
-          {childFolders.length > 0 ? (
-            <div className="mb-6">
-              <h3 className="mb-2 text-sm font-medium text-zinc-400">Subfolders</h3>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {childFolders.map((folder) => (
-                  <Link
-                    key={folder._id}
-                    to="/folders/$folderId"
-                    params={{ folderId: folder._id }}
-                    className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-3 text-sm transition hover:bg-white/5"
-                  >
-                    <FolderOpen className="size-4 text-sky-400" />
-                    <span className="truncate">{folder.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {/* New subfolder */}
-          {showNewSubfolder ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleCreateSubfolder();
-              }}
-              className="mb-4 flex items-center gap-2"
-            >
-              <Input
-                value={subfolderName}
-                onChange={(e) => setSubfolderName(e.target.value)}
-                placeholder="Subfolder name"
-                className="h-8 text-sm"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") {
-                    setShowNewSubfolder(false);
-                    setSubfolderName("");
-                  }
-                }}
-              />
-              <Button type="submit" size="sm" variant="ghost">
-                Create
-              </Button>
-            </form>
-          ) : (
-            <button
-              onClick={() => setShowNewSubfolder(true)}
-              className="mb-4 flex w-full items-center gap-2 rounded-lg border border-dashed border-white/10 p-3 text-sm text-zinc-500 transition hover:border-white/20 hover:text-zinc-300"
-            >
-              <Plus className="size-4" />
-              <span>Add subfolder</span>
-            </button>
-          )}
-
-          {/* Tweet list */}
-          {tweets === undefined ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-32 animate-pulse rounded-xl border border-white/10 bg-white/[0.02]"
-                />
-              ))}
-            </div>
-          ) : tweets.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
-              <p className="text-sm text-zinc-500">
-                No tweets in this folder yet. Paste a tweet URL above to save it
-                here.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {tweets.map((tweet) => (
-                <TweetCard
-                  key={tweet._id}
-                  tweet={tweet}
-                  onMove={(id) => setMovingTweetId(id)}
-                />
-              ))}
-            </div>
-          )}
         </div>
-      </main>
 
-      {/* Folder picker modal */}
+        <div className="mt-5 rounded-[1.5rem] border border-border/70 bg-background/70 p-3 sm:p-4">
+          <AddTweetForm folderId={typedFolderId} />
+        </div>
+      </section>
+
+      {childFolders.length > 0 ? (
+        <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
+          <h2 className="text-sm font-medium text-muted-foreground">Subfolders</h2>
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {childFolders.map((folder) => (
+              <Link
+                key={folder._id}
+                to="/folders/$folderId"
+                params={{ folderId: folder._id }}
+                className="flex min-h-14 items-center gap-3 rounded-[1.2rem] border border-border/70 bg-background/65 p-3 text-sm transition hover:border-brand/25 hover:bg-accent"
+              >
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-[0.95rem] bg-brand/12 text-brand">
+                  <FolderOpen className="size-4" />
+                </span>
+                <span className="truncate font-medium">{folder.name}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
+        {showNewSubfolder ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateSubfolder();
+            }}
+            className="flex flex-col gap-2 sm:flex-row"
+          >
+            <Input
+              value={subfolderName}
+              onChange={(e) => setSubfolderName(e.target.value)}
+              placeholder="Subfolder name"
+              className="h-11 text-sm"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setShowNewSubfolder(false);
+                  setSubfolderName("");
+                }
+              }}
+            />
+            <Button type="submit" className="rounded-full px-5">
+              Create
+            </Button>
+          </form>
+        ) : (
+          <button
+            onClick={() => setShowNewSubfolder(true)}
+            className="flex min-h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] border border-dashed border-border bg-background/40 p-3 text-sm text-muted-foreground transition hover:border-brand/25 hover:bg-accent hover:text-foreground"
+          >
+            <Plus className="size-4" />
+            <span>Add subfolder</span>
+          </button>
+        )}
+      </section>
+
+      <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
+        {tweets === undefined ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-32 animate-pulse rounded-[1.35rem] border border-border/70 bg-surface-soft"
+              />
+            ))}
+          </div>
+        ) : tweets.length === 0 ? (
+          <div className="rounded-[1.4rem] border border-dashed border-border/90 bg-background/50 p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No tweets in this folder yet. Paste a tweet URL above to save it here.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {tweets.map((tweet) => (
+              <TweetCard
+                key={tweet._id}
+                tweet={tweet}
+                onMove={(id) => setMovingTweetId(id)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
       {movingTweetId ? (
         <FolderPicker
           tweetId={movingTweetId}
           onClose={() => setMovingTweetId(null)}
         />
       ) : null}
-    </div>
+    </AppShell>
   );
 }

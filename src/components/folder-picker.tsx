@@ -2,6 +2,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Folder, Inbox, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function FolderPicker({
   tweetId,
@@ -15,9 +16,9 @@ export function FolderPicker({
 
   if (!data) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-        <div className="w-full max-w-sm rounded-xl border border-white/10 bg-zinc-900 p-4">
-          <p className="text-sm text-zinc-400">Loading folders...</p>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]">
+        <div className="w-full max-w-sm rounded-[1.5rem] border border-border/70 bg-card/90 p-4 shadow-xl">
+          <p className="text-sm text-muted-foreground">Loading folders...</p>
         </div>
       </div>
     );
@@ -29,14 +30,23 @@ export function FolderPicker({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-sm rounded-xl border border-white/10 bg-zinc-900 p-4"
+        className="w-full max-w-sm rounded-[1.5rem] border border-border/70 bg-card/92 p-4 shadow-xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Move tweet to folder"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-white">Move to...</h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white">
+          <h3 className="text-sm font-medium text-foreground">Move to...</h3>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+          >
             <X className="size-4" />
           </button>
         </div>
@@ -44,9 +54,9 @@ export function FolderPicker({
         <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
           <button
             onClick={() => handleMove(null)}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-400 transition hover:bg-white/5 hover:text-white"
+            className="flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
           >
-            <Inbox className="size-4" />
+            <Inbox className="size-4 text-brand" />
             <span>Inbox</span>
           </button>
 
@@ -54,9 +64,11 @@ export function FolderPicker({
             <button
               key={folder._id}
               onClick={() => handleMove(folder._id)}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-400 transition hover:bg-white/5 hover:text-white"
+              className={cn(
+                "flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
+              )}
             >
-              <Folder className="size-4" />
+              <Folder className="size-4 text-brand" />
               <span className="truncate">{folder.name}</span>
             </button>
           ))}

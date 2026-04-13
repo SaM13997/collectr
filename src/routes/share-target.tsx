@@ -6,6 +6,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Folder, Inbox, Check, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type ShareSearch = {
   text?: string;
@@ -66,8 +67,8 @@ function ShareTargetPage() {
 
   if (!session) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-        <div className="mx-auto max-w-md text-center">
+      <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
+        <div className="mx-auto max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 text-center shadow-xl backdrop-blur">
           <h1 className="text-2xl font-semibold">Shared tweet detected</h1>
           {tweetUrl ? (
             <p className="mt-2 text-sm text-muted-foreground">
@@ -90,8 +91,8 @@ function ShareTargetPage() {
 
   if (!tweetUrl) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-        <div className="mx-auto max-w-md text-center">
+      <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
+        <div className="mx-auto max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 text-center shadow-xl backdrop-blur">
           <h1 className="text-2xl font-semibold">No tweet URL found</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             The shared content doesn't contain a valid tweet URL.
@@ -131,10 +132,10 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
 
   if (saved) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-        <div className="mx-auto max-w-md text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-500/10">
-            <Check className="size-6 text-emerald-400" />
+      <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
+        <div className="mx-auto max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 text-center shadow-xl backdrop-blur">
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-highlight/15">
+            <Check className="size-6 text-highlight" />
           </div>
           <h1 className="text-2xl font-semibold">Tweet saved!</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -165,36 +166,35 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-      <div className="mx-auto w-full max-w-md">
+    <main className="flex min-h-screen items-center justify-center px-4 py-10 text-foreground">
+      <div className="mx-auto w-full max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 shadow-xl backdrop-blur">
         <h1 className="text-2xl font-semibold">Save tweet</h1>
 
         {/* Tweet URL */}
-        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+        <div className="mt-4 rounded-[1.3rem] border border-border/70 bg-background/70 p-4">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sky-500/10">
-              <ExternalLink className="size-5 text-sky-400" />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/12">
+              <ExternalLink className="size-5 text-brand" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-white">Tweet link detected</p>
-              <p className="mt-1 truncate text-xs text-zinc-500">{tweetUrl}</p>
+              <p className="text-sm font-medium text-foreground">Tweet link detected</p>
+              <p className="mt-1 truncate text-xs text-muted-foreground">{tweetUrl}</p>
             </div>
           </div>
         </div>
 
         {/* Folder selection */}
         <div className="mt-6">
-          <h2 className="text-sm font-medium text-zinc-300">
-            Choose destination
-          </h2>
-          <div className="mt-2 max-h-48 space-y-1 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] p-2">
+          <h2 className="text-sm font-medium text-muted-foreground">Choose destination</h2>
+          <div className="mt-2 max-h-48 space-y-1 overflow-y-auto rounded-[1.3rem] border border-border/70 bg-background/70 p-2">
             <button
               onClick={() => setSelectedFolder(null)}
-              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
+              className={cn(
+                "flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm transition",
                 selectedFolder === null
-                  ? "bg-white/10 text-white"
-                  : "text-zinc-400 hover:bg-white/5 hover:text-white"
-              }`}
+                  ? "bg-brand text-brand-foreground shadow-sm"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
             >
               <Inbox className="size-4" />
               <span>Inbox</span>
@@ -204,11 +204,12 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
               <button
                 key={folder._id}
                 onClick={() => setSelectedFolder(folder._id)}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
+                className={cn(
+                  "flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm transition",
                   selectedFolder === folder._id
-                    ? "bg-white/10 text-white"
-                    : "text-zinc-400 hover:bg-white/5 hover:text-white"
-                }`}
+                    ? "bg-brand text-brand-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                )}
               >
                 <Folder className="size-4" />
                 <span className="truncate">{folder.name}</span>
@@ -219,10 +220,10 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
 
         {/* Save button */}
         {error ? (
-          <p className="mt-3 text-sm text-red-400">{error}</p>
+          <p className="mt-3 text-sm text-destructive">{error}</p>
         ) : null}
         <Button
-          className="mt-4 w-full"
+          className="mt-4 w-full rounded-full"
           onClick={handleSave}
           disabled={isSaving}
         >

@@ -4,13 +4,12 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { authClient } from "@/lib/auth-client";
-import { UserButton } from "@/components/User-button";
 import { AddTweetForm } from "@/components/add-tweet-form";
-import { FolderTree } from "@/components/folder-tree";
+import { AppShell } from "@/components/app-shell";
 import { TweetCard } from "@/components/tweet-card";
 import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
-import { Inbox } from "lucide-react";
+import { Inbox, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -37,16 +36,54 @@ function HomePage() {
 
 function LandingPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-      <div className="mx-auto max-w-md text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">Collectr</h1>
-        <p className="mt-3 text-muted-foreground">
-          Save and organize tweet links from paste or the share sheet.
-        </p>
-        <div className="mt-6">
-          <Button asChild>
-            <Link to="/login">Sign in to get started</Link>
-          </Button>
+    <main className="flex min-h-screen items-center justify-center px-4 py-12 text-foreground">
+      <div className="w-full max-w-4xl rounded-[2rem] border border-border/70 bg-card/70 p-6 shadow-[0_24px_80px_color-mix(in_oklch,var(--foreground)_10%,transparent)] backdrop-blur sm:p-10">
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-sm font-medium text-accent-foreground">
+              <Sparkles className="size-4 text-brand" />
+              Save first, sort later
+            </div>
+            <h1 className="mt-5 max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+              A warmer home for the tweet links you want to keep.
+            </h1>
+            <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+              Capture from paste or the share sheet, then sweep links into folders
+              from a thumb-friendly dock on mobile or a pinned library rail on
+              desktop.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild className="rounded-full px-6">
+                <Link to="/login">Sign in to get started</Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-full px-6">
+                <Link to="/share-target">Try the share flow</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-3 text-left sm:grid-cols-2 lg:grid-cols-1">
+            <div className="rounded-[1.6rem] border border-border/70 bg-surface-raised p-5">
+              <p className="text-sm font-medium text-foreground">Thumb-accessible on mobile</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Folders, inbox, and settings stay anchored near the bottom edge.
+              </p>
+            </div>
+            <div className="rounded-[1.6rem] border border-border/70 bg-surface-raised p-5">
+              <p className="text-sm font-medium text-foreground">Light and dark built in</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Switch on demand or follow the device setting without losing the
+                color treatment.
+              </p>
+            </div>
+            <div className="rounded-[1.6rem] border border-border/70 bg-brand p-5 text-brand-foreground sm:col-span-2 lg:col-span-1">
+              <p className="text-sm font-medium">Folders that stay close</p>
+              <p className="mt-2 text-sm leading-6 text-brand-foreground/80">
+                Collectr now keeps your library one gesture away instead of hiding
+                it behind a top-heavy menu.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -58,90 +95,78 @@ function InboxView() {
   const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      {/* Sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-white/[0.02] p-4 md:block">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-white">Collectr</h2>
-          <UserButton />
+    <AppShell>
+      <section className="app-panel overflow-hidden rounded-[1.85rem] p-4 sm:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-brand">Inbox</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+              Save now. Organize when you have a minute.
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+              Paste any tweet link below and Collectr will keep it nearby until you
+              move it into the right folder.
+            </p>
+          </div>
+
+          <div className="rounded-[1.3rem] bg-accent/80 px-4 py-3 text-right">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Queue
+            </p>
+            <p className="mt-1 text-2xl font-semibold tracking-tight">
+              {tweets?.length ?? "..."}
+            </p>
+          </div>
         </div>
-        <div className="mt-4">
-          <FolderTree />
+
+        <div className="mt-5 rounded-[1.5rem] border border-border/70 bg-background/70 p-3 sm:p-4">
+          <AddTweetForm folderId={null} />
         </div>
-      </aside>
+      </section>
 
-      {/* Main content */}
-      <main className="flex-1">
-        <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-          {/* Mobile header */}
-          <div className="mb-4 flex items-center justify-between md:hidden">
-            <h1 className="text-lg font-semibold">Collectr</h1>
-            <UserButton />
-          </div>
-
-          {/* Mobile folder nav */}
-          <div className="mb-4 md:hidden">
-            <details className="rounded-lg border border-white/10 bg-white/[0.02] p-3 [&[open]]:pb-1">
-              <summary className="cursor-pointer text-sm font-medium text-zinc-300">
-                Folders
-              </summary>
-              <div className="mt-2">
-                <FolderTree />
-              </div>
-            </details>
-          </div>
-
-          {/* Add tweet form */}
-          <div className="mb-6">
-            <AddTweetForm folderId={null} />
-          </div>
-
-          {/* Inbox header */}
-          <div className="mb-4 flex items-center gap-2">
-            <Inbox className="size-5 text-zinc-400" />
-            <h2 className="text-lg font-semibold">Inbox</h2>
-            {tweets ? (
-              <span className="text-xs text-zinc-500">{tweets.length} tweets</span>
-            ) : null}
-          </div>
-
-          {/* Tweet list */}
-          {tweets === undefined ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-32 animate-pulse rounded-xl border border-white/10 bg-white/[0.02]"
-                />
-              ))}
-            </div>
-          ) : tweets.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 p-8 text-center">
-              <p className="text-sm text-zinc-500">
-                No tweets in your inbox yet. Paste a tweet URL above to save it.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {tweets.map((tweet) => (
-                <TweetCard
-                  key={tweet._id}
-                  tweet={tweet}
-                  onMove={(id) => setMovingTweetId(id)}
-                />
-              ))}
-            </div>
-          )}
+      <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <Inbox className="size-5 text-brand" />
+          <h2 className="text-lg font-semibold">Inbox</h2>
+          {tweets ? (
+            <span className="text-xs text-muted-foreground">{tweets.length} tweets</span>
+          ) : null}
         </div>
-      </main>
 
-      {/* Folder picker modal */}
+        {tweets === undefined ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-32 animate-pulse rounded-[1.35rem] border border-border/70 bg-surface-soft"
+              />
+            ))}
+          </div>
+        ) : tweets.length === 0 ? (
+          <div className="rounded-[1.4rem] border border-dashed border-border/90 bg-background/50 p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No tweets in your inbox yet. Paste a tweet URL above to save it.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {tweets.map((tweet) => (
+              <TweetCard
+                key={tweet._id}
+                tweet={tweet}
+                onMove={(id) => setMovingTweetId(id)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
       {movingTweetId ? (
         <FolderPicker
           tweetId={movingTweetId}
           onClose={() => setMovingTweetId(null)}
         />
       ) : null}
-    </div>
+    </AppShell>
   );
 }

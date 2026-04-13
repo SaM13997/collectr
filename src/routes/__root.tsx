@@ -19,6 +19,7 @@ import {
   fetchSession,
   getCookieName,
 } from "@convex-dev/better-auth/react-start";
+import { ThemeProvider, themeScript } from "@/components/theme-provider";
 import { authClient } from "@/lib/auth-client";
 import appCss from "../styles.css?url";
 import { PwaRegistrar } from "@/components/pwa-registrar";
@@ -51,7 +52,7 @@ export const Route = createRootRouteWithContext<{
       },
       {
         name: "theme-color",
-        content: "#09090b",
+        content: "#f7f2e8",
       },
       {
         name: "description",
@@ -98,25 +99,28 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="h-lvh flex flex-col overflow-x-clip w-full">
-        <div className="flex-1 flex flex-col">{children}</div>
-        <PwaRegistrar />
-        <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-        <Scripts />
+      <body className="flex min-h-screen w-full flex-col overflow-x-clip">
+        <ThemeProvider>
+          <div className="flex flex-1 flex-col">{children}</div>
+          <PwaRegistrar />
+          <TanStackDevtools
+            config={{
+              position: "bottom-right",
+            }}
+            plugins={[
+              {
+                name: "Tanstack Router",
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+          <Scripts />
+        </ThemeProvider>
       </body>
     </html>
   );
