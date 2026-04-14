@@ -16,6 +16,10 @@ import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 function getAuthErrorMessage(error: unknown) {
+  if (typeof error === "string" && error.length > 0) {
+    return error;
+  }
+
   if (
     error &&
     typeof error === "object" &&
@@ -24,6 +28,40 @@ function getAuthErrorMessage(error: unknown) {
     error.message.length > 0
   ) {
     return error.message;
+  }
+
+  if (
+    error &&
+    typeof error === "object" &&
+    "error" in error &&
+    error.error !== error
+  ) {
+    const nestedMessage = getAuthErrorMessage(error.error);
+    if (nestedMessage !== "Authentication failed.") {
+      return nestedMessage;
+    }
+  }
+
+  if (
+    error &&
+    typeof error === "object" &&
+    "cause" in error &&
+    error.cause !== error
+  ) {
+    const nestedMessage = getAuthErrorMessage(error.cause);
+    if (nestedMessage !== "Authentication failed.") {
+      return nestedMessage;
+    }
+  }
+
+  if (
+    error &&
+    typeof error === "object" &&
+    "statusText" in error &&
+    typeof error.statusText === "string" &&
+    error.statusText.length > 0
+  ) {
+    return error.statusText;
   }
 
   return "Authentication failed.";

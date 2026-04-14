@@ -7,6 +7,11 @@ import { betterAuth } from "better-auth";
 
 const siteUrl =
   process.env.BETTER_AUTH_URL ?? process.env.SITE_URL ?? "http://localhost:3000";
+const trustedOrigins = [
+  siteUrl,
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
 const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -37,6 +42,7 @@ export const createAuth = (
     },
     appName: "Collectr",
     baseURL: siteUrl,
+    trustedOrigins,
     ...(betterAuthSecret ? { secret: betterAuthSecret } : {}),
     database: authComponent.adapter(ctx),
     emailAndPassword: {
