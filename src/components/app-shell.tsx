@@ -21,6 +21,7 @@ import { ThemeSetting, useTheme } from "@/components/theme-provider";
 import { UserButton } from "@/components/User-button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type AppShellProps = {
   currentFolderId?: string;
@@ -325,9 +326,15 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
     : "U";
 
   const handleSignOut = async () => {
-    await authClient.signOut();
-    onClose();
-    router.navigate({ to: "/" });
+    try {
+      await authClient.signOut();
+      onClose();
+      router.navigate({ to: "/" });
+    } catch (err) {
+      toast.error("Failed to sign out", {
+        description: err instanceof Error ? err.message : "Something went wrong.",
+      });
+    }
   };
 
   return (

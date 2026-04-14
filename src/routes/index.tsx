@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { authClient } from "@/lib/auth-client";
+import { useAuthSession } from "@/lib/use-auth-session";
 import { AddTweetForm } from "@/components/add-tweet-form";
 import { AppShell } from "@/components/app-shell";
 import { TweetCard } from "@/components/tweet-card";
@@ -16,8 +16,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { data: sessionData, isPending } = authClient.useSession();
-  const session = sessionData?.session ?? null;
+  const { session, isPending } = useAuthSession();
 
   if (isPending) {
     return (

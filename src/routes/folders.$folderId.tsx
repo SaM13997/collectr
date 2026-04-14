@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { authClient } from "@/lib/auth-client";
+import { useAuthSession } from "@/lib/use-auth-session";
 import { AddTweetForm } from "@/components/add-tweet-form";
 import { AppShell } from "@/components/app-shell";
 import { TweetCard } from "@/components/tweet-card";
@@ -11,14 +11,14 @@ import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
 import { FolderOpen, ChevronRight, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/folders/$folderId")({
   component: FolderPage,
 });
 
 function FolderPage() {
-  const { data: sessionData, isPending } = authClient.useSession();
-  const session = sessionData?.session ?? null;
+  const { session, isPending } = useAuthSession();
 
   if (isPending) {
     return (
@@ -60,9 +60,15 @@ function FolderView() {
 
   const handleCreateSubfolder = async () => {
     if (!subfolderName.trim()) return;
-    await createSubfolder({ name: subfolderName.trim(), parentId: typedFolderId });
-    setSubfolderName("");
-    setShowNewSubfolder(false);
+    try {
+      await createSubfolder({ name: subfolderName.trim(), parentId: typedFolderId });
+      setSubfolderName("");
+      setShowNewSubfolder(false);
+    } catch (err) {
+      toast.error("Failed to create folder", {
+        description: err instanceof Error ? err.message : "Something went wrong.",
+      });
+    }
   };
 
   return (

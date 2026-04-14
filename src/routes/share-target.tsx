@@ -3,7 +3,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { authClient } from "@/lib/auth-client";
+import { useAuthSession } from "@/lib/use-auth-session";
 import { Button } from "@/components/ui/button";
 import { Folder, Inbox, Check, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,8 +45,7 @@ export const Route = createFileRoute("/share-target")({
 function ShareTargetPage() {
   const search = Route.useSearch();
   const tweetUrl = extractTweetUrl(search);
-  const { data: sessionData, isPending } = authClient.useSession();
-  const session = sessionData?.session ?? null;
+  const { session, isPending } = useAuthSession();
   const redirectParams = new URLSearchParams();
 
   if (search.title) redirectParams.set("title", search.title);

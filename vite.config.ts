@@ -18,9 +18,9 @@ const config = defineConfig({
       manifest: false,
       injectRegister: false,
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png', 'robots.txt', 'manifest.webmanifest'],
+      includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png', 'robots.txt', 'manifest.json'],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,txt}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,txt}'],
       },
     }),
     tanstackStart(),

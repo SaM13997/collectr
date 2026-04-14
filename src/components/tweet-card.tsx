@@ -6,6 +6,7 @@ import { TweetEmbed } from "./tweet-embed";
 import { TweetFallbackCard } from "./tweet-fallback-card";
 import { Button } from "@/components/ui/button";
 import { Trash2, FolderInput } from "lucide-react";
+import { toast } from "sonner";
 
 export function TweetCard({
   tweet,
@@ -33,7 +34,16 @@ export function TweetCard({
           variant="ghost"
           size="icon"
           className="size-8 rounded-full border border-border/70 bg-background/80 text-destructive hover:text-destructive"
-          onClick={() => removeTweet({ tweetId: tweet._id })}
+          onClick={async () => {
+            try {
+              await removeTweet({ tweetId: tweet._id });
+            } catch (err) {
+              toast.error("Failed to remove tweet", {
+                description:
+                  err instanceof Error ? err.message : "Something went wrong.",
+              });
+            }
+          }}
           title="Remove"
         >
           <Trash2 className="size-4" />

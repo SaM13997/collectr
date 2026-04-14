@@ -3,6 +3,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Folder, Inbox, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export function FolderPicker({
   tweetId,
@@ -25,8 +26,14 @@ export function FolderPicker({
   }
 
   const handleMove = async (folderId: Id<"folders"> | null) => {
-    await moveTweet({ tweetId, folderId });
-    onClose();
+    try {
+      await moveTweet({ tweetId, folderId });
+      onClose();
+    } catch (err) {
+      toast.error("Failed to move tweet", {
+        description: err instanceof Error ? err.message : "Something went wrong.",
+      });
+    }
   };
 
   return (

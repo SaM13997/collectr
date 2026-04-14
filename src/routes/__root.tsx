@@ -23,17 +23,22 @@ import { ThemeProvider, themeScript } from "@/components/theme-provider";
 import { authClient } from "@/lib/auth-client";
 import appCss from "../styles.css?url";
 import { PwaRegistrar } from "@/components/pwa-registrar";
+import { Toaster } from "sonner";
 
 // Get auth information for SSR using available cookies
 const fetchAuth = createServerFn({ method: "GET" }).handler(async () => {
-  const { createAuth } = await import("../../convex/auth");
-  const { session } = await fetchSession(getRequest());
-  const sessionCookieName = getCookieName(createAuth);
-  const token = getCookie(sessionCookieName);
-  return {
-    userId: session?.user.id,
-    token,
-  };
+  try {
+    const { createAuth } = await import("../../convex/auth");
+    const { session } = await fetchSession(getRequest());
+    const sessionCookieName = getCookieName(createAuth);
+    const token = getCookie(sessionCookieName);
+    return {
+      userId: session?.user.id,
+      token,
+    };
+  } catch {
+    return { userId: undefined, token: undefined };
+  }
 });
 
 export const Route = createRootRouteWithContext<{
@@ -63,7 +68,7 @@ export const Route = createRootRouteWithContext<{
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "apple-touch-icon", href: "/logo192.png" },
     ],
   }),
@@ -80,6 +85,16 @@ export const Route = createRootRouteWithContext<{
 
     return { userId, token };
   },
+  notFoundComponent: () => (
+    <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
+      <div className="text-center">
+        <p className="text-lg font-semibold">Page not found</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist.
+        </p>
+      </div>
+    </main>
+  ),
   component: RootComponent,
 });
 
@@ -105,9 +120,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-screen w-full flex-col overflow-x-clip">
-        <ThemeProvider>
+          <ThemeProvider>
           <div className="flex flex-1 flex-col">{children}</div>
           <PwaRegistrar />
+          <Toaster richColors closeButton position="bottom-right" />
           <TanStackDevtools
             config={{
               position: "bottom-right",
