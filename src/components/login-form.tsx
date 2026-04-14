@@ -13,6 +13,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "@tanstack/react-router";
+import { toast } from "sonner";
+
+function getAuthErrorMessage(error: unknown) {
+  if (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.length > 0
+  ) {
+    return error.message;
+  }
+
+  return "Authentication failed.";
+}
 
 export function LoginForm({
   className,
@@ -60,23 +75,31 @@ export function LoginForm({
       setIsSubmitting(true);
       setErrorMessage(null);
 
-      if (mode === "signUp") {
-        await authClient.signUp.email({
-          name: typeof name === "string" && name.trim().length > 0 ? name : email,
-          email,
-          password,
-        });
-      } else {
-        await authClient.signIn.email({
-          email,
-          password,
-        });
+      const result =
+        mode === "signUp"
+          ? await authClient.signUp.email({
+              name:
+                typeof name === "string" && name.trim().length > 0 ? name : email,
+              email,
+              password,
+            })
+          : await authClient.signIn.email({
+              email,
+              password,
+            });
+
+      if (result?.error) {
+        throw new Error(getAuthErrorMessage(result.error));
       }
 
       navigateAfterAuth();
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Authentication failed."
+      const message =
+        error instanceof Error ? error.message : "Authentication failed.";
+      setErrorMessage(message);
+      toast.error(
+        mode === "signIn" ? "Sign in failed" : "Sign up failed",
+        { description: message }
       );
     } finally {
       setIsSubmitting(false);
