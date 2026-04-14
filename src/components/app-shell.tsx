@@ -70,111 +70,77 @@ export function AppShell({ currentFolderId, children }: AppShellProps) {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
   return (
-    <div className="relative min-h-screen text-foreground">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1440px] gap-4 px-3 pb-24 pt-3 sm:px-4 md:gap-6 md:px-6 md:pb-6 md:pt-4">
-        <aside className="hidden w-[308px] shrink-0 md:block">
-          <div className="app-panel sticky top-4 flex min-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-[1.75rem] p-4">
-            <div className="mb-5 flex items-start justify-between gap-3">
-              <Link
-                to="/"
-                className="flex min-w-0 items-center gap-3 rounded-[1.25rem] p-2 transition hover:bg-accent/70"
-              >
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-[1.1rem] bg-brand text-brand-foreground shadow-sm">
-                  <FolderOpen className="size-5" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-base font-semibold tracking-tight">
-                    Collectr
-                  </span>
-                  <span className="block text-sm text-muted-foreground">
-                    Pocket archive for sharp links.
-                  </span>
-                </span>
-              </Link>
-              <div className="flex items-center gap-2">
-                <ThemeToggleButton />
-                <UserButton />
+    <div className="min-h-screen">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl gap-8 px-4 pb-24 pt-6 md:px-8 md:pb-8">
+        {/* Desktop Sidebar */}
+        <aside className="hidden w-64 shrink-0 md:block">
+          <div className="sticky top-6 flex flex-col gap-6">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3 px-2">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-foreground">
+                <FolderOpen className="size-4 text-background" />
               </div>
-            </div>
+              <span className="text-lg font-semibold tracking-tight">Collectr</span>
+            </Link>
 
-            <div className="mb-3 flex items-center justify-between px-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            {/* Navigation */}
+            <nav className="flex flex-col gap-1">
+              <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Library
               </p>
-              <p className="text-xs text-muted-foreground">One tap away</p>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
               <FolderTree currentFolderId={currentFolderId} />
-            </div>
+            </nav>
 
-            <div className="mt-4 grid gap-2">
+            {/* Bottom Actions */}
+            <div className="mt-auto flex flex-col gap-2 border-t border-border pt-4">
               <Button
                 type="button"
-                variant="outline"
-                className="h-11 justify-start rounded-[1rem] border-border/70 bg-background/70"
+                variant="ghost"
+                className="h-10 justify-start gap-3 px-2 text-muted-foreground hover:text-foreground"
                 onClick={() => setActivePanel("settings")}
               >
-                <Settings className="size-4 text-brand" />
+                <Settings className="size-4" />
                 <span>Settings</span>
               </Button>
-
-              <div className="rounded-[1.25rem] bg-accent/70 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-highlight/20 text-highlight">
-                    <Sparkles className="size-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      Built for quick triage
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Desktop keeps folders pinned on the left. Mobile slides them up
-                      from the thumb zone.
-                    </p>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 px-2">
+                <ThemeToggleButton />
+                <UserButton />
               </div>
             </div>
           </div>
         </aside>
 
+        {/* Main Content */}
         <main className="min-w-0 flex-1">
-          <div className="mx-auto max-w-3xl space-y-4 sm:space-y-5">
-            <div className="flex items-center justify-between gap-3 px-1 md:hidden">
-              <Link to="/" className="flex min-w-0 items-center gap-3">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-[1.1rem] bg-brand text-brand-foreground shadow-sm">
-                  <FolderOpen className="size-5" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-base font-semibold tracking-tight">
-                    Collectr
-                  </span>
-                  <span className="block truncate text-sm text-muted-foreground">
-                    Sort links before they disappear.
-                  </span>
-                </span>
+          <div className="flex flex-col gap-6">
+            {/* Mobile Header */}
+            <header className="flex items-center justify-between md:hidden">
+              <Link to="/" className="flex items-center gap-3">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-foreground">
+                  <FolderOpen className="size-4 text-background" />
+                </div>
+                <span className="text-lg font-semibold tracking-tight">Collectr</span>
               </Link>
               <div className="flex items-center gap-2">
                 <ThemeToggleButton />
                 <UserButton />
               </div>
-            </div>
+            </header>
 
             {children}
           </div>
         </main>
       </div>
 
-      <div className="fixed inset-x-0 bottom-4 z-30 px-3 md:hidden">
-        <div className="app-dock mx-auto flex w-full max-w-md items-center gap-2 rounded-[1.6rem] p-2">
+      {/* Mobile Dock */}
+      <div className="fixed inset-x-0 bottom-0 z-30 p-4 md:hidden">
+        <div className="app-dock mx-auto flex w-full max-w-sm items-center gap-1 rounded-2xl p-1.5">
           <Button
             asChild
             variant="ghost"
             className={cn(
-              "h-14 flex-1 rounded-[1.15rem] px-4 text-muted-foreground",
-              !currentFolderId &&
-                "bg-brand text-brand-foreground shadow-sm hover:bg-brand/90 hover:text-brand-foreground"
+              "h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground",
+              !currentFolderId && "bg-foreground text-background hover:bg-foreground hover:text-background"
             )}
           >
             <Link to="/" onClick={() => setActivePanel(null)}>
@@ -187,9 +153,9 @@ export function AppShell({ currentFolderId, children }: AppShellProps) {
             type="button"
             variant="ghost"
             className={cn(
-              "h-14 flex-1 rounded-[1.15rem] px-4 text-muted-foreground",
+              "h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground",
               (Boolean(currentFolderId) || activePanel === "folders") &&
-                "bg-brand text-brand-foreground shadow-sm hover:bg-brand/90 hover:text-brand-foreground"
+                "bg-foreground text-background hover:bg-foreground hover:text-background"
             )}
             onClick={() => setActivePanel("folders")}
           >
@@ -201,9 +167,9 @@ export function AppShell({ currentFolderId, children }: AppShellProps) {
             type="button"
             variant="ghost"
             className={cn(
-              "h-14 flex-1 rounded-[1.15rem] px-4 text-muted-foreground",
+              "h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground",
               activePanel === "settings" &&
-                "bg-brand text-brand-foreground shadow-sm hover:bg-brand/90 hover:text-brand-foreground"
+                "bg-foreground text-background hover:bg-foreground hover:text-background"
             )}
             onClick={() => setActivePanel("settings")}
           >
@@ -269,17 +235,17 @@ function AppSheet({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-40 flex items-end bg-black/25 backdrop-blur-[2px]",
+        "fixed inset-0 z-40 flex items-end bg-foreground/20 backdrop-blur-sm",
         mobileOnly ? "md:hidden" : "md:items-stretch md:justify-end"
       )}
       onClick={onClose}
     >
       <div
         className={cn(
-          "app-sheet w-full rounded-t-[1.75rem] border border-border/70 px-4 pb-8 pt-4 shadow-2xl",
+          "app-sheet w-full rounded-t-2xl border border-border p-6 shadow-xl",
           mobileOnly
-            ? "max-h-[78vh]"
-            : "max-h-[78vh] md:h-full md:max-h-none md:max-w-md md:rounded-none md:rounded-l-[1.75rem] md:px-6 md:py-6"
+            ? "max-h-[80vh]"
+            : "max-h-[80vh] md:h-full md:max-h-none md:max-w-md md:rounded-none md:rounded-l-2xl"
         )}
         role="dialog"
         aria-modal="true"
@@ -288,16 +254,14 @@ function AppSheet({
       >
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              {description}
-            </p>
+            <h2 className="text-lg font-semibold">{title}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="rounded-full"
+            className="size-8 rounded-lg"
             onClick={onClose}
           >
             <X className="size-4" />
@@ -338,94 +302,68 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="space-y-4 md:space-y-5">
-      <section className="rounded-[1.5rem] border border-border/70 bg-card/70 p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-brand text-brand-foreground shadow-sm">
-            <Sparkles className="size-4" />
-          </div>
-          <div>
-            <p className="text-sm font-medium">Appearance</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Switch between warm daylight, deep evening, or let the device decide.
-            </p>
-          </div>
-        </div>
+    <div className="flex flex-col gap-4">
+      {/* Appearance */}
+      <section className="rounded-xl border border-border bg-background p-4">
+        <p className="text-sm font-medium">Appearance</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Choose your preferred theme.
+        </p>
 
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <div className="mt-4 grid grid-cols-3 gap-2">
           {themeOptions.map((option) => (
             <button
               key={option.value}
               type="button"
               className={cn(
-                "rounded-[1.2rem] border p-3 text-left transition",
+                "flex flex-col items-center gap-2 rounded-lg border p-3 text-center transition",
                 theme === option.value
-                  ? "border-brand bg-brand text-brand-foreground shadow-sm"
-                  : "border-border bg-background/70 hover:border-brand/25 hover:bg-accent"
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border hover:border-foreground/20 hover:bg-accent"
               )}
               onClick={() => setTheme(option.value)}
             >
-              <option.icon
-                className={cn(
-                  "size-4",
-                  theme === option.value ? "text-brand-foreground" : "text-brand"
-                )}
-              />
-              <p className="mt-3 text-sm font-medium">{option.label}</p>
-              <p
-                className={cn(
-                  "mt-1 text-xs leading-5",
-                  theme === option.value
-                    ? "text-brand-foreground/80"
-                    : "text-muted-foreground"
-                )}
-              >
-                {option.description}
-              </p>
+              <option.icon className="size-4" />
+              <span className="text-xs font-medium">{option.label}</span>
             </button>
           ))}
         </div>
 
-        <p className="mt-4 text-xs text-muted-foreground">
-          The interface is currently showing in {resolvedTheme} mode.
+        <p className="mt-3 text-xs text-muted-foreground">
+          Currently using {resolvedTheme} mode.
         </p>
       </section>
 
-      <section className="rounded-[1.5rem] border border-border/70 bg-card/70 p-4">
-        <p className="text-sm font-medium">Navigation</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The mobile dock keeps inbox, folders, and settings inside your thumb arc.
-        </p>
-      </section>
-
-      <section className="rounded-[1.5rem] border border-border/70 bg-card/70 p-4">
+      {/* Account */}
+      <section className="rounded-xl border border-border bg-background p-4">
         <p className="text-sm font-medium">Account</p>
 
         {user ? (
-          <div className="mt-4 flex items-center gap-3">
-            <Avatar className="h-11 w-11 ring-1 ring-border/70">
+          <div className="mt-3 flex items-center gap-3">
+            <Avatar className="size-10">
               <AvatarImage src={user.image ?? ""} alt={user.name ?? "User"} />
-              <AvatarFallback>{initials}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-xs">{initials}</AvatarFallback>
             </Avatar>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{user.name}</p>
-              <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
         ) : null}
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <Button asChild variant="outline" className="flex-1 rounded-full">
+        <div className="mt-4 flex gap-2">
+          <Button asChild variant="outline" size="sm" className="flex-1">
             <Link to="/" onClick={onClose}>
               <Inbox className="size-4" />
-              <span>Open inbox</span>
+              <span>Inbox</span>
             </Link>
           </Button>
 
           <Button
             type="button"
             variant="outline"
-            className="flex-1 rounded-full border-destructive/25 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            size="sm"
+            className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={handleSignOut}
           >
             <LogOut className="size-4" />

@@ -19,21 +19,22 @@ export function TweetCard({
   const removeTweet = useMutation(api.tweets.remove);
 
   return (
-    <div className="group relative overflow-hidden rounded-[1.5rem] border border-border/70 bg-card/78 p-4 shadow-sm">
-      <div className="absolute right-2 top-2 flex gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+    <div className="group relative rounded-lg border border-border bg-background p-4 transition hover:border-foreground/20">
+      {/* Actions */}
+      <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition group-hover:opacity-100">
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
-          className="size-8 rounded-full border border-border/70 bg-background/80"
+          className="size-8"
           onClick={() => onMove(tweet._id)}
           title="Move to folder"
         >
           <FolderInput className="size-4" />
         </Button>
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
-          className="size-8 rounded-full border border-border/70 bg-background/80 text-destructive hover:text-destructive"
+          className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={async () => {
             try {
               await removeTweet({ tweetId: tweet._id });

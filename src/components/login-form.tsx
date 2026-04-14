@@ -148,20 +148,24 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form onSubmit={handleEmailSignIn}>
         <FieldGroup>
-          <div className="flex flex-col items-center gap-2 text-center">
-            <div className="flex flex-col items-center gap-2 font-medium">
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-brand text-brand-foreground shadow-sm">
-                <FolderTree className="size-6" />
-              </div>
-              <span className="sr-only">Collectr</span>
+          {/* Logo & Header */}
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-foreground">
+              <FolderTree className="size-5 text-background" />
             </div>
-            <h1 className="text-xl font-bold">Welcome to Collectr</h1>
-            <FieldDescription>
-              {mode === "signIn"
-                ? "Sign in to start saving tweet links."
-                : "Create your account to start collecting tweets."}
-            </FieldDescription>
+            <div>
+              <h1 className="text-xl font-semibold">
+                {mode === "signIn" ? "Welcome back" : "Create account"}
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {mode === "signIn"
+                  ? "Sign in to your account"
+                  : "Get started with Collectr"}
+              </p>
+            </div>
           </div>
+
+          {/* Form Fields */}
           {mode === "signUp" ? (
             <Field>
               <FieldLabel htmlFor="name">Name</FieldLabel>
@@ -174,7 +178,7 @@ export function LoginForm({
               id="email"
               type="email"
               name="email"
-              placeholder="m@example.com"
+              placeholder="you@example.com"
               required
             />
           </Field>
@@ -189,40 +193,36 @@ export function LoginForm({
               required
             />
           </Field>
+
           {errorMessage ? (
-            <FieldDescription className="text-center text-sm text-destructive">
-              {errorMessage}
-            </FieldDescription>
+            <p className="text-center text-sm text-destructive">{errorMessage}</p>
           ) : null}
-          <Field>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? "Working..."
-                : mode === "signIn"
-                  ? "Sign in"
-                  : "Create account"}
-            </Button>
-          </Field>
+
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting
+              ? "Working..."
+              : mode === "signIn"
+                ? "Sign in"
+                : "Create account"}
+          </Button>
+
           <FieldSeparator />
-          <FieldDescription className="text-center">
+
+          <p className="text-center text-sm text-muted-foreground">
             {mode === "signIn" ? "Need an account?" : "Already have an account?"}{" "}
             <button
               type="button"
-              className="font-medium text-brand transition hover:text-brand/80"
+              className="font-medium text-foreground underline-offset-2 hover:underline"
               onClick={() => {
                 setMode(mode === "signIn" ? "signUp" : "signIn");
                 setErrorMessage(null);
               }}
             >
-              {mode === "signIn" ? "Create one" : "Sign in instead"}
+              {mode === "signIn" ? "Sign up" : "Sign in"}
             </button>
-          </FieldDescription>
+          </p>
         </FieldGroup>
       </form>
-      <FieldDescription className="px-6 text-center">
-        Collectr is scaffolded for local development. Terms, privacy, and social
-        auth setup can be added when the app is productized.
-      </FieldDescription>
     </div>
   );
 }

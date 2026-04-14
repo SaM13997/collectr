@@ -9,7 +9,7 @@ import { AppShell } from "@/components/app-shell";
 import { TweetCard } from "@/components/tweet-card";
 import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
-import { Inbox, Sparkles } from "lucide-react";
+import { FolderOpen, Inbox, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -35,53 +35,64 @@ function HomePage() {
 
 function LandingPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12 text-foreground">
-      <div className="w-full max-w-4xl rounded-[2rem] border border-border/70 bg-card/70 p-6 shadow-[0_24px_80px_color-mix(in_oklch,var(--foreground)_10%,transparent)] backdrop-blur sm:p-10">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-sm font-medium text-accent-foreground">
-              <Sparkles className="size-4 text-brand" />
-              Save first, sort later
+    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16">
+      <div className="w-full max-w-2xl text-center">
+        {/* Logo */}
+        <div className="mb-8 flex justify-center">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-foreground">
+            <FolderOpen className="size-6 text-background" />
+          </div>
+        </div>
+
+        {/* Heading */}
+        <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+          Save tweets now, organize them later
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-md text-pretty text-lg leading-relaxed text-muted-foreground">
+          Capture links from paste or share sheet, then sort them into folders whenever you have a moment.
+        </p>
+
+        {/* CTA */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button asChild size="lg" className="min-w-40">
+            <Link to="/login">Get started</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="min-w-40">
+            <Link to="/share-target">Try the share flow</Link>
+          </Button>
+        </div>
+
+        {/* Features */}
+        <div className="mt-20 grid gap-6 text-left sm:grid-cols-3">
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-muted">
+              <Inbox className="size-4 text-foreground" />
             </div>
-            <h1 className="mt-5 max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-              A warmer home for the tweet links you want to keep.
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-              Capture from paste or the share sheet, then sweep links into folders
-              from a thumb-friendly dock on mobile or a pinned library rail on
-              desktop.
+            <p className="text-sm font-medium">Quick capture</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Paste any tweet URL and save it instantly.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild className="rounded-full px-6">
-                <Link to="/login">Sign in to get started</Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-full px-6">
-                <Link to="/share-target">Try the share flow</Link>
-              </Button>
-            </div>
           </div>
 
-          <div className="grid gap-3 text-left sm:grid-cols-2 lg:grid-cols-1">
-            <div className="rounded-[1.6rem] border border-border/70 bg-surface-raised p-5">
-              <p className="text-sm font-medium text-foreground">Thumb-accessible on mobile</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Folders, inbox, and settings stay anchored near the bottom edge.
-              </p>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-muted">
+              <FolderOpen className="size-4 text-foreground" />
             </div>
-            <div className="rounded-[1.6rem] border border-border/70 bg-surface-raised p-5">
-              <p className="text-sm font-medium text-foreground">Light and dark built in</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Switch on demand or follow the device setting without losing the
-                color treatment.
-              </p>
+            <p className="text-sm font-medium">Organize by folder</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Create folders and subfolders to keep things tidy.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-muted">
+              <Sparkles className="size-4 text-foreground" />
             </div>
-            <div className="rounded-[1.6rem] border border-border/70 bg-brand p-5 text-brand-foreground sm:col-span-2 lg:col-span-1">
-              <p className="text-sm font-medium">Folders that stay close</p>
-              <p className="mt-2 text-sm leading-6 text-brand-foreground/80">
-                Collectr now keeps your library one gesture away instead of hiding
-                it behind a top-heavy menu.
-              </p>
-            </div>
+            <p className="text-sm font-medium">Mobile-first</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Thumb-friendly navigation on any device.
+            </p>
           </div>
         </div>
       </div>
@@ -95,60 +106,56 @@ function InboxView() {
 
   return (
     <AppShell>
-      <section className="app-panel overflow-hidden rounded-[1.85rem] p-4 sm:p-5">
+      {/* Header Section */}
+      <section className="rounded-xl border border-border bg-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-brand">Inbox</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-              Save now. Organize when you have a minute.
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              Paste any tweet link below and Collectr will keep it nearby until you
-              move it into the right folder.
+            <h1 className="text-2xl font-semibold tracking-tight">Inbox</h1>
+            <p className="mt-1 text-muted-foreground">
+              Save tweet links now, organize them later.
             </p>
           </div>
 
-          <div className="rounded-[1.3rem] bg-accent/80 px-4 py-3 text-right">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Queue
-            </p>
-            <p className="mt-1 text-2xl font-semibold tracking-tight">
-              {tweets?.length ?? "..."}
-            </p>
+          <div className="flex items-center gap-2 rounded-lg bg-muted px-4 py-2">
+            <span className="text-sm text-muted-foreground">Queue</span>
+            <span className="text-lg font-semibold tabular-nums">
+              {tweets?.length ?? "-"}
+            </span>
           </div>
         </div>
 
-        <div className="mt-5 rounded-[1.5rem] border border-border/70 bg-background/70 p-3 sm:p-4">
+        <div className="mt-6">
           <AddTweetForm folderId={null} />
         </div>
       </section>
 
-      <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
+      {/* Tweets List */}
+      <section className="rounded-xl border border-border bg-card p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Inbox className="size-5 text-brand" />
-          <h2 className="text-lg font-semibold">Inbox</h2>
+          <Inbox className="size-4" />
+          <h2 className="font-medium">Saved tweets</h2>
           {tweets ? (
-            <span className="text-xs text-muted-foreground">{tweets.length} tweets</span>
+            <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {tweets.length}
+            </span>
           ) : null}
         </div>
 
         {tweets === undefined ? (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 animate-pulse rounded-[1.35rem] border border-border/70 bg-surface-soft"
-              />
+              <div key={i} className="h-28 animate-pulse rounded-lg bg-muted" />
             ))}
           </div>
         ) : tweets.length === 0 ? (
-          <div className="rounded-[1.4rem] border border-dashed border-border/90 bg-background/50 p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              No tweets in your inbox yet. Paste a tweet URL above to save it.
+          <div className="rounded-lg border border-dashed border-border py-12 text-center">
+            <Inbox className="mx-auto size-8 text-muted-foreground/50" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              No tweets saved yet. Paste a URL above to get started.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {tweets.map((tweet) => (
               <TweetCard
                 key={tweet._id}
