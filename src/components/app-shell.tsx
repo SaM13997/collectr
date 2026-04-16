@@ -7,7 +7,6 @@ import {
   Monitor,
   MoonStar,
   Settings,
-  Sparkles,
   SunMedium,
   X,
   type LucideIcon,
@@ -133,7 +132,7 @@ export function AppShell({ currentFolderId, children }: AppShellProps) {
       </div>
 
       {/* Mobile Dock */}
-      <div className="fixed inset-x-0 bottom-0 z-30 p-4 md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:hidden">
         <div className="app-dock mx-auto flex w-full max-w-sm items-center gap-1 rounded-2xl p-1.5">
           <Button
             asChild

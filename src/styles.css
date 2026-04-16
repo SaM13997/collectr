@@ -44,8 +44,6 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-highlight: var(--highlight);
-  --color-surface-raised: var(--surface-raised);
-  --color-surface-soft: var(--surface-soft);
 }
 
 /* Clean minimal light theme - warm neutrals with teal accent */
@@ -85,8 +83,6 @@
   --brand: oklch(0.65 0.15 175);
   --brand-foreground: oklch(0.98 0.01 175);
   --highlight: oklch(0.7 0.12 160);
-  --surface-raised: oklch(1 0 0);
-  --surface-soft: oklch(0.975 0.002 80);
 }
 
 /* Clean dark theme */
@@ -125,8 +121,6 @@
   --brand: oklch(0.7 0.14 175);
   --brand-foreground: oklch(0.13 0.01 260);
   --highlight: oklch(0.65 0.12 160);
-  --surface-raised: oklch(0.19 0.01 260);
-  --surface-soft: oklch(0.17 0.01 260);
 }
 
 @layer base {
@@ -157,10 +151,6 @@
 }
 
 @layer components {
-  .app-panel {
-    @apply bg-card border border-border;
-  }
-
   .app-dock {
     @apply bg-card/95 border border-border shadow-lg;
     backdrop-filter: blur(12px);
