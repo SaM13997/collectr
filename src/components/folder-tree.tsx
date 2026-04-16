@@ -70,11 +70,11 @@ export function FolderTree({
 
   if (!data) {
     return (
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-          <div key={i} className="h-8 animate-pulse rounded bg-muted" />
-          ))}
-        </div>
+      <div className="flex flex-col gap-1">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-9 animate-pulse rounded-lg bg-muted" />
+        ))}
+      </div>
     );
   }
 
@@ -89,13 +89,13 @@ export function FolderTree({
   };
 
   return (
-    <nav className="space-y-1">
+    <nav className="flex flex-col gap-0.5">
       <Link
         to="/"
         className={cn(
-          "flex min-h-11 items-center gap-2 rounded-[1rem] px-3 py-2 text-sm transition",
+          "flex h-9 items-center gap-3 rounded-lg px-2 text-sm transition",
           !currentFolderId
-            ? "bg-brand text-brand-foreground shadow-sm"
+            ? "bg-foreground text-background font-medium"
             : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )}
         onClick={onNavigate}
@@ -103,14 +103,7 @@ export function FolderTree({
         <Inbox className="size-4" />
         <span className="flex-1">Inbox</span>
         {inboxCount > 0 ? (
-          <span
-            className={cn(
-              "text-xs tabular-nums",
-              !currentFolderId ? "text-brand-foreground/75" : "text-muted-foreground"
-            )}
-          >
-            {inboxCount}
-          </span>
+          <span className="text-xs tabular-nums opacity-60">{inboxCount}</span>
         ) : null}
       </Link>
 
@@ -131,13 +124,13 @@ export function FolderTree({
             e.preventDefault();
             handleCreate();
           }}
-          className="flex items-center gap-1 pl-3"
+          className="flex items-center gap-1 px-2 py-1"
         >
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Folder name"
-            className="h-7 text-xs"
+            className="h-7 text-sm"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Escape") {
@@ -153,7 +146,7 @@ export function FolderTree({
       ) : (
         <button
           onClick={() => setIsCreating(true)}
-          className="flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
+          className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
         >
           <Plus className="size-4" />
           <span>New folder</span>
@@ -205,20 +198,17 @@ function FolderItem({
     <div>
       <div
         className={cn(
-          "group flex min-h-11 items-center gap-1 rounded-[1rem] px-3 py-2 text-sm transition",
+          "group flex h-9 items-center gap-2 rounded-lg px-2 text-sm transition",
           isActive
-            ? "bg-brand text-brand-foreground shadow-sm"
+            ? "bg-foreground text-background font-medium"
             : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )}
-        style={{ paddingLeft: `${(depth + 1) * 12 + 12}px` }}
+        style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
         {hasChildren ? (
           <button
             onClick={() => setExpanded(!expanded)}
-            className={cn(
-              "shrink-0 transition",
-              isActive ? "text-brand-foreground/80" : "text-muted-foreground hover:text-foreground"
-            )}
+            className="shrink-0 opacity-60 hover:opacity-100"
           >
             {isExpanded ? (
               <ChevronDown className="size-3" />
@@ -231,9 +221,9 @@ function FolderItem({
         )}
 
         {isActive ? (
-          <FolderOpen className="size-4 shrink-0 text-brand-foreground" />
+          <FolderOpen className="size-4 shrink-0" />
         ) : (
-          <Folder className="size-4 shrink-0 text-brand" />
+          <Folder className="size-4 shrink-0" />
         )}
 
         {isRenaming ? (
@@ -247,7 +237,7 @@ function FolderItem({
             <Input
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
-              className="h-6 text-xs"
+              className="h-6 text-sm"
               autoFocus
               onBlur={handleRename}
               onKeyDown={(e) => {
@@ -269,14 +259,9 @@ function FolderItem({
           </Link>
         )}
 
-        <span className="flex items-center gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+        <span className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
           {folder.tweetCount > 0 ? (
-            <span
-              className={cn(
-                "text-xs tabular-nums",
-                isActive ? "text-brand-foreground/75" : "text-muted-foreground"
-              )}
-            >
+            <span className="mr-1 text-xs tabular-nums opacity-60">
               {folder.tweetCount}
             </span>
           ) : null}
@@ -285,22 +270,14 @@ function FolderItem({
               setRenameValue(folder.name);
               setIsRenaming(true);
             }}
-            className={cn(
-              "transition",
-              isActive
-                ? "text-brand-foreground/75 hover:text-brand-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            )}
+            className="rounded p-0.5 opacity-60 hover:opacity-100"
             title="Rename"
           >
             <Pencil className="size-3" />
           </button>
           <button
             onClick={() => deleteFolder({ folderId: folder._id })}
-            className={cn(
-              "transition hover:text-destructive",
-              isActive ? "text-brand-foreground/75" : "text-muted-foreground"
-            )}
+            className="rounded p-0.5 opacity-60 hover:text-destructive hover:opacity-100"
             title="Delete (if empty)"
           >
             <Trash2 className="size-3" />
@@ -309,7 +286,7 @@ function FolderItem({
       </div>
 
       {isExpanded && children.length > 0 ? (
-        <div>
+        <div className="flex flex-col gap-0.5">
           {children.map((child) => (
             <FolderItem
               key={child._id}

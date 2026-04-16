@@ -49,7 +49,7 @@ export function AddTweetForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <div className="relative flex-1">
         <Link2 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -59,15 +59,15 @@ export function AddTweetForm({
             setError(null);
           }}
           placeholder="https://x.com/user/status/..."
-          className="h-11 rounded-full border-border/70 bg-background/80 pl-9"
+          className="h-10 pl-9"
           disabled={isSaving}
         />
       </div>
-      <Button type="submit" disabled={isSaving} className="h-11 rounded-full px-5">
-        {isSaving ? "Saving..." : "Save"}
+      <Button type="submit" disabled={isSaving} className="h-10">
+        {isSaving ? "Saving..." : "Save tweet"}
       </Button>
       {error ? (
-        <p className="text-xs text-destructive sm:self-center">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       ) : null}
     </form>
   );

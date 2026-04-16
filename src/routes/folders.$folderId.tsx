@@ -73,80 +73,76 @@ function FolderView() {
 
   return (
     <AppShell currentFolderId={typedFolderId}>
-      <section className="app-panel overflow-hidden rounded-[1.85rem] p-4 sm:p-5">
-        <nav className="mb-4 flex items-center gap-1 text-sm text-muted-foreground">
-          <Link to="/" className="transition hover:text-foreground">
+      {/* Header Section */}
+      <section className="rounded-xl border border-border bg-card p-6">
+        <nav className="mb-4 flex items-center gap-2 text-sm">
+          <Link to="/" className="text-muted-foreground transition hover:text-foreground">
             Home
           </Link>
-          <ChevronRight className="size-3" />
-          <span className="text-foreground">{currentFolder?.name ?? "Folder"}</span>
+          <ChevronRight className="size-3 text-muted-foreground" />
+          <span className="font-medium">{currentFolder?.name ?? "Folder"}</span>
         </nav>
 
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <FolderOpen className="size-5 text-brand" />
-              <p className="text-sm font-medium text-brand">Folder</p>
-            </div>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="text-2xl font-semibold tracking-tight">
               {currentFolder?.name ?? "Loading..."}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              Add fresh tweet links here, then branch into subfolders when this
-              collection grows legs.
+            <p className="mt-1 text-muted-foreground">
+              Save tweets to this folder.
             </p>
           </div>
 
-          <div className="rounded-[1.3rem] bg-accent/80 px-4 py-3 text-right">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Saved here
-            </p>
-            <p className="mt-1 text-2xl font-semibold tracking-tight">
-              {tweets?.length ?? "..."}
-            </p>
+          <div className="flex items-center gap-2 rounded-lg bg-muted px-4 py-2">
+            <span className="text-sm text-muted-foreground">Saved</span>
+            <span className="text-lg font-semibold tabular-nums">
+              {tweets?.length ?? "-"}
+            </span>
           </div>
         </div>
 
-        <div className="mt-5 rounded-[1.5rem] border border-border/70 bg-background/70 p-3 sm:p-4">
+        <div className="mt-6">
           <AddTweetForm folderId={typedFolderId} />
         </div>
       </section>
 
+      {/* Subfolders */}
       {childFolders.length > 0 ? (
-        <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
-          <h2 className="text-sm font-medium text-muted-foreground">Subfolders</h2>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="rounded-xl border border-border bg-card p-6">
+          <h2 className="mb-4 text-sm font-medium text-muted-foreground">Subfolders</h2>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {childFolders.map((folder) => (
               <Link
                 key={folder._id}
                 to="/folders/$folderId"
                 params={{ folderId: folder._id }}
-                className="flex min-h-14 items-center gap-3 rounded-[1.2rem] border border-border/70 bg-background/65 p-3 text-sm transition hover:border-brand/25 hover:bg-accent"
+                className="flex items-center gap-3 rounded-lg border border-border bg-background p-3 transition hover:border-foreground/20"
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-[0.95rem] bg-brand/12 text-brand">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-muted">
                   <FolderOpen className="size-4" />
-                </span>
-                <span className="truncate font-medium">{folder.name}</span>
+                </div>
+                <span className="truncate text-sm font-medium">{folder.name}</span>
               </Link>
             ))}
           </div>
         </section>
       ) : null}
 
-      <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
+      {/* Add Subfolder */}
+      <section className="rounded-xl border border-border bg-card p-6">
         {showNewSubfolder ? (
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleCreateSubfolder();
             }}
-            className="flex flex-col gap-2 sm:flex-row"
+            className="flex flex-col gap-3 sm:flex-row"
           >
             <Input
               value={subfolderName}
               onChange={(e) => setSubfolderName(e.target.value)}
               placeholder="Subfolder name"
-              className="h-11 text-sm"
+              className="h-10"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
@@ -155,14 +151,14 @@ function FolderView() {
                 }
               }}
             />
-            <Button type="submit" className="rounded-full px-5">
+            <Button type="submit" className="h-10">
               Create
             </Button>
           </form>
         ) : (
           <button
             onClick={() => setShowNewSubfolder(true)}
-            className="flex min-h-14 w-full items-center justify-center gap-2 rounded-[1.25rem] border border-dashed border-border bg-background/40 p-3 text-sm text-muted-foreground transition hover:border-brand/25 hover:bg-accent hover:text-foreground"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border py-4 text-sm text-muted-foreground transition hover:border-foreground/20 hover:bg-accent hover:text-foreground"
           >
             <Plus className="size-4" />
             <span>Add subfolder</span>
@@ -170,24 +166,33 @@ function FolderView() {
         )}
       </section>
 
-      <section className="rounded-[1.7rem] border border-border/70 bg-card/70 p-4 shadow-sm sm:p-5">
+      {/* Tweets List */}
+      <section className="rounded-xl border border-border bg-card p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <FolderOpen className="size-4" />
+          <h2 className="font-medium">Tweets</h2>
+          {tweets ? (
+            <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {tweets.length}
+            </span>
+          ) : null}
+        </div>
+
         {tweets === undefined ? (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 animate-pulse rounded-[1.35rem] border border-border/70 bg-surface-soft"
-              />
+              <div key={i} className="h-28 animate-pulse rounded-lg bg-muted" />
             ))}
           </div>
         ) : tweets.length === 0 ? (
-          <div className="rounded-[1.4rem] border border-dashed border-border/90 bg-background/50 p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              No tweets in this folder yet. Paste a tweet URL above to save it here.
+          <div className="rounded-lg border border-dashed border-border py-12 text-center">
+            <FolderOpen className="mx-auto size-8 text-muted-foreground/50" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              No tweets in this folder yet.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {tweets.map((tweet) => (
               <TweetCard
                 key={tweet._id}

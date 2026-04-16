@@ -114,13 +114,13 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="bg-background" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="flex min-h-screen w-full flex-col overflow-x-clip">
-          <ThemeProvider>
+      <body className="flex min-h-screen w-full flex-col overflow-x-clip antialiased">
+        <ThemeProvider>
           <div className="flex flex-1 flex-col">{children}</div>
           <PwaRegistrar />
           <Toaster richColors closeButton position="bottom-right" />
