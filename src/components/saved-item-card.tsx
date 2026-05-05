@@ -63,7 +63,7 @@ export function SavedItemCard({
 
       {/* Actions */}
       <button
-        className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 backdrop-blur-sm transition group-hover:opacity-100"
+        className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-full bg-background/50 text-muted-foreground opacity-100 backdrop-blur-sm transition hover:bg-background/90 hover:text-foreground"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
