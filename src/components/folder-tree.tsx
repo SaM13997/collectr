@@ -6,12 +6,12 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Bookmark,
   Folder,
   FolderOpen,
   Plus,
   Pencil,
   Trash2,
-  Inbox,
   ChevronRight,
   ChevronDown,
 } from "lucide-react";
@@ -100,8 +100,8 @@ export function FolderTree({
         )}
         onClick={onNavigate}
       >
-        <Inbox className="size-4" />
-        <span className="flex-1">Inbox</span>
+        <Bookmark className="size-4" />
+        <span className="flex-1">Saved</span>
         {inboxCount > 0 ? (
           <span className="text-xs tabular-nums opacity-60">{inboxCount}</span>
         ) : null}
@@ -149,7 +149,7 @@ export function FolderTree({
           className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
         >
           <Plus className="size-4" />
-          <span>New folder</span>
+          <span>New collection</span>
         </button>
       )}
     </nav>

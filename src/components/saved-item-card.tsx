@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import {
+  ExternalLink,
   FolderInput,
   MoreHorizontal,
   Trash2,
@@ -35,6 +36,11 @@ export function SavedItemCard({
         target="_blank"
         rel="noopener noreferrer"
         className="flex flex-col gap-2"
+        aria-label={
+          handle
+            ? `Open post by @${handle} on X.com (opens in new tab)`
+            : `Open post on X.com (opens in new tab)`
+        }
       >
         <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
           {/* Placeholder visual */}
@@ -50,6 +56,7 @@ export function SavedItemCard({
               {domain}
             </span>
           </div>
+          <ExternalLink className="absolute bottom-2 right-2 size-3.5 text-muted-foreground/60" />
         </div>
         <div className="px-0.5">
           <p className="truncate text-xs font-medium text-foreground">
@@ -83,7 +90,7 @@ export function SavedItemCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 justify-start gap-2 px-2 text-xs"
+              className="h-10 justify-start gap-2 px-2 text-xs"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -97,7 +104,7 @@ export function SavedItemCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 justify-start gap-2 px-2 text-xs text-destructive hover:text-destructive"
+              className="h-10 justify-start gap-2 px-2 text-xs text-destructive hover:text-destructive"
               onClick={async (e) => {
                 e.stopPropagation();
                 e.preventDefault();

@@ -199,7 +199,7 @@ function SavedView() {
 
           {inboxTweets === undefined ? (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
                   className="aspect-square animate-pulse rounded-xl bg-muted"

@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   Bookmark,
+  ChevronLeft,
   LogOut,
   Monitor,
   MoonStar,
@@ -133,7 +134,7 @@ export function AppShell({
                   className="size-9"
                   onClick={onBack}
                 >
-                  <X className="size-5" />
+                  <ChevronLeft className="size-5" />
                 </Button>
               ) : null}
               <h1 className="text-xl font-semibold tracking-tight">
