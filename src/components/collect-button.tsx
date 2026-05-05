@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "../../convex/_generated/api"
 import type { Id } from "../../convex/_generated/dataModel"
-import { motion, AnimatePresence } from "motion/react"
+import { motion, AnimatePresence, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import {
@@ -22,6 +22,9 @@ type View = "main" | "collections" | "tags"
 
 const TWEET_URL_RE =
   /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/\d+)/i
+
+const LAYOUT_SPRING = { type: "spring" as const, duration: 0.5, bounce: 0 }
+const FAST_SPRING = { type: "spring" as const, duration: 0.3, bounce: 0 }
 
 function useClickOutside(
   ref: React.RefObject<HTMLElement | null>,
@@ -48,6 +51,8 @@ export function CollectButton() {
   const [newFolderName, setNewFolderName] = useState("")
   const [isSaving, setIsSaving] = useState(false)
 
+  const shouldReduceMotion = useReducedMotion()
+
   const folderData = useQuery(api.folders.listTree)
   const addTweet = useMutation(api.tweets.addFromUrl)
   const createFolder = useMutation(api.folders.create)
@@ -67,10 +72,35 @@ export function CollectButton() {
 
   const handlePaste = useCallback(async () => {
     try {
+      let permission: PermissionStatus | undefined
+      try {
+        permission = await navigator.permissions.query({
+          name: "clipboard-read" as PermissionName,
+        })
+      } catch {
+        // Permissions API may not support clipboard-read
+      }
+
+      if (permission && permission.state === "denied") {
+        toast.error("Clipboard access was denied. Check your browser settings.")
+        return
+      }
+
       const text = await navigator.clipboard.readText()
+      if (!text.trim()) {
+        toast.error("Clipboard is empty")
+        return
+      }
       setContent(text)
-    } catch {
-      toast.error("Unable to access clipboard")
+      toast.success("Pasted from clipboard")
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "NotAllowedError") {
+        toast.error(
+          "Clipboard access not allowed. Make sure this site is served over HTTPS and try again."
+        )
+      } else {
+        toast.error("Unable to read clipboard. Try pasting manually.")
+      }
     }
   }, [])
 
@@ -142,94 +172,93 @@ export function CollectButton() {
   }, [open, close])
 
   return (
-    <>
-      {/* Floating trigger button */}
-      <motion.button
-        onClick={() => setOpen(true)}
-        className={cn(
-          "fixed bottom-6 right-4 z-30 flex h-12 items-center gap-2 rounded-full border border-border bg-primary px-5 text-sm font-medium text-primary-foreground shadow-lg transition-shadow hover:shadow-xl",
-          "md:hidden",
-          open && "pointer-events-none opacity-0"
-        )}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
-      >
-        <Plus className="size-4" />
-        collect
-      </motion.button>
+    <AnimatePresence>
+      {!open ? (
+        <motion.button
+          key="trigger"
+          layoutId="collect-popover"
+          onClick={() => setOpen(true)}
+          className="fixed bottom-6 right-4 z-30 flex h-12 items-center gap-2 rounded-2xl border border-border bg-primary px-5 text-sm font-medium text-primary-foreground shadow-lg md:hidden"
+          exit={
+            shouldReduceMotion
+              ? { opacity: 0, transition: { duration: 0.1 } }
+              : { opacity: 0, transition: { duration: 0.2 } }
+          }
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          transition={LAYOUT_SPRING}
+        >
+          <Plus className="size-4" />
+          collect
+        </motion.button>
+      ) : (
+        <div key="popover" className="fixed inset-0 z-40 md:hidden">
+          {/* Backdrop */}
+          <motion.div
+            className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0.1 : 0.2 }}
+          />
 
-      {/* Popover */}
-      <AnimatePresence>
-        {open && (
-          <div className="fixed inset-0 z-40 md:hidden">
-            {/* Backdrop */}
-            <motion.div
-              className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            />
+          {/* Card — shares layoutId with trigger for morph animation */}
+          <motion.div
+            ref={containerRef}
+            layoutId="collect-popover"
+            layout
+            transition={LAYOUT_SPRING}
+            className="absolute inset-x-4 bottom-6 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+          >
+            <AnimatePresence mode="wait">
+              {view === "main" && (
+                <MotionView key="main">
+                  <MainView
+                    content={content}
+                    onContentChange={setContent}
+                    onPaste={handlePaste}
+                    selectedFolder={selectedFolder}
+                    tags={tags}
+                    onOpenCollections={() => setView("collections")}
+                    onOpenTags={() => setView("tags")}
+                    onClose={close}
+                    onSubmit={handleSubmit}
+                    isSaving={isSaving}
+                  />
+                </MotionView>
+              )}
 
-            {/* Popover card */}
-            <motion.div
-              ref={containerRef}
-              className="absolute inset-x-4 bottom-6 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
-              initial={{ opacity: 0, y: 24, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 24, scale: 0.96 }}
-              transition={{ type: "spring", bounce: 0.1, duration: 0.35 }}
-            >
-              <AnimatePresence mode="wait">
-                {view === "main" && (
-                  <MotionView key="main">
-                    <MainView
-                      content={content}
-                      onContentChange={setContent}
-                      onPaste={handlePaste}
-                      selectedFolder={selectedFolder}
-                      tags={tags}
-                      onOpenCollections={() => setView("collections")}
-                      onOpenTags={() => setView("tags")}
-                      onClose={close}
-                      onSubmit={handleSubmit}
-                      isSaving={isSaving}
-                    />
-                  </MotionView>
-                )}
+              {view === "collections" && (
+                <MotionView key="collections">
+                  <CollectionsView
+                    collections={collections}
+                    selectedFolderId={selectedFolderId}
+                    onSelect={(id) => setSelectedFolderId(id)}
+                    onBack={() => setView("main")}
+                    newFolderName={newFolderName}
+                    onNewFolderNameChange={setNewFolderName}
+                    onCreateFolder={handleCreateFolder}
+                  />
+                </MotionView>
+              )}
 
-                {view === "collections" && (
-                  <MotionView key="collections">
-                    <CollectionsView
-                      collections={collections}
-                      selectedFolderId={selectedFolderId}
-                      onSelect={(id) => setSelectedFolderId(id)}
-                      onBack={() => setView("main")}
-                      newFolderName={newFolderName}
-                      onNewFolderNameChange={setNewFolderName}
-                      onCreateFolder={handleCreateFolder}
-                    />
-                  </MotionView>
-                )}
-
-                {view === "tags" && (
-                  <MotionView key="tags">
-                    <TagsView
-                      tags={tags}
-                      tagInput={tagInput}
-                      onTagInputChange={setTagInput}
-                      onAddTag={handleAddTag}
-                      onRemoveTag={handleRemoveTag}
-                      onBack={() => setView("main")}
-                    />
-                  </MotionView>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
+              {view === "tags" && (
+                <MotionView key="tags">
+                  <TagsView
+                    tags={tags}
+                    tagInput={tagInput}
+                    onTagInputChange={setTagInput}
+                    onAddTag={handleAddTag}
+                    onRemoveTag={handleRemoveTag}
+                    onBack={() => setView("main")}
+                  />
+                </MotionView>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }
 
@@ -239,7 +268,7 @@ function MotionView({ children }: { children: React.ReactNode }) {
       initial={{ opacity: 0, x: 32 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -32 }}
-      transition={{ type: "spring", bounce: 0, duration: 0.25 }}
+      transition={FAST_SPRING}
     >
       {children}
     </motion.div>
@@ -380,52 +409,54 @@ function CollectionsView({
       </div>
 
       {/* List */}
-      <div className="max-h-[20vh] overflow-y-auto px-4">
-        {/* None option */}
-        <button
-          type="button"
-          onClick={() => onSelect(null)}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
-            selectedFolderId === null
-              ? "bg-accent text-foreground"
-              : "text-muted-foreground hover:bg-accent hover:text-foreground"
-          )}
-        >
-          <span className="flex-1 text-left">No collection</span>
-          {selectedFolderId === null && (
-            <Check className="size-4 shrink-0" />
-          )}
-        </button>
-
-        {collections.map((folder) => (
+      <div className="max-h-[20vh] overflow-y-auto px-4 pb-2">
+        <div className="flex flex-col gap-1">
+          {/* None option */}
           <button
-            key={folder._id}
             type="button"
-            onClick={() => onSelect(folder._id)}
+            onClick={() => onSelect(null)}
             className={cn(
               "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
-              selectedFolderId === folder._id
+              selectedFolderId === null
                 ? "bg-accent text-foreground"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
           >
-            <FolderOpen className="size-4 shrink-0" />
-            <span className="flex-1 text-left truncate">{folder.name}</span>
-            <span className="text-xs text-muted-foreground shrink-0">
-              {folder.tweetCount}
-            </span>
-            {selectedFolderId === folder._id && (
+            <span className="flex-1 text-left">No collection</span>
+            {selectedFolderId === null && (
               <Check className="size-4 shrink-0" />
             )}
           </button>
-        ))}
 
-        {collections.length === 0 && (
-          <p className="py-4 text-center text-sm text-muted-foreground">
-            No collections yet
-          </p>
-        )}
+          {collections.map((folder) => (
+            <button
+              key={folder._id}
+              type="button"
+              onClick={() => onSelect(folder._id)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                selectedFolderId === folder._id
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              <FolderOpen className="size-4 shrink-0" />
+              <span className="flex-1 text-left truncate">{folder.name}</span>
+              <span className="text-xs text-muted-foreground shrink-0">
+                {folder.tweetCount}
+              </span>
+              {selectedFolderId === folder._id && (
+                <Check className="size-4 shrink-0" />
+              )}
+            </button>
+          ))}
+
+          {collections.length === 0 && (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              No collections yet
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Create new */}
@@ -485,7 +516,6 @@ function TagsView({
 
       {/* Applied tags */}
       <div className="px-4 pb-2">
-        <p className="mb-2 text-xs text-muted-foreground">Tags applied</p>
         {tags.length === 0 ? (
           <p className="py-2 text-sm text-muted-foreground">No tags yet</p>
         ) : (
