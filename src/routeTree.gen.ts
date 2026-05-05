@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShareTargetRouteImport } from './routes/share-target'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FoldersFolderIdRouteImport } from './routes/folders.$folderId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -20,9 +23,24 @@ const ShareTargetRoute = ShareTargetRouteImport.update({
   path: '/share-target',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsRoute = CollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +61,20 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/share-target': typeof ShareTargetRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/share-target': typeof ShareTargetRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -58,7 +82,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/collections': typeof CollectionsRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/share-target': typeof ShareTargetRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -67,16 +94,30 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/collections'
     | '/login'
+    | '/profile'
+    | '/search'
     | '/share-target'
     | '/folders/$folderId'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/share-target' | '/folders/$folderId' | '/api/auth/$'
+  to:
+    | '/'
+    | '/collections'
+    | '/login'
+    | '/profile'
+    | '/search'
+    | '/share-target'
+    | '/folders/$folderId'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
+    | '/collections'
     | '/login'
+    | '/profile'
+    | '/search'
     | '/share-target'
     | '/folders/$folderId'
     | '/api/auth/$'
@@ -84,7 +125,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CollectionsRoute: typeof CollectionsRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
+  SearchRoute: typeof SearchRoute
   ShareTargetRoute: typeof ShareTargetRoute
   FoldersFolderIdRoute: typeof FoldersFolderIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -99,11 +143,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShareTargetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections': {
+      id: '/collections'
+      path: '/collections'
+      fullPath: '/collections'
+      preLoaderRoute: typeof CollectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -132,7 +197,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CollectionsRoute: CollectionsRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
+  SearchRoute: SearchRoute,
   ShareTargetRoute: ShareTargetRoute,
   FoldersFolderIdRoute: FoldersFolderIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

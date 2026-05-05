@@ -22,6 +22,16 @@ import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { AddTweetForm } from "./add-tweet-form";
+import {
+  FamilyDrawerRoot,
+  FamilyDrawerTrigger,
+  FamilyDrawerPortal,
+  FamilyDrawerOverlay,
+  FamilyDrawerContent,
+  FamilyDrawerAnimatedWrapper,
+  FamilyDrawerAnimatedContent,
+} from "@/components/ui/family-drawer";
+import { FloatingTooltip } from "@/components/unlumen-ui/floating-tooltip";
 
 type AppShellProps = {
   children: ReactNode;
@@ -77,162 +87,229 @@ export function AppShell({
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
   return (
-    <div className="min-h-screen">
-      {/* Desktop Sidebar */}
-      <aside className="fixed left-0 top-0 hidden h-full w-56 flex-col border-r border-border bg-background md:flex">
-        <div className="flex flex-1 flex-col gap-6 p-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 px-2">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-foreground">
-              <Bookmark className="size-4 text-background" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight">
-              Collectr
-            </span>
-          </Link>
-
-          {/* Navigation */}
-          <nav className="flex flex-col gap-1">
-            <Link
-              to="/"
-              className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-foreground transition hover:bg-accent"
-            >
-              <Bookmark className="size-4" />
-              <span>Saved</span>
+    <FloatingTooltip.Provider>
+      <div className="min-h-screen">
+        {/* Desktop Sidebar */}
+        <aside className="fixed left-0 top-0 hidden h-full w-56 flex-col border-r border-border bg-background md:flex">
+          <div className="flex flex-1 flex-col gap-6 p-4">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3 px-2">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-foreground">
+                <Bookmark className="size-4 text-background" />
+              </div>
+              <span className="text-lg font-semibold tracking-tight">
+                Collectr
+              </span>
             </Link>
-          </nav>
-        </div>
 
-        {/* Bottom Actions */}
-        <div className="flex flex-col gap-2 border-t border-border p-4">
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-10 justify-start gap-3 px-3 text-muted-foreground hover:text-foreground"
-            onClick={() => setActivePanel("settings")}
-          >
-            <Settings className="size-4" />
-            <span>Settings</span>
-          </Button>
-          <div className="flex items-center gap-2 px-3">
-            <ThemeToggleButton />
-            <UserButton />
+            {/* Navigation */}
+            <nav className="flex flex-col gap-1">
+              <Link
+                to="/"
+                className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-foreground transition hover:bg-accent"
+              >
+                <Bookmark className="size-4" />
+                <span>Saved</span>
+              </Link>
+            </nav>
           </div>
-        </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="min-w-0 flex-1 md:pl-56">
-        <div className="mx-auto max-w-3xl px-4 pb-28 pt-4 md:px-8 md:pb-8 md:pt-8">
-          {/* Mobile Header */}
-          <header className="mb-6 flex items-center justify-between md:hidden">
-            <div className="flex items-center gap-3">
-              {showBack ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-9"
-                  onClick={onBack}
-                >
-                  <ChevronLeft className="size-5" />
-                </Button>
-              ) : null}
-              <h1 className="text-xl font-semibold tracking-tight">
+          {/* Bottom Actions */}
+          <div className="flex flex-col gap-2 border-t border-border p-4">
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-10 justify-start gap-3 px-3 text-muted-foreground hover:text-foreground"
+              onClick={() => setActivePanel("settings")}
+            >
+              <Settings className="size-4" />
+              <span>Settings</span>
+            </Button>
+            <div className="flex items-center gap-2 px-3">
+              <ThemeToggleButton />
+              <UserButton />
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="min-w-0 flex-1 md:pl-56">
+          <div className="mx-auto max-w-3xl px-4 pb-28 pt-4 md:px-8 md:pb-8 md:pt-8">
+            {/* Mobile Header */}
+            <header className="mb-6 flex items-center justify-between md:hidden">
+              <div className="flex items-center gap-3">
+                {showBack ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-9"
+                    onClick={onBack}
+                    aria-label="Go back"
+                  >
+                    <ChevronLeft className="size-5" />
+                  </Button>
+                ) : null}
+                <h1 className="text-xl font-semibold tracking-tight">
+                  {title ?? "Saved"}
+                </h1>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9"
+                onClick={() => setActivePanel("add")}
+                aria-label="Add link"
+              >
+                <Plus className="size-5" />
+              </Button>
+            </header>
+
+            {/* Desktop Header */}
+            <header className="mb-6 hidden items-center justify-between md:flex">
+              <h1 className="text-2xl font-semibold tracking-tight">
                 {title ?? "Saved"}
               </h1>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setActivePanel("add")}
+              >
+                <Plus className="size-4" />
+                <span>Add link</span>
+              </Button>
+            </header>
+
+            {children}
+          </div>
+        </main>
+
+        {/* Mobile Dock */}
+        <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
+          <div className="app-dock mx-auto flex w-full max-w-xs items-center gap-1 rounded-2xl p-1.5">
+            <FloatingTooltipTrigger content="Saved">
+              <Button
+                asChild
+                variant="ghost"
+                className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
+              >
+                <Link to="/" onClick={() => setActivePanel(null)}>
+                  <Bookmark className="size-4" />
+                  <span>Saved</span>
+                </Link>
+              </Button>
+            </FloatingTooltipTrigger>
+
+            <FamilyDrawerRoot
+              open={activePanel === "add"}
+              onOpenChange={(open) => {
+                if (!open) setActivePanel(null);
+              }}
+            >
+              <FamilyDrawerTrigger asChild>
+                <FloatingTooltipTrigger content="Add link">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
+                    onClick={() => setActivePanel("add")}
+                  >
+                    <Plus className="size-4" />
+                    <span>Add</span>
+                  </Button>
+                </FloatingTooltipTrigger>
+              </FamilyDrawerTrigger>
+              <AddLinkDrawer onClose={() => setActivePanel(null)} />
+            </FamilyDrawerRoot>
+
+            <FloatingTooltipTrigger content="Settings">
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
+                onClick={() => setActivePanel("settings")}
+              >
+                <Settings className="size-4" />
+                <span>Settings</span>
+              </Button>
+            </FloatingTooltipTrigger>
+          </div>
+        </div>
+
+        {/* Desktop Add Drawer */}
+        {activePanel === "add" ? (
+          <div className="hidden md:block">
+            <FamilyDrawerRoot
+              open={activePanel === "add"}
+              onOpenChange={(open) => {
+                if (!open) setActivePanel(null);
+              }}
+            >
+              <AddLinkDrawer onClose={() => setActivePanel(null)} />
+            </FamilyDrawerRoot>
+          </div>
+        ) : null}
+
+        {activePanel === "settings" ? (
+          <AppSheet
+            title="Settings"
+            description="Tune the workspace and keep the app comfortable in any light."
+            onClose={() => setActivePanel(null)}
+          >
+            <SettingsPanel onClose={() => setActivePanel(null)} />
+          </AppSheet>
+        ) : null}
+      </div>
+    </FloatingTooltip.Provider>
+  );
+}
+
+function FloatingTooltipTrigger({
+  children,
+  content,
+}: {
+  children: React.ReactNode;
+  content: string;
+}) {
+  return (
+    <FloatingTooltip.Trigger content={content}>
+      {children}
+    </FloatingTooltip.Trigger>
+  );
+}
+
+function AddLinkDrawer({ onClose }: { onClose: () => void }) {
+  return (
+    <FamilyDrawerPortal>
+      <FamilyDrawerOverlay onClick={onClose} className="z-40" />
+      <FamilyDrawerContent className="z-40 bg-card md:right-4 md:left-auto md:mx-0 md:max-w-md md:rounded-[24px]">
+        <FamilyDrawerAnimatedWrapper>
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Add link</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Paste a tweet or X post URL to save it.
+              </p>
             </div>
             <Button
+              type="button"
               variant="ghost"
               size="icon"
-              className="size-9"
-              onClick={() => setActivePanel("add")}
+              className="size-8 rounded-lg"
+              onClick={onClose}
+              aria-label="Close"
             >
-              <Plus className="size-5" />
+              <X className="size-4" />
             </Button>
-          </header>
-
-          {/* Desktop Header */}
-          <header className="mb-8 hidden items-center justify-between md:flex">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {title ?? "Saved"}
-            </h1>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => setActivePanel("add")}
-            >
-              <Plus className="size-4" />
-              <span>Add link</span>
-            </Button>
-          </header>
-
-          {children}
-        </div>
-      </main>
-
-      {/* Mobile Dock */}
-      <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
-        <div className="app-dock mx-auto flex w-full max-w-xs items-center gap-1 rounded-2xl p-1.5">
-          <Button
-            asChild
-            variant="ghost"
-            className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
-          >
-            <Link to="/" onClick={() => setActivePanel(null)}>
-              <Bookmark className="size-4" />
-              <span>Saved</span>
-            </Link>
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
-            onClick={() => setActivePanel("add")}
-          >
-            <Plus className="size-4" />
-            <span>Add</span>
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
-            onClick={() => setActivePanel("settings")}
-          >
-            <Settings className="size-4" />
-            <span>Settings</span>
-          </Button>
-        </div>
-      </div>
-
-      {activePanel === "add" ? (
-        <AppSheet
-          title="Add link"
-          description="Paste a tweet or X post URL to save it."
-          mobileOnly
-          onClose={() => setActivePanel(null)}
-        >
-          <div className="pb-4">
-            <AddTweetForm
-              folderId={null}
-              onAdded={() => setActivePanel(null)}
-            />
           </div>
-        </AppSheet>
-      ) : null}
-
-      {activePanel === "settings" ? (
-        <AppSheet
-          title="Settings"
-          description="Tune the workspace and keep the app comfortable in any light."
-          onClose={() => setActivePanel(null)}
-        >
-          <SettingsPanel onClose={() => setActivePanel(null)} />
-        </AppSheet>
-      ) : null}
-    </div>
+          <FamilyDrawerAnimatedContent>
+            <div className="pb-4">
+              <AddTweetForm folderId={null} onAdded={onClose} />
+            </div>
+          </FamilyDrawerAnimatedContent>
+        </FamilyDrawerAnimatedWrapper>
+      </FamilyDrawerContent>
+    </FamilyDrawerPortal>
   );
 }
 
@@ -295,6 +372,7 @@ function AppSheet({
             size="icon"
             className="size-8 rounded-lg"
             onClick={onClose}
+            aria-label="Close"
           >
             <X className="size-4" />
           </Button>
@@ -355,6 +433,7 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
                   : "border-border hover:border-foreground/20 hover:bg-accent"
               )}
               onClick={() => setTheme(option.value)}
+              aria-pressed={theme === option.value}
             >
               <option.icon className="size-4" />
               <span className="text-xs font-medium">{option.label}</span>

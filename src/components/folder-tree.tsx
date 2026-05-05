@@ -16,6 +16,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
 
 interface FolderNode {
   _id: Id<"folders">;
@@ -52,7 +53,9 @@ function branchContainsFolder(
   }
 
   const children = tree.get(folderId) ?? [];
-  return children.some((child) => branchContainsFolder(tree, child._id, targetFolderId));
+  return children.some((child) =>
+    branchContainsFolder(tree, child._id, targetFolderId)
+  );
 }
 
 export function FolderTree({
@@ -196,7 +199,7 @@ function FolderItem({
 
   return (
     <div>
-      <div
+      <motion.div
         className={cn(
           "group flex h-9 items-center gap-2 rounded-lg px-2 text-sm transition",
           isActive
@@ -204,11 +207,13 @@ function FolderItem({
             : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
+        whileHover={{ scale: 1.01 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
         {hasChildren ? (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="shrink-0 opacity-60 hover:opacity-100"
+            className="flex size-8 shrink-0 items-center justify-center rounded opacity-60 hover:opacity-100"
           >
             {isExpanded ? (
               <ChevronDown className="size-3" />
@@ -270,35 +275,45 @@ function FolderItem({
               setRenameValue(folder.name);
               setIsRenaming(true);
             }}
-            className="rounded p-0.5 opacity-60 hover:opacity-100"
+            className="flex size-8 items-center justify-center rounded opacity-60 hover:opacity-100"
             title="Rename"
           >
-            <Pencil className="size-3" />
+            <Pencil className="size-3.5" />
           </button>
           <button
             onClick={() => deleteFolder({ folderId: folder._id })}
-            className="rounded p-0.5 opacity-60 hover:text-destructive hover:opacity-100"
+            className="flex size-8 items-center justify-center rounded opacity-60 hover:text-destructive hover:opacity-100"
             title="Delete (if empty)"
           >
-            <Trash2 className="size-3" />
+            <Trash2 className="size-3.5" />
           </button>
         </span>
-      </div>
+      </motion.div>
 
-      {isExpanded && children.length > 0 ? (
-        <div className="flex flex-col gap-0.5">
-          {children.map((child) => (
-            <FolderItem
-              key={child._id}
-              folder={child}
-              tree={tree}
-              currentFolderId={currentFolderId}
-              onNavigate={onNavigate}
-              depth={depth + 1}
-            />
-          ))}
-        </div>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {isExpanded && children.length > 0 ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 40 }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="flex flex-col gap-0.5">
+              {children.map((child) => (
+                <FolderItem
+                  key={child._id}
+                  folder={child}
+                  tree={tree}
+                  currentFolderId={currentFolderId}
+                  onNavigate={onNavigate}
+                  depth={depth + 1}
+                />
+              ))}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

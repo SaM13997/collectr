@@ -11,6 +11,7 @@ import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
 import { Bookmark, FolderOpen, Inbox, Link2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnimatedList } from "@/components/unlumen-ui/animated-list";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -126,7 +127,7 @@ function SavedView() {
   return (
     <AppShell>
       {/* Filter Chips */}
-      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto pb-2 mb-8">
         {filterTabs.map((tab) => (
           <button
             key={tab.value}
@@ -147,7 +148,7 @@ function SavedView() {
       {/* Collections Section */}
       {showCollections ? (
         <section>
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between">
             <h2 className="text-base font-semibold tracking-tight">
               Collections
             </h2>
@@ -162,7 +163,7 @@ function SavedView() {
           </div>
 
           {collections.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border py-10 text-center">
+            <div className="rounded-xl border border-dashed border-border p-4 text-center">
               <FolderOpen className="mx-auto size-7 text-muted-foreground/50" />
               <p className="mt-2 text-sm text-muted-foreground">
                 No collections yet.
@@ -185,8 +186,8 @@ function SavedView() {
 
       {/* Links Section */}
       {showLinks ? (
-        <section>
-          <div className="mb-3 flex items-center justify-between">
+        <section className="mt-10">
+          <div className="mb-2 flex items-center justify-between">
             <h2 className="text-base font-semibold tracking-tight">
               {filter === "links" ? "All links" : "Recent links"}
             </h2>
@@ -198,31 +199,34 @@ function SavedView() {
           </div>
 
           {inboxTweets === undefined ? (
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+            <div className="flex flex-col gap-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="aspect-square animate-pulse rounded-xl bg-muted"
+                  className="h-20 animate-pulse rounded-xl bg-muted"
                 />
               ))}
             </div>
           ) : inboxTweets.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border py-10 text-center">
+            <div className="rounded-xl border border-dashed border-border p-4 text-center">
               <Link2 className="mx-auto size-7 text-muted-foreground/50" />
               <p className="mt-2 text-sm text-muted-foreground">
                 No links saved yet.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-              {inboxTweets.map((tweet) => (
+            <AnimatedList
+              items={inboxTweets.map((t) => ({ ...t, id: t._id }))}
+              renderItem={(tweet) => (
                 <SavedItemCard
-                  key={tweet._id}
                   item={tweet}
+                  variant="list"
                   onMove={(id) => setMovingTweetId(id)}
                 />
-              ))}
-            </div>
+              )}
+              gap={8}
+              animation="scale"
+            />
           )}
         </section>
       ) : null}

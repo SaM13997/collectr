@@ -11,86 +11,107 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  Expandable,
+  ExpandableTrigger,
+  ExpandableContent,
+} from "@/components/ui/expandable";
 
 interface SavedItemCardProps {
   item: Doc<"tweets">;
   onMove?: (id: Id<"tweets">) => void;
   className?: string;
+  variant?: "grid" | "list";
 }
 
 export function SavedItemCard({
   item,
   onMove,
   className,
+  variant = "grid",
 }: SavedItemCardProps) {
   const [showActions, setShowActions] = useState(false);
   const removeTweet = useMutation(api.tweets.remove);
 
   const domain = "x.com";
   const handle = extractHandle(item.url);
+  const isList = variant === "list";
 
-  return (
-    <div className={cn("group relative", className)}>
-      <a
-        href={item.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex flex-col gap-2"
-        aria-label={
-          handle
-            ? `Open post by @${handle} on X.com (opens in new tab)`
-            : `Open post on X.com (opens in new tab)`
-        }
+  const cardContent = (
+    <>
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-xl bg-muted",
+          isList ? "size-14 shrink-0" : "aspect-square"
+        )}
       >
-        <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-          {/* Placeholder visual */}
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-muted to-background p-3">
-            <svg
-              viewBox="0 0 24 24"
-              className="size-8 text-foreground/80"
-              fill="currentColor"
-            >
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
+        {/* Placeholder visual */}
+        <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-muted to-background p-2">
+          <svg
+            viewBox="0 0 24 24"
+            className={cn("text-foreground/80", isList ? "size-5" : "size-8")}
+            fill="currentColor"
+          >
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+          {!isList && (
             <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {domain}
             </span>
-          </div>
-          <ExternalLink className="absolute bottom-2 right-2 size-3.5 text-muted-foreground/60" />
+          )}
         </div>
-        <div className="px-0.5">
-          <p className="truncate text-xs font-medium text-foreground">
-            {handle ? `@${handle}` : `Post ${item.tweetId}`}
-          </p>
-          <p className="truncate text-[11px] text-muted-foreground">
-            {item.url}
-          </p>
-        </div>
-      </a>
+        <ExternalLink
+          className={cn(
+            "absolute text-muted-foreground/60",
+            isList ? "bottom-1 right-1 size-3" : "bottom-2 right-2 size-3.5"
+          )}
+        />
+      </div>
+      <div className={cn("min-w-0", isList ? "flex-1" : "px-0.5")}>
+        <p className="truncate text-xs font-medium text-foreground">
+          {handle ? `@${handle}` : `Post ${item.tweetId}`}
+        </p>
+        <p className="truncate text-[11px] text-muted-foreground">
+          {item.url}
+        </p>
+      </div>
+    </>
+  );
 
-      {/* Actions */}
-      <button
-        className="absolute right-2 top-2 flex size-9 items-center justify-center rounded-full bg-background/50 text-muted-foreground opacity-100 backdrop-blur-sm transition hover:bg-background/90 hover:text-foreground"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          setShowActions(!showActions);
-        }}
+  const actions = (
+    <div className={cn(isList ? "relative shrink-0" : "")}>
+      {showActions && (
+        <div
+          className="fixed inset-0 z-30"
+          onClick={() => setShowActions(false)}
+        />
+      )}
+      <Expandable
+        expanded={showActions}
+        onToggle={() => setShowActions(!showActions)}
       >
-        <MoreHorizontal className="size-4" />
-      </button>
-
-      {showActions ? (
-        <>
-          <div
-            className="fixed inset-0 z-30"
-            onClick={() => setShowActions(false)}
-          />
-          <div className="absolute right-2 top-10 z-40 flex flex-col gap-1 rounded-xl border border-border bg-card p-1.5 shadow-lg">
+        <ExpandableTrigger
+          className={cn(
+            "flex items-center justify-center rounded-full text-muted-foreground transition hover:bg-background/90 hover:text-foreground",
+            isList
+              ? "size-8 bg-transparent"
+              : "absolute right-2 top-2 size-9 bg-background/50 opacity-100 backdrop-blur-sm"
+          )}
+        >
+          <MoreHorizontal className="size-4" />
+        </ExpandableTrigger>
+        <ExpandableContent
+          preset="scale"
+          className={cn(
+            "z-40",
+            isList ? "absolute right-0 top-9" : "absolute right-2 top-10"
+          )}
+        >
+          <div className="flex w-32 flex-col gap-1 rounded-xl border border-border bg-card p-1.5 shadow-lg">
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 justify-start gap-2 px-2 text-xs"
+              className="h-9 justify-start gap-2 px-2 text-xs"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -104,7 +125,7 @@ export function SavedItemCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 justify-start gap-2 px-2 text-xs text-destructive hover:text-destructive"
+              className="h-9 justify-start gap-2 px-2 text-xs text-destructive hover:text-destructive"
               onClick={async (e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -113,7 +134,9 @@ export function SavedItemCard({
                 } catch (err) {
                   toast.error("Failed to remove", {
                     description:
-                      err instanceof Error ? err.message : "Something went wrong.",
+                      err instanceof Error
+                        ? err.message
+                        : "Something went wrong.",
                   });
                 }
                 setShowActions(false);
@@ -123,8 +146,32 @@ export function SavedItemCard({
               Remove
             </Button>
           </div>
-        </>
-      ) : null}
+        </ExpandableContent>
+      </Expandable>
+    </div>
+  );
+
+  return (
+    <div className={cn("group relative", isList ? "flex items-center gap-2" : "", className)}>
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          "flex gap-3",
+          isList
+            ? "flex-1 items-center rounded-xl border border-border bg-card p-3 transition hover:bg-accent"
+            : "flex-col"
+        )}
+        aria-label={
+          handle
+            ? `Open post by @${handle} on X.com (opens in new tab)`
+            : `Open post on X.com (opens in new tab)`
+        }
+      >
+        {cardContent}
+      </a>
+      {actions}
     </div>
   );
 }
