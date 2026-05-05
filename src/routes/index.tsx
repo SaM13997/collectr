@@ -151,12 +151,14 @@ function SavedView() {
             <h2 className="text-base font-semibold tracking-tight">
               Collections
             </h2>
-            <button
-              onClick={() => setFilter("collections")}
-              className="text-sm font-medium text-brand hover:underline"
-            >
-              See all
-            </button>
+            {filter !== "all" && (
+              <button
+                onClick={() => setFilter("collections")}
+                className="text-sm font-medium text-brand hover:underline"
+              >
+                See all
+              </button>
+            )}
           </div>
 
           {collections.length === 0 ? (

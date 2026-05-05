@@ -60,6 +60,7 @@ export function AddTweetForm({
               setError(null);
             }}
             placeholder="Paste a tweet or X post URL..."
+            aria-label="Paste a tweet or X post URL"
             className="h-10 pl-9"
             disabled={isSaving}
           />
