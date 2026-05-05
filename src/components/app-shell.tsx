@@ -24,14 +24,13 @@ import { toast } from "sonner";
 import { AddTweetForm } from "./add-tweet-form";
 import {
   FamilyDrawerRoot,
-  FamilyDrawerTrigger,
   FamilyDrawerPortal,
   FamilyDrawerOverlay,
   FamilyDrawerContent,
   FamilyDrawerAnimatedWrapper,
   FamilyDrawerAnimatedContent,
 } from "@/components/ui/family-drawer";
-import { FloatingTooltip } from "@/components/unlumen-ui/floating-tooltip";
+import { CollectButton } from "@/components/collect-button";
 
 type AppShellProps = {
   children: ReactNode;
@@ -87,7 +86,7 @@ export function AppShell({
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
   return (
-    <FloatingTooltip.Provider>
+    <>
       <div className="min-h-screen">
         {/* Desktop Sidebar */}
         <aside className="fixed left-0 top-0 hidden h-full w-56 flex-col border-r border-border bg-background md:flex">
@@ -157,10 +156,10 @@ export function AppShell({
                 variant="ghost"
                 size="icon"
                 className="size-9"
-                onClick={() => setActivePanel("add")}
-                aria-label="Add link"
+                onClick={() => setActivePanel("settings")}
+                aria-label="Settings"
               >
-                <Plus className="size-5" />
+                <Settings className="size-5" />
               </Button>
             </header>
 
@@ -183,58 +182,6 @@ export function AppShell({
             {children}
           </div>
         </main>
-
-        {/* Mobile Dock */}
-        <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
-          <div className="app-dock mx-auto flex w-full max-w-xs items-center gap-1 rounded-2xl p-1.5">
-            <FloatingTooltipTrigger content="Saved">
-              <Button
-                asChild
-                variant="ghost"
-                className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
-              >
-                <Link to="/" onClick={() => setActivePanel(null)}>
-                  <Bookmark className="size-4" />
-                  <span>Saved</span>
-                </Link>
-              </Button>
-            </FloatingTooltipTrigger>
-
-            <FamilyDrawerRoot
-              open={activePanel === "add"}
-              onOpenChange={(open) => {
-                if (!open) setActivePanel(null);
-              }}
-            >
-              <FamilyDrawerTrigger asChild>
-                <FloatingTooltipTrigger content="Add link">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
-                    onClick={() => setActivePanel("add")}
-                  >
-                    <Plus className="size-4" />
-                    <span>Add</span>
-                  </Button>
-                </FloatingTooltipTrigger>
-              </FamilyDrawerTrigger>
-              <AddLinkDrawer onClose={() => setActivePanel(null)} />
-            </FamilyDrawerRoot>
-
-            <FloatingTooltipTrigger content="Settings">
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
-                onClick={() => setActivePanel("settings")}
-              >
-                <Settings className="size-4" />
-                <span>Settings</span>
-              </Button>
-            </FloatingTooltipTrigger>
-          </div>
-        </div>
 
         {/* Desktop Add Drawer */}
         {activePanel === "add" ? (
@@ -260,21 +207,8 @@ export function AppShell({
           </AppSheet>
         ) : null}
       </div>
-    </FloatingTooltip.Provider>
-  );
-}
-
-function FloatingTooltipTrigger({
-  children,
-  content,
-}: {
-  children: React.ReactNode;
-  content: string;
-}) {
-  return (
-    <FloatingTooltip.Trigger content={content}>
-      {children}
-    </FloatingTooltip.Trigger>
+      <CollectButton />
+    </>
   );
 }
 
