@@ -131,8 +131,9 @@ function SavedView() {
           <button
             key={tab.value}
             onClick={() => setFilter(tab.value)}
+            aria-pressed={filter === tab.value}
             className={cn(
-              "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition",
+              "shrink-0 rounded-full border px-4 py-2.5 text-sm font-medium transition",
               filter === tab.value
                 ? "border-foreground bg-foreground text-background"
                 : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
