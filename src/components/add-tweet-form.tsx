@@ -49,23 +49,25 @@ export function AddTweetForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <div className="relative flex-1">
-        <Link2 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={url}
-          onChange={(e) => {
-            setUrl(e.target.value);
-            setError(null);
-          }}
-          placeholder="Paste a tweet or X post URL..."
-          className="h-10 pl-9"
-          disabled={isSaving}
-        />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Link2 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              setError(null);
+            }}
+            placeholder="Paste a tweet or X post URL..."
+            className="h-10 pl-9"
+            disabled={isSaving}
+          />
+        </div>
+        <Button type="submit" disabled={isSaving} className="h-10">
+          {isSaving ? "Saving..." : "Save link"}
+        </Button>
       </div>
-      <Button type="submit" disabled={isSaving} className="h-10">
-        {isSaving ? "Saving..." : "Save link"}
-      </Button>
       {error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : null}
