@@ -48,6 +48,23 @@
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-overlay: var(--surface-overlay);
+
+  /* Typography — Raycast design system */
+  --font-size-title: 1.5rem;
+  --font-size-heading: 1.125rem;
+  --font-size-body: 0.875rem;
+  --font-size-detail: 0.75rem;
+
+  --font-weight-title: 700;
+  --font-weight-heading: 600;
+  --font-weight-body: 400;
+  --font-weight-detail: 400;
+
+  /* Spacing & padding — Raycast scale */
+  --spacing-section: 2.5rem;
+  --spacing-card-padding: 1.25rem;
+  --spacing-card-gap: 1.5rem;
+  --spacing-page-x: 1rem;
 }
 
 /* Clean minimal light theme - warm neutrals with teal accent */
