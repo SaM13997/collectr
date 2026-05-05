@@ -97,7 +97,7 @@ function ShareTargetPage() {
             The shared content doesn't contain a valid tweet URL.
           </p>
           <Button asChild className="mt-6">
-            <Link to="/">Go to inbox</Link>
+            <Link to="/">Go to Saved</Link>
           </Button>
         </div>
       </main>
@@ -153,7 +153,7 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
                 }
               }}
             >
-              {selectedFolder ? "Go to folder" : "Go to inbox"}
+              {selectedFolder ? "Go to collection" : "Go to Saved"}
             </Button>
             <Button variant="outline" onClick={() => router.navigate({ to: "/" })}>
               Back to home

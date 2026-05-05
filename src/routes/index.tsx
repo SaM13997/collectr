@@ -4,16 +4,19 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useAuthSession } from "@/lib/use-auth-session";
-import { AddTweetForm } from "@/components/add-tweet-form";
 import { AppShell } from "@/components/app-shell";
-import { TweetCard } from "@/components/tweet-card";
+import { CollectionCard } from "@/components/collection-card";
+import { SavedItemCard } from "@/components/saved-item-card";
 import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, Inbox, Sparkles } from "lucide-react";
+import { Bookmark, FolderOpen, Inbox, Link2, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
+
+type FilterTab = "all" | "collections" | "links";
 
 function HomePage() {
   const { session, isPending } = useAuthSession();
@@ -30,7 +33,7 @@ function HomePage() {
     return <LandingPage />;
   }
 
-  return <InboxView />;
+  return <SavedView />;
 }
 
 function LandingPage() {
@@ -40,17 +43,18 @@ function LandingPage() {
         {/* Logo */}
         <div className="mb-8 flex justify-center">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-foreground">
-            <FolderOpen className="size-6 text-background" />
+            <Bookmark className="size-6 text-background" />
           </div>
         </div>
 
         {/* Heading */}
         <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-          Save tweets now, organize them later
+          Save links now, organize them later
         </h1>
 
         <p className="mx-auto mt-6 max-w-md text-pretty text-lg leading-relaxed text-muted-foreground">
-          Capture links from paste or share sheet, then sort them into folders whenever you have a moment.
+          Capture tweets, posts, and links from anywhere. Sort them into
+          collections whenever you have a moment.
         </p>
 
         {/* CTA */}
@@ -71,7 +75,7 @@ function LandingPage() {
             </div>
             <p className="text-sm font-medium">Quick capture</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Paste any tweet URL and save it instantly.
+              Paste any link and save it instantly.
             </p>
           </div>
 
@@ -79,9 +83,9 @@ function LandingPage() {
             <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-muted">
               <FolderOpen className="size-4 text-foreground" />
             </div>
-            <p className="text-sm font-medium">Organize by folder</p>
+            <p className="text-sm font-medium">Organize by collection</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Create folders and subfolders to keep things tidy.
+              Create collections to keep things tidy.
             </p>
           </div>
 
@@ -100,72 +104,125 @@ function LandingPage() {
   );
 }
 
-function InboxView() {
-  const tweets = useQuery(api.tweets.listInbox);
+function SavedView() {
+  const [filter, setFilter] = useState<FilterTab>("all");
   const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
+
+  const inboxTweets = useQuery(api.tweets.listInbox);
+  const folderData = useQuery(api.folders.listTree);
+
+  const collections = folderData?.folders ?? [];
+  const inboxCount = folderData?.inboxCount ?? 0;
+
+  const showCollections = filter === "all" || filter === "collections";
+  const showLinks = filter === "all" || filter === "links";
+
+  const filterTabs: { value: FilterTab; label: string }[] = [
+    { value: "all", label: "All" },
+    { value: "collections", label: "Collections" },
+    { value: "links", label: "Links" },
+  ];
 
   return (
     <AppShell>
-      {/* Header Section */}
-      <section className="rounded-xl border border-border bg-card p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Inbox</h1>
-            <p className="mt-1 text-muted-foreground">
-              Save tweet links now, organize them later.
-            </p>
+      {/* Filter Chips */}
+      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+        {filterTabs.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setFilter(tab.value)}
+            className={cn(
+              "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition",
+              filter === tab.value
+                ? "border-foreground bg-foreground text-background"
+                : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Collections Section */}
+      {showCollections ? (
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold tracking-tight">
+              Collections
+            </h2>
+            <button
+              onClick={() => setFilter("collections")}
+              className="text-sm font-medium text-brand hover:underline"
+            >
+              See all
+            </button>
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg bg-muted px-4 py-2">
-            <span className="text-sm text-muted-foreground">Queue</span>
-            <span className="text-lg font-semibold tabular-nums">
-              {tweets?.length ?? "-"}
-            </span>
-          </div>
-        </div>
+          {collections.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border py-10 text-center">
+              <FolderOpen className="mx-auto size-7 text-muted-foreground/50" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                No collections yet.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {collections.map((folder) => (
+                <CollectionCard
+                  key={folder._id}
+                  id={folder._id}
+                  name={folder.name}
+                  itemCount={folder.tweetCount}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ) : null}
 
-        <div className="mt-6">
-          <AddTweetForm folderId={null} />
-        </div>
-      </section>
+      {/* Links Section */}
+      {showLinks ? (
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold tracking-tight">
+              {filter === "links" ? "All links" : "Recent links"}
+            </h2>
+            {inboxCount > 0 ? (
+              <span className="text-sm text-muted-foreground">
+                {inboxCount} saved
+              </span>
+            ) : null}
+          </div>
 
-      {/* Tweets List */}
-      <section className="rounded-xl border border-border bg-card p-6">
-        <div className="mb-4 flex items-center gap-2">
-          <Inbox className="size-4" />
-          <h2 className="font-medium">Saved tweets</h2>
-          {tweets ? (
-            <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-              {tweets.length}
-            </span>
-          ) : null}
-        </div>
-
-        {tweets === undefined ? (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-28 animate-pulse rounded-lg bg-muted" />
-            ))}
-          </div>
-        ) : tweets.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border py-12 text-center">
-            <Inbox className="mx-auto size-8 text-muted-foreground/50" />
-            <p className="mt-3 text-sm text-muted-foreground">
-              No tweets saved yet. Paste a URL above to get started.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {tweets.map((tweet) => (
-              <TweetCard
-                key={tweet._id}
-                tweet={tweet}
-                onMove={(id) => setMovingTweetId(id)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+          {inboxTweets === undefined ? (
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-square animate-pulse rounded-xl bg-muted"
+                />
+              ))}
+            </div>
+          ) : inboxTweets.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border py-10 text-center">
+              <Link2 className="mx-auto size-7 text-muted-foreground/50" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                No links saved yet.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+              {inboxTweets.map((tweet) => (
+                <SavedItemCard
+                  key={tweet._id}
+                  item={tweet}
+                  onMove={(id) => setMovingTweetId(id)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ) : null}
 
       {movingTweetId ? (
         <FolderPicker

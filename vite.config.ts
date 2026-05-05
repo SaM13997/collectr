@@ -7,6 +7,9 @@ import { nitroV2Plugin } from '@tanstack/nitro-v2-vite-plugin'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const config = defineConfig({
+  server: {
+    allowedHosts: true,
+  },
   plugins: [
     nitroV2Plugin(),
     // this is the plugin that enables path aliases

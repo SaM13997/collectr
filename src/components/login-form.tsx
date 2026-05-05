@@ -15,53 +15,76 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-function getAuthErrorMessage(error: unknown) {
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  INVALID_EMAIL_OR_PASSWORD: "Wrong email or password.",
+  INVALID_PASSWORD: "Wrong email or password.",
+  INVALID_EMAIL: "Wrong email or password.",
+  USER_NOT_FOUND: "Wrong email or password.",
+  FAILED_TO_CREATE_USER: "Could not create your account. Please try again.",
+  FAILED_TO_CREATE_SESSION: "Could not create a session. Please try again.",
+  INVALID_TOKEN: "Your session is invalid. Please sign in again.",
+  EMAIL_NOT_VERIFIED: "Please verify your email before signing in.",
+  USER_ALREADY_EXISTS: "An account with this email already exists.",
+};
+
+const AUTH_MESSAGE_MAP: Record<string, string> = {
+  "Invalid email or password": "Wrong email or password.",
+  "Invalid password": "Wrong email or password.",
+  "Invalid email": "Wrong email or password.",
+  "User not found": "Wrong email or password.",
+  "User already exists": "An account with this email already exists.",
+  "Failed to create session": "Could not create a session. Please try again.",
+  "Failed to create user": "Could not create your account. Please try again.",
+};
+
+function getAuthErrorMessage(error: unknown): string {
   if (typeof error === "string" && error.length > 0) {
-    return error;
+    return AUTH_MESSAGE_MAP[error] ?? error;
   }
 
-  if (
-    error &&
-    typeof error === "object" &&
-    "message" in error &&
-    typeof error.message === "string" &&
-    error.message.length > 0
-  ) {
-    return error.message;
-  }
-
-  if (
-    error &&
-    typeof error === "object" &&
-    "error" in error &&
-    error.error !== error
-  ) {
-    const nestedMessage = getAuthErrorMessage(error.error);
-    if (nestedMessage !== "Authentication failed.") {
-      return nestedMessage;
+  if (error && typeof error === "object") {
+    if ("code" in error && typeof error.code === "string" && error.code in AUTH_ERROR_MESSAGES) {
+      return AUTH_ERROR_MESSAGES[error.code];
     }
-  }
 
-  if (
-    error &&
-    typeof error === "object" &&
-    "cause" in error &&
-    error.cause !== error
-  ) {
-    const nestedMessage = getAuthErrorMessage(error.cause);
-    if (nestedMessage !== "Authentication failed.") {
-      return nestedMessage;
+    if (
+      "message" in error &&
+      typeof error.message === "string" &&
+      error.message.length > 0
+    ) {
+      return AUTH_MESSAGE_MAP[error.message] ?? error.message;
     }
-  }
 
-  if (
-    error &&
-    typeof error === "object" &&
-    "statusText" in error &&
-    typeof error.statusText === "string" &&
-    error.statusText.length > 0
-  ) {
-    return error.statusText;
+    if ("error" in error && error.error !== error) {
+      const nestedMessage = getAuthErrorMessage(error.error);
+      if (nestedMessage !== "Authentication failed.") {
+        return nestedMessage;
+      }
+    }
+
+    if ("cause" in error && error.cause !== error) {
+      const nestedMessage = getAuthErrorMessage(error.cause);
+      if (nestedMessage !== "Authentication failed.") {
+        return nestedMessage;
+      }
+    }
+
+    if ("status" in error && typeof error.status === "number") {
+      if (error.status === 401 || error.status === 403) {
+        return "Wrong email or password.";
+      }
+      if (error.status === 502 || error.status === 503) {
+        return "Unable to reach the auth service. Please try again.";
+      }
+    }
+
+    if (
+      "statusText" in error &&
+      typeof error.statusText === "string" &&
+      error.statusText.length > 0
+    ) {
+      return error.statusText;
+    }
   }
 
   return "Authentication failed.";
@@ -132,8 +155,7 @@ export function LoginForm({
 
       navigateAfterAuth();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Authentication failed.";
+      const message = getAuthErrorMessage(error);
       setErrorMessage(message);
       toast.error(
         mode === "signIn" ? "Sign in failed" : "Sign up failed",

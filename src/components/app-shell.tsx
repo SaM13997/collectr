@@ -1,11 +1,11 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
-  FolderOpen,
-  Inbox,
+  Bookmark,
   LogOut,
   Monitor,
   MoonStar,
+  Plus,
   Settings,
   SunMedium,
   X,
@@ -14,24 +14,26 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { FolderTree } from "@/components/folder-tree";
 import { ThemeToggleButton } from "@/components/theme-toggle-button";
 import { ThemeSetting, useTheme } from "@/components/theme-provider";
 import { UserButton } from "@/components/User-button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { AddTweetForm } from "./add-tweet-form";
 
 type AppShellProps = {
-  currentFolderId?: string;
   children: ReactNode;
+  title?: string;
+  showBack?: boolean;
+  onBack?: () => void;
 };
 
-type ActivePanel = "folders" | "settings" | null;
+type ActivePanel = "settings" | "add" | null;
 
 type AppSheetProps = {
   title: string;
-  description: string;
+  description?: string;
   mobileOnly?: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -65,111 +67,137 @@ const themeOptions: ThemeOption[] = [
   },
 ];
 
-export function AppShell({ currentFolderId, children }: AppShellProps) {
+export function AppShell({
+  children,
+  title,
+  showBack,
+  onBack,
+}: AppShellProps) {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl gap-8 px-4 pb-24 pt-6 md:px-8 md:pb-8">
-        {/* Desktop Sidebar */}
-        <aside className="hidden w-64 shrink-0 md:block">
-          <div className="sticky top-6 flex flex-col gap-6">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 px-2">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-foreground">
-                <FolderOpen className="size-4 text-background" />
-              </div>
-              <span className="text-lg font-semibold tracking-tight">Collectr</span>
-            </Link>
-
-            {/* Navigation */}
-            <nav className="flex flex-col gap-1">
-              <p className="mb-2 px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Library
-              </p>
-              <FolderTree currentFolderId={currentFolderId} />
-            </nav>
-
-            {/* Bottom Actions */}
-            <div className="mt-auto flex flex-col gap-2 border-t border-border pt-4">
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-10 justify-start gap-3 px-2 text-muted-foreground hover:text-foreground"
-                onClick={() => setActivePanel("settings")}
-              >
-                <Settings className="size-4" />
-                <span>Settings</span>
-              </Button>
-              <div className="flex items-center gap-2 px-2">
-                <ThemeToggleButton />
-                <UserButton />
-              </div>
+      {/* Desktop Sidebar */}
+      <aside className="fixed left-0 top-0 hidden h-full w-56 flex-col border-r border-border bg-background md:flex">
+        <div className="flex flex-1 flex-col gap-6 p-4">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 px-2">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-foreground">
+              <Bookmark className="size-4 text-background" />
             </div>
-          </div>
-        </aside>
+            <span className="text-lg font-semibold tracking-tight">
+              Collectr
+            </span>
+          </Link>
 
-        {/* Main Content */}
-        <main className="min-w-0 flex-1">
-          <div className="flex flex-col gap-6">
-            {/* Mobile Header */}
-            <header className="flex items-center justify-between md:hidden">
-              <Link to="/" className="flex items-center gap-3">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-foreground">
-                  <FolderOpen className="size-4 text-background" />
-                </div>
-                <span className="text-lg font-semibold tracking-tight">Collectr</span>
-              </Link>
-              <div className="flex items-center gap-2">
-                <ThemeToggleButton />
-                <UserButton />
-              </div>
-            </header>
+          {/* Navigation */}
+          <nav className="flex flex-col gap-1">
+            <Link
+              to="/"
+              className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-foreground transition hover:bg-accent"
+            >
+              <Bookmark className="size-4" />
+              <span>Saved</span>
+            </Link>
+          </nav>
+        </div>
 
-            {children}
+        {/* Bottom Actions */}
+        <div className="flex flex-col gap-2 border-t border-border p-4">
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-10 justify-start gap-3 px-3 text-muted-foreground hover:text-foreground"
+            onClick={() => setActivePanel("settings")}
+          >
+            <Settings className="size-4" />
+            <span>Settings</span>
+          </Button>
+          <div className="flex items-center gap-2 px-3">
+            <ThemeToggleButton />
+            <UserButton />
           </div>
-        </main>
-      </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="min-w-0 flex-1 md:pl-56">
+        <div className="mx-auto max-w-3xl px-4 pb-28 pt-4 md:px-8 md:pb-8 md:pt-8">
+          {/* Mobile Header */}
+          <header className="mb-6 flex items-center justify-between md:hidden">
+            <div className="flex items-center gap-3">
+              {showBack ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-9"
+                  onClick={onBack}
+                >
+                  <X className="size-5" />
+                </Button>
+              ) : null}
+              <h1 className="text-xl font-semibold tracking-tight">
+                {title ?? "Saved"}
+              </h1>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-9"
+              onClick={() => setActivePanel("add")}
+            >
+              <Plus className="size-5" />
+            </Button>
+          </header>
+
+          {/* Desktop Header */}
+          <header className="mb-8 hidden items-center justify-between md:flex">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {title ?? "Saved"}
+            </h1>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setActivePanel("add")}
+            >
+              <Plus className="size-4" />
+              <span>Add link</span>
+            </Button>
+          </header>
+
+          {children}
+        </div>
+      </main>
 
       {/* Mobile Dock */}
-      <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:hidden">
-        <div className="app-dock mx-auto flex w-full max-w-sm items-center gap-1 rounded-2xl p-1.5">
+      <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
+        <div className="app-dock mx-auto flex w-full max-w-xs items-center gap-1 rounded-2xl p-1.5">
           <Button
             asChild
             variant="ghost"
-            className={cn(
-              "h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground",
-              !currentFolderId && "bg-foreground text-background hover:bg-foreground hover:text-background"
-            )}
+            className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
           >
             <Link to="/" onClick={() => setActivePanel(null)}>
-              <Inbox className="size-4" />
-              <span>Inbox</span>
+              <Bookmark className="size-4" />
+              <span>Saved</span>
             </Link>
           </Button>
 
           <Button
             type="button"
             variant="ghost"
-            className={cn(
-              "h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground",
-              (Boolean(currentFolderId) || activePanel === "folders") &&
-                "bg-foreground text-background hover:bg-foreground hover:text-background"
-            )}
-            onClick={() => setActivePanel("folders")}
+            className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
+            onClick={() => setActivePanel("add")}
           >
-            <FolderOpen className="size-4" />
-            <span>Folders</span>
+            <Plus className="size-4" />
+            <span>Add</span>
           </Button>
 
           <Button
             type="button"
             variant="ghost"
-            className={cn(
-              "h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground",
-              activePanel === "settings" &&
-                "bg-foreground text-background hover:bg-foreground hover:text-background"
-            )}
+            className="h-12 flex-1 gap-2 rounded-xl text-sm font-medium text-muted-foreground"
             onClick={() => setActivePanel("settings")}
           >
             <Settings className="size-4" />
@@ -178,17 +206,17 @@ export function AppShell({ currentFolderId, children }: AppShellProps) {
         </div>
       </div>
 
-      {activePanel === "folders" ? (
+      {activePanel === "add" ? (
         <AppSheet
-          title="Folders"
-          description="Jump between collections without reaching for the top of the screen."
+          title="Add link"
+          description="Paste a tweet or X post URL to save it."
           mobileOnly
           onClose={() => setActivePanel(null)}
         >
-          <div className="max-h-[62vh] overflow-y-auto pr-1">
-            <FolderTree
-              currentFolderId={currentFolderId}
-              onNavigate={() => setActivePanel(null)}
+          <div className="pb-4">
+            <AddTweetForm
+              folderId={null}
+              onAdded={() => setActivePanel(null)}
             />
           </div>
         </AppSheet>
@@ -254,7 +282,11 @@ function AppSheet({
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold">{title}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+            {description ? (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {description}
+              </p>
+            ) : null}
           </div>
           <Button
             type="button"
@@ -295,7 +327,8 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
       router.navigate({ to: "/" });
     } catch (err) {
       toast.error("Failed to sign out", {
-        description: err instanceof Error ? err.message : "Something went wrong.",
+        description:
+          err instanceof Error ? err.message : "Something went wrong.",
       });
     }
   };
@@ -341,11 +374,15 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
           <div className="mt-3 flex items-center gap-3">
             <Avatar className="size-10">
               <AvatarImage src={user.image ?? ""} alt={user.name ?? "User"} />
-              <AvatarFallback className="bg-muted text-xs">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-muted text-xs">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{user.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {user.email}
+              </p>
             </div>
           </div>
         ) : null}
@@ -353,8 +390,8 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
         <div className="mt-4 flex gap-2">
           <Button asChild variant="outline" size="sm" className="flex-1">
             <Link to="/" onClick={onClose}>
-              <Inbox className="size-4" />
-              <span>Inbox</span>
+              <Bookmark className="size-4" />
+              <span>Saved</span>
             </Link>
           </Button>
 

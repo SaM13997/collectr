@@ -58,13 +58,13 @@ export function AddTweetForm({
             setUrl(e.target.value);
             setError(null);
           }}
-          placeholder="https://x.com/user/status/..."
+          placeholder="Paste a tweet or X post URL..."
           className="h-10 pl-9"
           disabled={isSaving}
         />
       </div>
       <Button type="submit" disabled={isSaving} className="h-10">
-        {isSaving ? "Saving..." : "Save tweet"}
+        {isSaving ? "Saving..." : "Save link"}
       </Button>
       {error ? (
         <p className="text-sm text-destructive">{error}</p>

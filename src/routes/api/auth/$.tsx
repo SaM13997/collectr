@@ -12,36 +12,63 @@ export const getProxyHeaders = (requestHeaders: Headers) => {
   headers.set("accept-encoding", "application/json");
   headers.delete("host");
   headers.delete("origin");
+  headers.delete("referer");
   return headers;
 };
 
-const proxyAuthRequest = (request: Request) => {
+export const getConvexSiteUrl = (env: NodeJS.ProcessEnv) => {
+  const explicitSiteUrl = env.CONVEX_SITE_URL ?? env.VITE_CONVEX_SITE_URL;
+
+  if (explicitSiteUrl) {
+    return explicitSiteUrl;
+  }
+
+  const convexUrl = env.CONVEX_URL ?? env.VITE_CONVEX_URL;
+
+  if (!convexUrl) {
+    return undefined;
+  }
+
+  return convexUrl.replace(/\.convex\.cloud$/u, ".convex.site");
+};
+
+const proxyAuthRequest = async (request: Request) => {
   const requestUrl = new URL(request.url);
-  const convexSiteUrl = process.env.VITE_CONVEX_SITE_URL;
+  const convexSiteUrl = getConvexSiteUrl(process.env);
 
   if (!convexSiteUrl) {
-    throw new Error("VITE_CONVEX_SITE_URL is not set");
+    return new Response(
+      JSON.stringify({ message: "Auth service is not configured." }),
+      { status: 500, headers: { "content-type": "application/json" } }
+    );
   }
 
   const nextUrl = `${convexSiteUrl}${requestUrl.pathname}${requestUrl.search}`;
   const headers = getProxyHeaders(request.headers);
 
-  return fetch(nextUrl, {
-    method: request.method,
-    headers,
-    redirect: "manual",
-    body: request.body,
-    // @ts-expect-error undici-specific fetch option for dev TLS workaround
-    dispatcher: process.env.NODE_ENV === "production" ? undefined : insecureDevAgent,
-    // @ts-expect-error duplex is required for streaming request bodies in modern fetch
-    duplex: "half",
-  }).then(async (response) => {
+  try {
+    const response = await fetch(nextUrl, {
+      method: request.method,
+      headers,
+      redirect: "manual",
+      body: request.body,
+      // @ts-expect-error undici-specific fetch option for dev TLS workaround
+      dispatcher: process.env.NODE_ENV === "production" ? undefined : insecureDevAgent,
+      duplex: "half",
+    });
+
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
     });
-  });
+  } catch (err) {
+    console.error("[auth-proxy] Failed to reach auth service:", err);
+    return new Response(
+      JSON.stringify({ message: "Unable to reach the auth service. Please try again later." }),
+      { status: 502, headers: { "content-type": "application/json" } }
+    );
+  }
 };
 
 export const Route = createFileRoute("/api/auth/$")({
