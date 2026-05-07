@@ -16,9 +16,9 @@ import {
   ExpandableTrigger,
   ExpandableContent,
 } from "@/components/ui/expandable";
-
 interface SavedItemCardProps {
   item: Doc<"tweets">;
+  onOpen?: () => void;
   onMove?: (id: Id<"tweets">) => void;
   className?: string;
   variant?: "grid" | "list";
@@ -26,6 +26,7 @@ interface SavedItemCardProps {
 
 export function SavedItemCard({
   item,
+  onOpen,
   onMove,
   className,
   variant = "grid",
@@ -37,6 +38,11 @@ export function SavedItemCard({
   const handle = extractHandle(item.url);
   const isList = variant === "list";
 
+  const handleOpenExternal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(item.url, "_blank", "noopener,noreferrer");
+  };
+
   const cardContent = (
     <>
       <div
@@ -45,34 +51,47 @@ export function SavedItemCard({
           isList ? "size-14 shrink-0" : "aspect-square"
         )}
       >
-        {/* Placeholder visual */}
-        <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-muted to-background p-2">
-          <svg
-            viewBox="0 0 24 24"
-            className={cn("text-foreground/80", isList ? "size-5" : "size-8")}
-            fill="currentColor"
-          >
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-          </svg>
-          {!isList && (
-            <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-              {domain}
-            </span>
-          )}
-        </div>
-        <ExternalLink
-          className={cn(
-            "absolute text-muted-foreground/60",
-            isList ? "bottom-1 right-1 size-3" : "bottom-2 right-2 size-3.5"
-          )}
-        />
+        {item.mediaUrl || item.authorAvatar ? (
+          <img
+            src={item.mediaUrl || item.authorAvatar}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-muted to-background p-2">
+            <svg
+              viewBox="0 0 24 24"
+              className={cn("text-foreground/80", isList ? "size-5" : "size-8")}
+              fill="currentColor"
+            >
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            {!isList && (
+              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {domain}
+              </span>
+            )}
+          </div>
+        )}
+        <button
+          onClick={handleOpenExternal}
+          className="absolute bottom-1 right-1 flex size-6 items-center justify-center rounded-full bg-background/80 text-muted-foreground/60 transition hover:bg-background hover:text-foreground"
+          aria-label="Open original link"
+        >
+          <ExternalLink className="size-3" />
+        </button>
       </div>
-      <div className={cn("min-w-0", isList ? "flex-1" : "px-0.5")}>
+      <div className={cn("min-w-0 overflow-hidden", isList ? "flex-1" : "px-0.5")}>
         <p className="truncate text-xs font-medium text-foreground">
-          {handle ? `@${handle}` : `Post ${item.tweetId}`}
+          {item.authorHandle
+            ? `@${item.authorHandle}`
+            : handle
+              ? `@${handle}`
+              : `Post ${item.tweetId}`}
         </p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {item.url}
+          {item.text?.trim() || "Tweet text unavailable"}
         </p>
       </div>
     </>
@@ -153,24 +172,23 @@ export function SavedItemCard({
 
   return (
     <div className={cn("group relative", isList ? "flex items-center gap-2" : "", className)}>
-      <a
-        href={item.url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={onOpen}
         className={cn(
-          "flex gap-3",
+          "flex gap-3 text-left",
           isList
-            ? "flex-1 items-center rounded-xl border border-border bg-card p-3 transition hover:bg-accent"
+            ? "min-w-0 flex-1 items-center rounded-xl border border-border bg-card p-3 transition hover:bg-accent"
             : "flex-col"
         )}
         aria-label={
-          handle
-            ? `Open post by @${handle} on X.com (opens in new tab)`
-            : `Open post on X.com (opens in new tab)`
+          item.authorHandle || handle
+            ? `View entry by @${item.authorHandle || handle}`
+            : `View entry`
         }
       >
         {cardContent}
-      </a>
+      </button>
       {actions}
     </div>
   );

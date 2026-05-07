@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -107,47 +106,59 @@
   --surface: oklch(0.96 0.004 80);
   --surface-raised: oklch(0.93 0.004 80);
   --surface-overlay: oklch(0.9 0.004 80);
+  --gradient-1: #ffd6fa;
+  --gradient-2: #c5b6ff;
+  --gradient-3: #d4a6ff;
 }
 
 /* Raycast-inspired dark theme: warm red accent on deep navy */
 .dark {
-  --background: #1A1A2E;
-  --foreground: #FFFFFF;
-  --card: #2A2A3E;
-  --card-foreground: #FFFFFF;
-  --popover: #2A2A3E;
-  --popover-foreground: #FFFFFF;
-  --primary: #FF6363;
-  --primary-foreground: #FFFFFF;
-  --secondary: #2A2A3E;
-  --secondary-foreground: #FFFFFF;
-  --muted: #2A2A3E;
-  --muted-foreground: #E4E4E4;
-  --accent: #2A2A3E;
-  --accent-foreground: #FFFFFF;
+  --dark-bg: #1A1A2E;
+  --dark-surface: #2A2A3E;
+  --dark-text: #FFFFFF;
+  --dark-accent: #FF6363;
+  --dark-muted-text: #E4E4E4;
+  --dark-border: rgba(255, 255, 255, 0.1);
+  --dark-surface-raised: #32324A;
+  --dark-surface-overlay: #3A3A52;
+
+  --background: var(--dark-bg);
+  --foreground: var(--dark-text);
+  --card: var(--dark-surface);
+  --card-foreground: var(--dark-text);
+  --popover: var(--dark-surface);
+  --popover-foreground: var(--dark-text);
+  --primary: var(--dark-accent);
+  --primary-foreground: var(--dark-text);
+  --secondary: var(--dark-surface);
+  --secondary-foreground: var(--dark-text);
+  --muted: var(--dark-surface);
+  --muted-foreground: var(--dark-muted-text);
+  --accent: var(--dark-surface);
+  --accent-foreground: var(--dark-text);
   --destructive: oklch(0.62 0.2 25);
-  --border: rgba(255, 255, 255, 0.1);
-  --input: #2A2A3E;
-  --ring: #FF6363;
-  --chart-1: #FF6363;
+  --border: var(--dark-border);
+  --input: var(--dark-surface);
+  --ring: var(--dark-accent);
+  --chart-1: var(--dark-accent);
   --chart-2: oklch(0.65 0.1 200);
   --chart-3: oklch(0.7 0.08 220);
   --chart-4: oklch(0.75 0.06 240);
   --chart-5: oklch(0.65 0.12 160);
-  --sidebar: #1A1A2E;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #FF6363;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #2A2A3E;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #FF6363;
-  --brand: #FF6363;
-  --brand-foreground: #FFFFFF;
+  --sidebar: var(--dark-bg);
+  --sidebar-foreground: var(--dark-text);
+  --sidebar-primary: var(--dark-accent);
+  --sidebar-primary-foreground: var(--dark-text);
+  --sidebar-accent: var(--dark-surface);
+  --sidebar-accent-foreground: var(--dark-text);
+  --sidebar-border: var(--dark-border);
+  --sidebar-ring: var(--dark-accent);
+  --brand: var(--dark-accent);
+  --brand-foreground: var(--dark-text);
   --highlight: oklch(0.65 0.12 160);
-  --surface: #2A2A3E;
-  --surface-raised: #32324A;
-  --surface-overlay: #3A3A52;
+  --surface: var(--dark-surface);
+  --surface-raised: var(--dark-surface-raised);
+  --surface-overlay: var(--dark-surface-overlay);
 }
 
 @layer base {

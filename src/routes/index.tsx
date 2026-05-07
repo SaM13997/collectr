@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "convex/react";
+import { useEffect, useRef, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useAuthSession } from "@/lib/use-auth-session";
+import { fetchTweetMetadata } from "@/lib/tweet-parser";
 import { AppShell } from "@/components/app-shell";
 import { CollectionCard } from "@/components/collection-card";
 import { SavedItemCard } from "@/components/saved-item-card";
@@ -69,33 +70,31 @@ function LandingPage() {
         </div>
 
         {/* Features */}
-        <div className="mt-20 grid gap-card-gap text-left sm:grid-cols-3">
-          <div className="rounded-xl border border-border bg-card p-card-padding">
-            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-muted">
-              <Inbox className="size-4 text-foreground" />
+        <div className="mt-20 grid gap-10 text-left sm:grid-cols-3">
+          <div className="flex flex-col gap-4">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-muted">
+              <Inbox className="size-5 text-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-heading font-heading">Quick capture</p>
-            <p className="mt-1 text-body text-muted-foreground">
+            <p className="text-body text-muted-foreground">
               Paste any link and save it instantly.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-card-padding">
-            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-muted">
-              <FolderOpen className="size-4 text-foreground" />
-            </div>
+          <div className="flex flex-col gap-4">
+            <FolderOpen className="size-6 text-foreground" strokeWidth={1.5} />
             <p className="text-heading font-heading">Organize by collection</p>
-            <p className="mt-1 text-body text-muted-foreground">
+            <p className="text-body text-muted-foreground">
               Create collections to keep things tidy.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-card-padding">
-            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-muted">
-              <Sparkles className="size-4 text-foreground" />
+          <div className="flex flex-col gap-4">
+            <div className="flex size-9 items-center justify-center rounded-full bg-muted">
+              <Sparkles className="size-5 text-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-heading font-heading">Mobile-first</p>
-            <p className="mt-1 text-body text-muted-foreground">
+            <p className="text-body text-muted-foreground">
               Thumb-friendly navigation on any device.
             </p>
           </div>
@@ -106,11 +105,41 @@ function LandingPage() {
 }
 
 function SavedView() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<FilterTab>("all");
   const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
 
   const inboxTweets = useQuery(api.tweets.listInbox);
   const folderData = useQuery(api.folders.listTree);
+  const setMetadata = useMutation(api.tweets.setMetadata);
+  const attemptedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!inboxTweets) return;
+
+    const tweetsWithoutText = inboxTweets.filter((t) => !t.text?.trim());
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    tweetsWithoutText.forEach((tweet, index) => {
+      if (attemptedRef.current.has(tweet._id)) return;
+      attemptedRef.current.add(tweet._id);
+
+      const timer = setTimeout(async () => {
+        const meta = await fetchTweetMetadata(tweet.url);
+        await setMetadata({
+          tweetId: tweet._id,
+          status: meta ? "ok" : "unavailable",
+          ...meta,
+        }).catch(() => {});
+      }, index * 400 + Math.random() * 200);
+
+      timers.push(timer);
+    });
+
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, [inboxTweets, setMetadata]);
 
   const collections = folderData?.folders ?? [];
   const inboxCount = folderData?.inboxCount ?? 0;
@@ -212,6 +241,7 @@ function SavedView() {
                 <SavedItemCard
                   item={tweet}
                   variant="list"
+                  onOpen={() => navigate({ to: "/entries/$entryId", params: { entryId: tweet._id } })}
                   onMove={(id) => setMovingTweetId(id)}
                 />
               )}

@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FoldersFolderIdRouteImport } from './routes/folders.$folderId'
+import { Route as EntriesEntryIdRouteImport } from './routes/entries.$entryId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const ShareTargetRoute = ShareTargetRouteImport.update({
@@ -53,6 +54,11 @@ const FoldersFolderIdRoute = FoldersFolderIdRouteImport.update({
   path: '/folders/$folderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntriesEntryIdRoute = EntriesEntryIdRouteImport.update({
+  id: '/entries/$entryId',
+  path: '/entries/$entryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/share-target': typeof ShareTargetRoute
+  '/entries/$entryId': typeof EntriesEntryIdRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/share-target': typeof ShareTargetRoute
+  '/entries/$entryId': typeof EntriesEntryIdRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/share-target': typeof ShareTargetRoute
+  '/entries/$entryId': typeof EntriesEntryIdRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/search'
     | '/share-target'
+    | '/entries/$entryId'
     | '/folders/$folderId'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/search'
     | '/share-target'
+    | '/entries/$entryId'
     | '/folders/$folderId'
     | '/api/auth/$'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/search'
     | '/share-target'
+    | '/entries/$entryId'
     | '/folders/$folderId'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   ShareTargetRoute: typeof ShareTargetRoute
+  EntriesEntryIdRoute: typeof EntriesEntryIdRoute
   FoldersFolderIdRoute: typeof FoldersFolderIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoldersFolderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entries/$entryId': {
+      id: '/entries/$entryId'
+      path: '/entries/$entryId'
+      fullPath: '/entries/$entryId'
+      preLoaderRoute: typeof EntriesEntryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   ShareTargetRoute: ShareTargetRoute,
+  EntriesEntryIdRoute: EntriesEntryIdRoute,
   FoldersFolderIdRoute: FoldersFolderIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

@@ -23,6 +23,11 @@ export default defineSchema({
       v.literal("unavailable"),
       v.literal("failed")
     ),
+    authorName: v.optional(v.string()),
+    authorHandle: v.optional(v.string()),
+    authorAvatar: v.optional(v.string()),
+    text: v.optional(v.string()),
+    mediaUrl: v.optional(v.string()),
   })
     .index("by_user_folder", ["userId", "folderId"])
     .index("by_user_tweetId", ["userId", "tweetId"]),

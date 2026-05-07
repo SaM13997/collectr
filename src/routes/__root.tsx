@@ -55,10 +55,7 @@ export const Route = createRootRouteWithContext<{
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      {
-        name: "theme-color",
-        content: "#f7f2e8",
-      },
+
       {
         name: "description",
         content:
@@ -66,6 +63,9 @@ export const Route = createRootRouteWithContext<{
       },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico" },
       { rel: "manifest", href: "/manifest.json" },
@@ -124,17 +124,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <div className="flex flex-1 flex-col">{children}</div>
           <PwaRegistrar />
           <Toaster richColors closeButton position="bottom-right" />
-          <TanStackDevtools
-            config={{
-              position: "bottom-right",
-            }}
-            plugins={[
-              {
-                name: "Tanstack Router",
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
+          {import.meta.env.DEV && (
+            <TanStackDevtools
+              config={{
+                position: "bottom-right",
+              }}
+              plugins={[
+                {
+                  name: "Tanstack Router",
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+              ]}
+            />
+          )}
           <Scripts />
         </ThemeProvider>
       </body>

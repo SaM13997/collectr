@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useAuthSession } from "@/lib/use-auth-session";
@@ -42,6 +42,7 @@ function SearchPage() {
 }
 
 function SearchView() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
   const inboxTweets = useQuery(api.tweets.listInbox);
@@ -84,6 +85,7 @@ function SearchView() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search saved links..."
+          aria-label="Search saved links"
           className="h-12 rounded-xl bg-surface-raised pl-11 text-sm"
           autoFocus
         />
@@ -119,6 +121,7 @@ function SearchView() {
             <div key={tweet._id} className="stagger-item" style={{ "--i": i } as React.CSSProperties}>
               <SavedItemCard
                 item={tweet}
+                onOpen={() => navigate({ to: "/entries/$entryId", params: { entryId: tweet._id } })}
                 onMove={(id) => setMovingTweetId(id)}
               />
             </div>

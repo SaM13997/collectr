@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState, lazy, Suspense } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   Bookmark,
@@ -21,22 +21,50 @@ import { UserButton } from "@/components/User-button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { AddTweetForm } from "./add-tweet-form";
-import {
-  FamilyDrawerRoot,
-  FamilyDrawerPortal,
-  FamilyDrawerOverlay,
-  FamilyDrawerContent,
-  FamilyDrawerAnimatedWrapper,
-  FamilyDrawerAnimatedContent,
-} from "@/components/ui/family-drawer";
-import { CollectButton } from "@/components/collect-button";
+import { useDialogFocus } from "@/lib/use-dialog-focus";
+const AddTweetForm = lazy(() =>
+  import("./add-tweet-form").then((m) => ({ default: m.AddTweetForm }))
+);
+const FamilyDrawerRoot = lazy(() =>
+  import("@/components/ui/family-drawer").then((m) => ({
+    default: m.FamilyDrawerRoot,
+  }))
+);
+const FamilyDrawerPortal = lazy(() =>
+  import("@/components/ui/family-drawer").then((m) => ({
+    default: m.FamilyDrawerPortal,
+  }))
+);
+const FamilyDrawerOverlay = lazy(() =>
+  import("@/components/ui/family-drawer").then((m) => ({
+    default: m.FamilyDrawerOverlay,
+  }))
+);
+const FamilyDrawerContent = lazy(() =>
+  import("@/components/ui/family-drawer").then((m) => ({
+    default: m.FamilyDrawerContent,
+  }))
+);
+const FamilyDrawerAnimatedWrapper = lazy(() =>
+  import("@/components/ui/family-drawer").then((m) => ({
+    default: m.FamilyDrawerAnimatedWrapper,
+  }))
+);
+const FamilyDrawerAnimatedContent = lazy(() =>
+  import("@/components/ui/family-drawer").then((m) => ({
+    default: m.FamilyDrawerAnimatedContent,
+  }))
+);
+const CollectButton = lazy(() =>
+  import("@/components/collect-button").then((m) => ({
+    default: m.CollectButton,
+  }))
+);
 
 type AppShellProps = {
   children: ReactNode;
   title?: string;
-  showBack?: boolean;
-  onBack?: () => void;
+  backButton?: ReactNode;
 };
 
 type ActivePanel = "settings" | "add" | null;
@@ -44,7 +72,7 @@ type ActivePanel = "settings" | "add" | null;
 type AppSheetProps = {
   title: string;
   description?: string;
-  mobileOnly?: boolean;
+  variant?: "mobile-only" | "responsive";
   onClose: () => void;
   children: ReactNode;
 };
@@ -80,8 +108,7 @@ const themeOptions: ThemeOption[] = [
 export function AppShell({
   children,
   title,
-  showBack,
-  onBack,
+  backButton,
 }: AppShellProps) {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
@@ -137,17 +164,7 @@ export function AppShell({
             {/* Mobile Header */}
             <header className="mb-6 flex items-center justify-between md:hidden">
               <div className="flex items-center gap-3">
-                {showBack ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-9"
-                    onClick={onBack}
-                    aria-label="Go back"
-                  >
-                    <ChevronLeft className="size-5" />
-                  </Button>
-                ) : null}
+                {backButton}
                 <h1 className="text-xl font-semibold tracking-tight">
                   {title ?? "Saved"}
                 </h1>
@@ -155,7 +172,7 @@ export function AppShell({
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-9"
+                className="size-11"
                 onClick={() => setActivePanel("settings")}
                 aria-label="Settings"
               >
@@ -185,16 +202,18 @@ export function AppShell({
 
         {/* Desktop Add Drawer */}
         {activePanel === "add" ? (
-          <div className="hidden md:block">
-            <FamilyDrawerRoot
-              open={activePanel === "add"}
-              onOpenChange={(open) => {
-                if (!open) setActivePanel(null);
-              }}
-            >
-              <AddLinkDrawer onClose={() => setActivePanel(null)} />
-            </FamilyDrawerRoot>
-          </div>
+          <Suspense fallback={null}>
+            <div className="hidden md:block">
+              <FamilyDrawerRoot
+                open={activePanel === "add"}
+                onOpenChange={(open) => {
+                  if (!open) setActivePanel(null);
+                }}
+              >
+                <AddLinkDrawer onClose={() => setActivePanel(null)} />
+              </FamilyDrawerRoot>
+            </div>
+          </Suspense>
         ) : null}
 
         {activePanel === "settings" ? (
@@ -207,7 +226,9 @@ export function AppShell({
           </AppSheet>
         ) : null}
       </div>
-      <CollectButton />
+      <Suspense fallback={null}>
+        <CollectButton />
+      </Suspense>
     </>
   );
 }
@@ -250,10 +271,14 @@ function AddLinkDrawer({ onClose }: { onClose: () => void }) {
 function AppSheet({
   title,
   description,
-  mobileOnly,
+  variant = "responsive",
   onClose,
   children,
 }: AppSheetProps) {
+  const isMobileOnly = variant === "mobile-only";
+  const containerRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, containerRef);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -275,20 +300,22 @@ function AppSheet({
     <div
       className={cn(
         "fixed inset-0 z-40 flex items-end bg-foreground/20 backdrop-blur-sm",
-        mobileOnly ? "md:hidden" : "md:items-stretch md:justify-end"
+        isMobileOnly ? "md:hidden" : "md:items-stretch md:justify-end"
       )}
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className={cn(
           "app-sheet w-full rounded-t-2xl border border-border p-6 shadow-xl",
-          mobileOnly
+          isMobileOnly
             ? "max-h-[80vh]"
             : "max-h-[80vh] md:h-full md:max-h-none md:max-w-md md:rounded-none md:rounded-l-2xl"
         )}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-6 flex items-start justify-between gap-4">
@@ -304,7 +331,7 @@ function AppSheet({
             type="button"
             variant="ghost"
             size="icon"
-            className="size-8 rounded-lg"
+            className="size-11 rounded-lg"
             onClick={onClose}
             aria-label="Close"
           >
@@ -315,6 +342,26 @@ function AppSheet({
         {children}
       </div>
     </div>
+  );
+}
+
+export function BackButton({
+  onClick,
+  "aria-label": ariaLabel = "Go back",
+}: {
+  onClick: () => void;
+  "aria-label"?: string;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-11"
+      onClick={onClick}
+      aria-label={ariaLabel}
+    >
+      <ChevronLeft className="size-5" />
+    </Button>
   );
 }
 

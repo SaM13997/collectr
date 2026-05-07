@@ -5,8 +5,6 @@ type ResolvedTheme = "light" | "dark";
 
 const THEME_STORAGE_KEY = "collectr-theme";
 const DARK_THEME_MEDIA = "(prefers-color-scheme: dark)";
-const LIGHT_THEME_COLOR = "#f7f2e8";
-const DARK_THEME_COLOR = "#1f2431";
 
 type ThemeContextValue = {
   theme: ThemeSetting;
@@ -52,6 +50,24 @@ function resolveTheme(
   return theme === "system" ? (systemDarkMode ? "dark" : "light") : theme;
 }
 
+function setThemeColorMeta() {
+  if (typeof document === "undefined") {
+    return;
+  }
+  const bg = getComputedStyle(document.documentElement)
+    .getPropertyValue("--background")
+    .trim();
+  if (!bg) return;
+
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", bg);
+}
+
 function applyTheme(theme: ThemeSetting, systemDarkMode: boolean) {
   if (typeof document === "undefined") {
     return;
@@ -62,19 +78,12 @@ function applyTheme(theme: ThemeSetting, systemDarkMode: boolean) {
   root.classList.toggle("dark", resolvedTheme === "dark");
   root.dataset.theme = resolvedTheme;
 
-  document
-    .querySelector('meta[name="theme-color"]')
-    ?.setAttribute(
-      "content",
-      resolvedTheme === "dark" ? DARK_THEME_COLOR : LIGHT_THEME_COLOR
-    );
+  setThemeColorMeta();
 }
 
 export const themeScript = `
 (() => {
   const storageKey = "${THEME_STORAGE_KEY}";
-  const lightThemeColor = "${LIGHT_THEME_COLOR}";
-  const darkThemeColor = "${DARK_THEME_COLOR}";
   const root = document.documentElement;
 
   try {
@@ -90,9 +99,16 @@ export const themeScript = `
     root.classList.toggle("dark", resolvedTheme === "dark");
     root.dataset.theme = resolvedTheme;
 
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", resolvedTheme === "dark" ? darkThemeColor : lightThemeColor);
+    const bg = getComputedStyle(root).getPropertyValue("--background").trim();
+    if (bg) {
+      let meta = document.querySelector('meta[name="theme-color"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "theme-color");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute("content", bg);
+    }
   } catch {
     root.dataset.theme = root.classList.contains("dark") ? "dark" : "light";
   }

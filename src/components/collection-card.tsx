@@ -1,8 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { FolderOpen } from "lucide-react";
 import type { Id } from "../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import Grainient from "@/components/Grainient";
+
+/* Token values mirror --gradient-1/2/3 in styles.css */
+const GRADIENT_1 = "#ffd6fa";
+const GRADIENT_2 = "#c5b6ff";
+const GRADIENT_3 = "#d4a6ff";
 
 interface CollectionCardProps {
   id: Id<"folders">;
@@ -29,27 +33,24 @@ export function CollectionCard({
         className
       )}
     >
-      <div className="relative w-[101%] overflow-hidden border-b">
-        <Grainient
-          color1="#ffd6fa"
-          color2="#c5b6ff"
-          color3="#d4a6ff"
-          className=""
-        />
-        {/* {thumbnailUrl ? (
+      <div className="relative aspect-[4/3] w-full">
+        {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
             alt=""
-            className="absolute inset-0 z-10 size-full object-cover"
+            className="absolute inset-0 size-full object-cover"
             loading="lazy"
           />
         ) : (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <FolderOpen className="size-8 text-foreground/60" />
-          </div>
-        )} */}
+          <Grainient
+            color1={GRADIENT_1}
+            color2={GRADIENT_2}
+            color3={GRADIENT_3}
+            className="absolute inset-0"
+          />
+        )}
       </div>
-      <div className="flex items-center justify-between gap-2 p-3">
+      <div className="flex items-center justify-between gap-2 px-3 py-2.5">
         <p className="min-w-0 truncate text-body font-body text-foreground">{name}</p>
         <p className="shrink-0 text-xs text-muted-foreground">
           {itemCount}

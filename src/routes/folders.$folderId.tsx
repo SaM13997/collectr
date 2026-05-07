@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useAuthSession } from "@/lib/use-auth-session";
-import { AppShell } from "@/components/app-shell";
+import { AppShell, BackButton } from "@/components/app-shell";
 import { SavedItemCard } from "@/components/saved-item-card";
 import { CollectionCard } from "@/components/collection-card";
 import { FolderPicker } from "@/components/folder-picker";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Link2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { AnimatedList } from "@/components/unlumen-ui/animated-list";
 
 export const Route = createFileRoute("/folders/$folderId")({
   component: FolderPage,
@@ -46,6 +47,7 @@ function FolderPage() {
 
 function FolderView() {
   const { folderId } = Route.useParams();
+  const navigate = useNavigate();
   const typedFolderId = folderId as Id<"folders">;
   const tweets = useQuery(api.tweets.listByFolder, { folderId: typedFolderId });
   const folderData = useQuery(api.folders.listTree);
@@ -79,16 +81,15 @@ function FolderView() {
   return (
     <AppShell
       title={currentFolder?.name ?? "Collection"}
-      showBack
-      onBack={() => window.history.back()}
+      backButton={<BackButton onClick={() => window.history.back()} />}
     >
       {/* Subcollections */}
       {childFolders.length > 0 || showNewSubfolder ? (
         <section>
-          <h2 className="mb-3 text-base font-semibold tracking-tight">
+          <h2 className="mb-3 text-heading font-heading tracking-tight">
             Subcollections
           </h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-card-gap sm:grid-cols-2">
             {childFolders.map((folder) => (
               <CollectionCard
                 key={folder._id}
@@ -137,43 +138,47 @@ function FolderView() {
         </form>
       )}
 
-      {/* Items Grid */}
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold tracking-tight">Links</h2>
+      {/* Links */}
+      <section className="mt-section">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-heading font-heading tracking-tight">Links</h2>
           {tweets ? (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-body text-muted-foreground">
               {tweets.length} saved
             </span>
           ) : null}
         </div>
 
         {tweets === undefined ? (
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+          <div className="flex flex-col gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="aspect-square animate-pulse rounded-xl bg-muted"
+                className="h-16 animate-pulse rounded-xl bg-muted"
               />
             ))}
           </div>
         ) : tweets.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border py-10 text-center">
+          <div className="rounded-xl border border-dashed border-border p-card-padding text-center">
             <Link2 className="mx-auto size-7 text-muted-foreground/50" />
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-body text-muted-foreground">
               No links in this collection yet.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-            {tweets.map((tweet) => (
+          <AnimatedList
+            items={tweets.map((t) => ({ ...t, id: t._id }))}
+            renderItem={(tweet) => (
               <SavedItemCard
-                key={tweet._id}
                 item={tweet}
+                variant="list"
+                onOpen={() => navigate({ to: "/entries/$entryId", params: { entryId: tweet._id } })}
                 onMove={(id) => setMovingTweetId(id)}
               />
-            ))}
-          </div>
+            )}
+            gap={8}
+            animation="scale"
+          />
         )}
       </section>
 

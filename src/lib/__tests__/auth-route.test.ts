@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getConvexSiteUrl, getProxyHeaders } from "./$.tsx";
+import { getConvexSiteUrl, getProxyHeaders } from "../../routes/api/auth/$.tsx";
 
 describe("getProxyHeaders", () => {
   it("removes browser host and origin before proxying upstream", () => {

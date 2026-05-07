@@ -5,9 +5,10 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link2 } from "lucide-react";
+import { fetchTweetMetadata } from "@/lib/tweet-parser";
 
 const TWEET_URL_RE =
-  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/\d+)/i;
+  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/(\d+))/i;
 
 export function AddTweetForm({
   folderId,
@@ -20,6 +21,7 @@ export function AddTweetForm({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const addTweet = useMutation(api.tweets.addFromUrl);
+  const setMetadata = useMutation(api.tweets.setMetadata);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -36,9 +38,22 @@ export function AddTweetForm({
       return;
     }
 
+    const tweetIdMatch = trimmed.match(TWEET_URL_RE);
+    const tweetIdStr = tweetIdMatch?.[2];
+
     try {
       setIsSaving(true);
-      await addTweet({ url: trimmed, folderId: folderId ?? null });
+      const docId = await addTweet({ url: trimmed, folderId: folderId ?? null });
+
+      if (tweetIdStr) {
+        const meta = await fetchTweetMetadata(trimmed);
+        await setMetadata({
+          tweetId: docId,
+          status: meta ? "ok" : "unavailable",
+          ...meta,
+        });
+      }
+
       setUrl("");
       onAdded?.();
     } catch (err) {

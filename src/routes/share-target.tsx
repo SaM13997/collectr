@@ -7,6 +7,7 @@ import { useAuthSession } from "@/lib/use-auth-session";
 import { Button } from "@/components/ui/button";
 import { Folder, Inbox, Check, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fetchTweetMetadata } from "@/lib/tweet-parser";
 
 type ShareSearch = {
   text?: string;
@@ -15,7 +16,7 @@ type ShareSearch = {
 };
 
 const tweetUrlPattern =
-  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/\d+)/i;
+  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/(\d+))/i;
 
 const normalizeSearchValue = (value: unknown) =>
   typeof value === "string" && value.trim().length > 0 ? value : undefined;
@@ -31,6 +32,11 @@ const extractTweetUrl = ({ text, title, url }: ShareSearch) => {
     .join(" ");
 
   return combined.match(tweetUrlPattern)?.[1];
+};
+
+const extractTweetId = (url: string): string | null => {
+  const match = url.match(tweetUrlPattern);
+  return match?.[2] ?? null;
 };
 
 export const Route = createFileRoute("/share-target")({
@@ -67,7 +73,7 @@ function ShareTargetPage() {
   if (!session) {
     return (
       <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
-        <div className="mx-auto max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 text-center shadow-xl backdrop-blur">
+        <div className="mx-auto max-w-md rounded-xl bg-card p-6 text-center">
           <h1 className="text-2xl font-semibold">Shared tweet detected</h1>
           {tweetUrl ? (
             <p className="mt-2 text-sm text-muted-foreground">
@@ -91,7 +97,7 @@ function ShareTargetPage() {
   if (!tweetUrl) {
     return (
       <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
-        <div className="mx-auto max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 text-center shadow-xl backdrop-blur">
+        <div className="mx-auto max-w-md rounded-xl bg-card p-6 text-center">
           <h1 className="text-2xl font-semibold">No tweet URL found</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             The shared content doesn't contain a valid tweet URL.
@@ -104,13 +110,14 @@ function ShareTargetPage() {
     );
   }
 
-  return <SaveSharedTweet tweetUrl={tweetUrl} />;
+  return <SaveSharedTweet tweetUrl={tweetUrl} shareText={search.text || search.title} />;
 }
 
-function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
+function SaveSharedTweet({ tweetUrl, shareText }: { tweetUrl: string; shareText?: string }) {
   const router = useRouter();
   const data = useQuery(api.folders.listTree);
   const addTweet = useMutation(api.tweets.addFromUrl);
+  const setMetadata = useMutation(api.tweets.setMetadata);
   const [selectedFolder, setSelectedFolder] = useState<Id<"folders"> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -120,8 +127,24 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
     try {
       setIsSaving(true);
       setError(null);
-      await addTweet({ url: tweetUrl, folderId: selectedFolder });
+      const id = await addTweet({ url: tweetUrl, folderId: selectedFolder, shareText });
       setSaved(true);
+
+      const tweetIdStr = extractTweetId(tweetUrl);
+      if (tweetIdStr) {
+        (async () => {
+          try {
+            const meta = await fetchTweetMetadata(tweetUrl);
+            await setMetadata({
+              tweetId: id,
+              status: meta ? "ok" : "unavailable",
+              ...meta,
+            });
+          } catch {
+            // Silently ignore background metadata fetch errors
+          }
+        })();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save tweet.");
     } finally {
@@ -132,7 +155,7 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
   if (saved) {
     return (
       <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
-        <div className="mx-auto max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 text-center shadow-xl backdrop-blur">
+        <div className="mx-auto max-w-md rounded-xl bg-card p-6 text-center">
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-highlight/15">
             <Check className="size-6 text-highlight" />
           </div>
@@ -166,11 +189,11 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10 text-foreground">
-      <div className="mx-auto w-full max-w-md rounded-[1.8rem] border border-border/70 bg-card/75 p-6 shadow-xl backdrop-blur">
+      <div className="mx-auto w-full max-w-md rounded-xl bg-card p-6">
         <h1 className="text-2xl font-semibold">Save tweet</h1>
 
         {/* Tweet URL */}
-        <div className="mt-4 rounded-[1.3rem] border border-border/70 bg-background/70 p-4">
+        <div className="mt-4 rounded-lg bg-muted/50 p-4">
           <div className="flex items-start gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/12">
               <ExternalLink className="size-5 text-brand" />
@@ -185,13 +208,13 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
         {/* Folder selection */}
         <div className="mt-6">
           <h2 className="text-sm font-medium text-muted-foreground">Choose destination</h2>
-          <div className="mt-2 max-h-48 space-y-1 overflow-y-auto rounded-[1.3rem] border border-border/70 bg-background/70 p-2">
+          <div className="mt-2 max-h-48 space-y-1 overflow-y-auto rounded-lg bg-muted/30 p-2">
             <button
               onClick={() => setSelectedFolder(null)}
               className={cn(
-                "flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm transition",
+                "flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition",
                 selectedFolder === null
-                  ? "bg-brand text-brand-foreground shadow-sm"
+                  ? "bg-brand text-brand-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
@@ -204,9 +227,9 @@ function SaveSharedTweet({ tweetUrl }: { tweetUrl: string }) {
                 key={folder._id}
                 onClick={() => setSelectedFolder(folder._id)}
                 className={cn(
-                  "flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm transition",
+                  "flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition",
                   selectedFolder === folder._id
-                    ? "bg-brand text-brand-foreground shadow-sm"
+                    ? "bg-brand text-brand-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 )}
               >

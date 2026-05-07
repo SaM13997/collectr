@@ -11,7 +11,9 @@ const config = defineConfig({
     allowedHosts: true,
   },
   plugins: [
-    nitroV2Plugin(),
+    nitroV2Plugin({
+      compatibilityDate: '2026-05-07',
+    }),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],

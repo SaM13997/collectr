@@ -5,6 +5,7 @@ import type { Id } from "../../convex/_generated/dataModel"
 import { motion, AnimatePresence, useReducedMotion } from "motion/react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogFocus } from "@/lib/use-dialog-focus"
 import {
   X,
   ChevronLeft,
@@ -160,6 +161,8 @@ export function CollectButton() {
   }
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  useDialogFocus(open, containerRef, triggerRef)
   useClickOutside(containerRef, close)
 
   useEffect(() => {
@@ -175,6 +178,7 @@ export function CollectButton() {
     <AnimatePresence>
       {!open ? (
         <motion.button
+          ref={triggerRef}
           key="trigger"
           layoutId="collect-popover"
           onClick={() => setOpen(true)}
@@ -209,6 +213,10 @@ export function CollectButton() {
             layout
             transition={LAYOUT_SPRING}
             className="absolute inset-x-4 bottom-6 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Collect"
+            tabIndex={-1}
           >
             <AnimatePresence mode="wait">
               {view === "main" && (
@@ -306,7 +314,7 @@ function MainView({
         <button
           type="button"
           onClick={onClose}
-          className="flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
           aria-label="Close"
         >
           <X className="size-4" />
@@ -325,7 +333,7 @@ function MainView({
         <button
           type="button"
           onClick={onPaste}
-          className="absolute right-6 top-3.5 flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          className="absolute right-6 top-1.5 flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
           aria-label="Paste from clipboard"
         >
           <ClipboardPaste className="size-4" />
@@ -400,7 +408,7 @@ function CollectionsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
           aria-label="Back"
         >
           <ChevronLeft className="size-4" />
@@ -506,7 +514,7 @@ function TagsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
           aria-label="Back"
         >
           <ChevronLeft className="size-4" />
@@ -530,7 +538,7 @@ function TagsView({
                 <button
                   type="button"
                   onClick={() => onRemoveTag(tag)}
-                  className="ml-0.5 flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+                  className="ml-0.5 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
                   aria-label={`Remove ${tag} tag`}
                 >
                   <X className="size-3" />

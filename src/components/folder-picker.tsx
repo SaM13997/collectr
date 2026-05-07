@@ -4,6 +4,8 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { Folder, Inbox, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useRef } from "react";
+import { useDialogFocus } from "@/lib/use-dialog-focus";
 
 export function FolderPicker({
   tweetId,
@@ -12,6 +14,9 @@ export function FolderPicker({
   tweetId: Id<"tweets">;
   onClose: () => void;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, containerRef);
+
   const data = useQuery(api.folders.listTree);
   const moveTweet = useMutation(api.tweets.move);
 
@@ -42,10 +47,12 @@ export function FolderPicker({
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className="w-full max-w-sm rounded-[1.5rem] border border-border/70 bg-card/92 p-4 shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-label="Move link to collection"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">

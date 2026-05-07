@@ -43,6 +43,7 @@ export const addFromUrl = mutation({
   args: {
     url: v.string(),
     folderId: v.union(v.id("folders"), v.null()),
+    shareText: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
@@ -72,13 +73,17 @@ export const addFromUrl = mutation({
       return existing._id;
     }
 
+    const shareText = args.shareText?.trim();
+    const hasShareText = shareText && shareText.length > 0;
+
     return ctx.db.insert("tweets", {
       userId,
       tweetId: parsed.tweetId,
       url: parsed.cleanUrl,
       folderId: args.folderId,
       createdAt: Date.now(),
-      embedStatus: "pending",
+      embedStatus: hasShareText ? "ok" : "pending",
+      ...(hasShareText ? { text: shareText } : {}),
     });
   },
 });
@@ -115,5 +120,41 @@ export const remove = mutation({
       throw new Error("Tweet not found");
     }
     await ctx.db.delete(args.tweetId);
+  },
+});
+
+export const getById = query({
+  args: { tweetId: v.id("tweets") },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const tweet = await ctx.db.get(args.tweetId);
+    if (!tweet || tweet.userId !== userId) return null;
+    return tweet;
+  },
+});
+
+export const setMetadata = mutation({
+  args: {
+    tweetId: v.id("tweets"),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("ok"),
+      v.literal("unavailable"),
+      v.literal("failed")
+    ),
+    authorName: v.optional(v.string()),
+    authorHandle: v.optional(v.string()),
+    authorAvatar: v.optional(v.string()),
+    text: v.optional(v.string()),
+    mediaUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const tweet = await ctx.db.get(args.tweetId);
+    if (!tweet || tweet.userId !== userId) {
+      throw new Error("Tweet not found");
+    }
+    const { tweetId, status, ...fields } = args;
+    await ctx.db.patch(tweetId, { embedStatus: status, ...fields });
   },
 });
