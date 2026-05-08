@@ -35,7 +35,7 @@ export function FolderPicker({
       await moveTweet({ tweetId, folderId });
       onClose();
     } catch (err) {
-      toast.error("Failed to move tweet", {
+      toast.error("Failed to move", {
         description: err instanceof Error ? err.message : "Something went wrong.",
       });
     }

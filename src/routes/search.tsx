@@ -8,7 +8,18 @@ import { SavedItemCard } from "@/components/saved-item-card";
 import { FolderPicker } from "@/components/folder-picker";
 import { Input } from "@/components/ui/input";
 import { Search as SearchIcon, Link2 } from "lucide-react";
-import type { Id } from "../../convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
+
+type SourceFilter = "all" | "x" | "reddit" | "instagram" | "link";
+
+const SOURCE_FILTERS: { value: SourceFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "x", label: "X" },
+  { value: "reddit", label: "Reddit" },
+  { value: "instagram", label: "Instagram" },
+  { value: "link", label: "Links" },
+];
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
@@ -41,20 +52,36 @@ function SearchPage() {
   return <SearchView />;
 }
 
+function matchItem(item: Doc<"tweets">, q: string, folderMap: Map<string, string>): boolean {
+  const handle = item.url.match(/(?:twitter\.com|x\.com)\/([^/]+)\/status\//)?.[1];
+  const folderName = item.folderId ? folderMap.get(item.folderId) : undefined;
+  return (
+    item.url.toLowerCase().includes(q) ||
+    (item.canonicalUrl?.toLowerCase().includes(q) ?? false) ||
+    (item.title?.toLowerCase().includes(q) ?? false) ||
+    (item.text?.toLowerCase().includes(q) ?? false) ||
+    (item.description?.toLowerCase().includes(q) ?? false) ||
+    (item.authorHandle?.toLowerCase().includes(q) ?? false) ||
+    (item.authorName?.toLowerCase().includes(q) ?? false) ||
+    (handle?.toLowerCase().includes(q) ?? false) ||
+    (folderName?.toLowerCase().includes(q) ?? false) ||
+    (item.tags?.some((tag) => tag.toLowerCase().includes(q)) ?? false) ||
+    (item.note?.toLowerCase().includes(q) ?? false)
+  );
+}
+
+
+
 function SearchView() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [source, setSource] = useState<SourceFilter>("all");
   const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
-  const inboxTweets = useQuery(api.tweets.listInbox);
+  const allTweets = useQuery(api.tweets.listAll);
   const folderData = useQuery(api.folders.listTree);
 
-  const allTweets = useMemo(() => {
-    if (!inboxTweets) return [];
-    return inboxTweets;
-  }, [inboxTweets]);
-
   const folderMap = useMemo(() => {
-    if (!folderData?.folders) return new Map();
+    if (!folderData?.folders) return new Map<string, string>();
     const map = new Map<string, string>();
     for (const f of folderData.folders) {
       map.set(f._id, f.name);
@@ -63,23 +90,25 @@ function SearchView() {
   }, [folderData?.folders]);
 
   const filtered = useMemo(() => {
-    if (!query.trim()) return [];
-    const q = query.toLowerCase().trim();
-    return allTweets.filter((t) => {
-      const handle = t.url.match(/(?:twitter\.com|x\.com)\/([^/]+)\/status\//)?.[1];
-      return (
-        t.url.toLowerCase().includes(q) ||
-        handle?.toLowerCase().includes(q) ||
-        (t.folderId && folderMap.get(t.folderId)?.toLowerCase().includes(q))
-      );
-    });
-  }, [query, allTweets, folderMap]);
+    if (!allTweets) return [];
+    let items = allTweets;
+    if (source !== "all") {
+      items = items.filter((t) => t.source === source);
+    }
+    if (query.trim()) {
+      const q = query.toLowerCase().trim();
+      items = items.filter((t) => matchItem(t, q, folderMap));
+    }
+    return items;
+  }, [query, allTweets, source, folderMap]);
 
-  const showResults = query.trim().length > 0;
+  const isLoading = allTweets === undefined;
+  const hasNoResults = !isLoading && filtered.length === 0;
+  const isFiltering = source !== "all" || query.trim().length > 0;
 
   return (
     <AppShell title="Search">
-      <div className="relative mb-6">
+      <div className="relative mb-4">
         <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={query}
@@ -91,7 +120,43 @@ function SearchView() {
         />
       </div>
 
-      {!showResults ? (
+      <div className="no-scrollbar flex gap-2 overflow-x-auto pb-2 mb-6">
+        {SOURCE_FILTERS.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setSource(tab.value)}
+            aria-pressed={source === tab.value}
+            className={cn(
+              "shrink-0 rounded-full border px-4 py-2.5 text-body font-body transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
+              source === tab.value
+                ? "border-foreground bg-foreground text-background"
+                : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="aspect-square animate-pulse rounded-xl bg-muted" />
+          ))}
+        </div>
+      ) : hasNoResults && isFiltering ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-muted">
+            <Link2 className="size-5 text-muted-foreground" />
+          </div>
+          <p className="mt-4 text-sm font-medium text-foreground">
+            No results found
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Try a different search term or filter.
+          </p>
+        </div>
+      ) : hasNoResults ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-muted">
             <SearchIcon className="size-5 text-muted-foreground" />
@@ -101,18 +166,6 @@ function SearchView() {
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             Find tweets, links, and posts you've saved.
-          </p>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-muted">
-            <Link2 className="size-5 text-muted-foreground" />
-          </div>
-          <p className="mt-4 text-sm font-medium text-foreground">
-            No results found
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Try a different search term.
           </p>
         </div>
       ) : (

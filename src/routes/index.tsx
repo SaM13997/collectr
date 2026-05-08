@@ -4,7 +4,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useAuthSession } from "@/lib/use-auth-session";
-import { fetchTweetMetadata } from "@/lib/tweet-parser";
+import { fetchItemMetadata } from "@/lib/item-metadata";
+import { isMetadataFetchEnabled } from "@/lib/feature-flags";
 import { AppShell } from "@/components/app-shell";
 import { CollectionCard } from "@/components/collection-card";
 import { SavedItemCard } from "@/components/saved-item-card";
@@ -55,7 +56,7 @@ function LandingPage() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-md text-pretty text-body text-muted-foreground">
-          Capture tweets, posts, and links from anywhere. Sort them into
+          Capture posts and links from anywhere. Sort them into
           collections whenever you have a moment.
         </p>
 
@@ -119,15 +120,16 @@ function SavedView() {
   useEffect(() => {
     if (!inboxTweets) return;
 
-    const tweetsWithoutText = inboxTweets.filter((t) => !t.text?.trim());
+    const tweetsWithoutContent = inboxTweets.filter((t) => !(t.text?.trim() || t.title?.trim()));
+    const fetchable = tweetsWithoutContent.filter((t) => isMetadataFetchEnabled(t.source));
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    tweetsWithoutText.forEach((tweet, index) => {
+    fetchable.forEach((tweet, index) => {
       if (attemptedRef.current.has(tweet._id)) return;
       attemptedRef.current.add(tweet._id);
 
       const timer = setTimeout(async () => {
-        const meta = await fetchTweetMetadata(tweet.url);
+        const meta = await fetchItemMetadata(tweet.url, tweet.source);
         await setMetadata({
           tweetId: tweet._id,
           status: meta ? "ok" : "unavailable",
@@ -238,7 +240,7 @@ function SavedView() {
                 No links saved yet
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Paste a tweet URL to get started
+                Paste a link to get started
               </p>
             </div>
           ) : (

@@ -12,7 +12,9 @@ import type * as auth from "../auth.js";
 import type * as folders from "../folders.js";
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
+import type * as redditSync from "../redditSync.js";
 import type * as tweets from "../tweets.js";
+import type * as urlParser from "../urlParser.js";
 import type * as users from "../users.js";
 
 import type {
@@ -34,7 +36,9 @@ declare const fullApi: ApiFromModules<{
   folders: typeof folders;
   helpers: typeof helpers;
   http: typeof http;
+  redditSync: typeof redditSync;
   tweets: typeof tweets;
+  urlParser: typeof urlParser;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

@@ -23,6 +23,18 @@ export default defineSchema({
       v.literal("unavailable"),
       v.literal("failed")
     ),
+    source: v.union(
+      v.literal("x"),
+      v.literal("reddit"),
+      v.literal("instagram"),
+      v.literal("link")
+    ),
+    canonicalUrl: v.string(),
+    sourceItemId: v.optional(v.string()),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    note: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
     authorName: v.optional(v.string()),
     authorHandle: v.optional(v.string()),
     authorAvatar: v.optional(v.string()),

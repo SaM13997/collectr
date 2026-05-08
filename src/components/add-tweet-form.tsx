@@ -5,7 +5,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link2 } from "lucide-react";
-import { fetchTweetMetadata } from "@/lib/tweet-parser";
+import { fetchItemMetadata } from "@/lib/item-metadata";
 
 const TWEET_URL_RE =
   /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/(\d+))/i;
@@ -29,12 +29,12 @@ export function AddTweetForm({
 
     const trimmed = url.trim();
     if (!trimmed) {
-      setError("Paste a tweet URL.");
+      setError("Paste a link URL.");
       return;
     }
 
     if (!TWEET_URL_RE.test(trimmed)) {
-      setError("That doesn't look like a tweet URL.");
+      setError("That doesn't look like a valid link.");
       return;
     }
 
@@ -46,7 +46,7 @@ export function AddTweetForm({
       const docId = await addTweet({ url: trimmed, folderId: folderId ?? null });
 
       if (tweetIdStr) {
-        const meta = await fetchTweetMetadata(trimmed);
+        const meta = await fetchItemMetadata(trimmed, "x");
         await setMetadata({
           tweetId: docId,
           status: meta ? "ok" : "unavailable",
@@ -57,7 +57,7 @@ export function AddTweetForm({
       setUrl("");
       onAdded?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save tweet.");
+      setError(err instanceof Error ? err.message : "Failed to save.");
     } finally {
       setIsSaving(false);
     }
@@ -74,8 +74,8 @@ export function AddTweetForm({
               setUrl(e.target.value);
               setError(null);
             }}
-            placeholder="Paste a tweet or X post URL..."
-            aria-label="Paste a tweet or X post URL"
+            placeholder="Paste a link URL..."
+            aria-label="Paste a link URL"
             className="h-10 pl-9"
             disabled={isSaving}
           />

@@ -243,7 +243,7 @@ function AddLinkDrawer({ onClose }: { onClose: () => void }) {
             <div>
               <h2 className="text-lg font-semibold">Add link</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Paste a tweet or X post URL to save it.
+                Paste a link URL to save it.
               </p>
             </div>
           <Button

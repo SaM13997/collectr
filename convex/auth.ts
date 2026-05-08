@@ -4,6 +4,7 @@ import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 import { betterAuth } from "better-auth";
+import { genericOAuth } from "better-auth/plugins";
 
 const siteUrl =
   process.env.BETTER_AUTH_URL ?? process.env.SITE_URL ?? "http://localhost:3000";
@@ -15,9 +16,9 @@ const trustedOrigins = [
 const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const redditClientId = process.env.REDDIT_CLIENT_ID;
+const redditClientSecret = process.env.REDDIT_CLIENT_SECRET;
 
-// The component client has methods needed for integrating Convex with Better Auth,
-// as well as helper methods for general use.
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
 export const createAuth = (
@@ -34,9 +35,25 @@ export const createAuth = (
         }
       : undefined;
 
+  const redditOAuthConfig =
+    redditClientId && redditClientSecret
+      ? [
+          {
+            providerId: "reddit" as const,
+            clientId: redditClientId,
+            clientSecret: redditClientSecret,
+            authorizationUrl: "https://www.reddit.com/api/v1/authorize",
+            tokenUrl: "https://www.reddit.com/api/v1/access_token",
+            userInfoUrl: "https://oauth.reddit.com/api/v1/me",
+            scopes: ["identity", "history"],
+            accessType: "offline",
+            authorizationUrlParams: { duration: "permanent" },
+            authentication: "basic" as const,
+          },
+        ]
+      : [];
+
   return betterAuth({
-    // disable logging when createAuth is called just to generate options.
-    // this is not required, but there's a lot of noise in logs without it.
     logger: {
       disabled: optionsOnly,
     },
@@ -50,9 +67,7 @@ export const createAuth = (
       requireEmailVerification: false,
     },
     ...(socialProviders ? { socialProviders } : {}),
-    plugins: [
-      convex(),
-    ],
+    plugins: [convex(), genericOAuth({ config: redditOAuthConfig })],
   });
 };
 

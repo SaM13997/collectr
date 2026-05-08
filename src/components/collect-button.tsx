@@ -18,11 +18,9 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { parseUrl, extractUrlFromText } from "@/lib/url-parser"
 
 type View = "main" | "collections" | "tags"
-
-const TWEET_URL_RE =
-  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/\d+)/i
 
 const LAYOUT_SPRING = { type: "spring" as const, duration: 0.5, bounce: 0 }
 const FAST_SPRING = { type: "spring" as const, duration: 0.3, bounce: 0 }
@@ -108,18 +106,23 @@ export function CollectButton() {
   const handleSubmit = async () => {
     const trimmed = content.trim()
     if (!trimmed) {
-      toast.error("Enter something to collect")
+      toast.error("Enter a URL to save")
       return
     }
 
-    if (!TWEET_URL_RE.test(trimmed)) {
-      toast.error("That doesn't look like a tweet URL")
+    let parsed = parseUrl(trimmed)
+    if (!parsed) {
+      const extracted = extractUrlFromText(trimmed)
+      if (extracted) parsed = parseUrl(extracted)
+    }
+    if (!parsed) {
+      toast.error("Enter a valid URL")
       return
     }
 
     try {
       setIsSaving(true)
-      await addTweet({ url: trimmed, folderId: selectedFolderId })
+      await addTweet({ url: parsed.rawUrl, folderId: selectedFolderId, tags: tags.length > 0 ? tags : undefined })
       toast.success("Saved")
       close()
     } catch (err) {
@@ -325,7 +328,7 @@ function MainView({
         <textarea
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
-          placeholder="Paste a tweet or X post URL..."
+          placeholder="Paste a URL to save..."
           className="h-24 w-full resize-none rounded-lg border border-border bg-background px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/30"
           autoFocus
         />

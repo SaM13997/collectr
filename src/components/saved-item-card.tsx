@@ -8,6 +8,9 @@ import {
   FolderInput,
   MoreHorizontal,
   Trash2,
+  Hash,
+  Globe,
+  Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -34,9 +37,30 @@ export function SavedItemCard({
   const [showActions, setShowActions] = useState(false);
   const removeTweet = useMutation(api.tweets.remove);
 
-  const domain = "x.com";
+  const sourceDomains: Record<string, string> = {
+    x: "x.com",
+    reddit: "reddit.com",
+    instagram: "instagram.com",
+  };
+  const domain = sourceDomains[item.source] ?? (() => { try { return new URL(item.url).hostname; } catch { return "link"; } })();
   const handle = extractHandle(item.url);
   const isList = variant === "list";
+
+  const primaryLabel = item.source === "reddit"
+    ? (item.authorName || "Reddit")
+    : item.source === "instagram"
+      ? (item.authorHandle ? `@${item.authorHandle}` : "Instagram")
+      : (item.authorHandle
+        ? `@${item.authorHandle}`
+        : handle
+          ? `@${handle}`
+          : `Post ${item.tweetId}`);
+
+  const secondaryLabel = item.source === "reddit"
+    ? (item.title || item.text?.trim() || "Reddit post")
+    : item.source === "instagram"
+      ? (item.text?.trim() || "Instagram post")
+      : (item.text?.trim() || "Content unavailable");
 
   const handleOpenExternal = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,13 +84,27 @@ export function SavedItemCard({
           />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-muted to-background p-2">
-            <svg
-              viewBox="0 0 24 24"
-              className={cn("text-foreground/80", isList ? "size-5" : "size-8")}
-              fill="currentColor"
-            >
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
+            {item.source === "x" ? (
+              <svg
+                viewBox="0 0 24 24"
+                className={cn("text-foreground/80", isList ? "size-5" : "size-8")}
+                fill="currentColor"
+              >
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            ) : item.source === "reddit" ? (
+              <svg
+                viewBox="0 0 24 24"
+                className={cn("text-foreground/80", isList ? "size-5" : "size-8")}
+                fill="currentColor"
+              >
+                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744a1.926 1.926 0 0 1 1.928 1.928 1.927 1.927 0 0 1-1.928 1.928 1.927 1.927 0 0 1-1.928-1.928 1.926 1.926 0 0 1 1.928-1.928zM6.934 7.002a1.93 1.93 0 0 1 1.928 1.928 1.93 1.93 0 0 1-1.928 1.928 1.93 1.93 0 0 1-1.928-1.928 1.93 1.93 0 0 1 1.928-1.928zm4.972 1.61a5.054 5.054 0 0 0-4.148 2.164.499.499 0 1 0 .818.572 4.053 4.053 0 0 1 6.66 0 .5.5 0 0 0 .818-.572 5.054 5.054 0 0 0-4.148-2.164zm8.02 2.513a1.26 1.26 0 0 0-1.027.477l-2.83-.916a.5.5 0 0 0-.3.953l2.828.916a1.268 1.268 0 0 0 1.329 1.266 1.268 1.268 0 0 0-.2-2.696z" />
+              </svg>
+            ) : item.source === "instagram" ? (
+              <Camera className={cn("text-foreground/80", isList ? "size-5" : "size-8")} />
+            ) : (
+              <Globe className={cn("text-foreground/80", isList ? "size-5" : "size-8")} />
+            )}
             {!isList && (
               <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {domain}
@@ -84,15 +122,24 @@ export function SavedItemCard({
       </div>
       <div className={cn("min-w-0 overflow-hidden", isList ? "flex-1" : "px-0.5")}>
         <p className="truncate text-xs font-medium text-foreground">
-          {item.authorHandle
-            ? `@${item.authorHandle}`
-            : handle
-              ? `@${handle}`
-              : `Post ${item.tweetId}`}
+          {primaryLabel}
         </p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {item.text?.trim() || "Tweet text unavailable"}
+          {secondaryLabel}
         </p>
+        {item.tags && item.tags.length > 0 ? (
+          <div className="mt-0.5 flex flex-wrap gap-1">
+            {item.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-0.5 rounded-full border border-border px-1.5 py-0 text-[10px] text-muted-foreground"
+              >
+                <Hash className="size-2.5" />
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </>
   );
@@ -184,7 +231,7 @@ export function SavedItemCard({
         aria-label={
           item.authorHandle || handle
             ? `View entry by @${item.authorHandle || handle}`
-            : `View entry`
+            : item.authorName || `View entry`
         }
       >
         {cardContent}

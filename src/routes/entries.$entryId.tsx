@@ -13,6 +13,8 @@ import {
   Trash2,
   Copy,
   Check,
+  Hash,
+  Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -118,12 +120,28 @@ function EntryView() {
   }
 
   const handle = extractHandle(tweet.url);
-  const displayName = tweet.authorName || handle || "Unknown";
+  const displayName = tweet.source === "instagram"
+    ? (tweet.authorName || "Instagram")
+    : (tweet.authorName || handle || "Unknown");
   const displayHandle = tweet.authorHandle || handle;
+
+  const sourceLabels: Record<string, string> = {
+    x: "Open original",
+    reddit: "Open on Reddit",
+    instagram: "Open on Instagram",
+    link: "Open link",
+  };
+  const openLabel = sourceLabels[tweet.source] || "Open link";
+
+  const fallbackText = tweet.source === "reddit"
+    ? "No post content."
+    : tweet.source === "instagram"
+      ? "Instagram post"
+      : "Content unavailable.";
 
   return (
     <AppShell
-      title={displayHandle ? `@${displayHandle}` : "Entry"}
+      title={displayHandle ? `@${displayHandle}` : tweet.source === "instagram" ? "Instagram" : "Entry"}
       backButton={<BackButton onClick={() => router.history.back()} />}
     >
       {/* Author header */}
@@ -136,9 +154,13 @@ function EntryView() {
           />
         ) : (
           <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]">
-            <span className="text-lg font-semibold text-muted-foreground">
-              {displayName[0]?.toUpperCase()}
-            </span>
+            {tweet.source === "instagram" && !tweet.authorName ? (
+              <Camera className="size-6 text-muted-foreground" />
+            ) : (
+              <span className="text-lg font-semibold text-muted-foreground">
+                {displayName[0]?.toUpperCase()}
+              </span>
+            )}
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -153,20 +175,23 @@ function EntryView() {
         </div>
       </div>
 
-      {/* Tweet text */}
+      {tweet.title?.trim() && (
+        <h2 className="mt-4 text-lg font-semibold text-foreground">{tweet.title}</h2>
+      )}
+
       {tweet.text?.trim() ? (
-        <div className="mt-4 rounded-xl border border-border bg-card p-card-padding">
+        <div className={cn("rounded-xl border border-border bg-card p-card-padding", tweet.title?.trim() ? "mt-2" : "mt-4")}>
           <p className="whitespace-pre-wrap text-body text-foreground leading-relaxed">
             {tweet.text}
           </p>
         </div>
-      ) : (
+      ) : !tweet.title?.trim() ? (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-card-padding">
           <p className="text-body text-muted-foreground">
-            Tweet text unavailable.
+            {fallbackText}
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Media preview */}
       {tweet.mediaUrl ? (
@@ -180,6 +205,21 @@ function EntryView() {
         </div>
       ) : null}
 
+      {/* Tags */}
+      {tweet.tags && tweet.tags.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {tweet.tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs text-foreground"
+            >
+              <Hash className="size-3" />
+              {tag}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
       {/* Actions */}
       <div className="mt-6 flex flex-col gap-2">
         {/* Open original */}
@@ -190,7 +230,7 @@ function EntryView() {
           className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent active:scale-[0.99]"
         >
           <ExternalLink className="size-4" />
-          Open on X
+          {openLabel}
         </a>
 
         {/* Secondary actions */}

@@ -1,5 +1,8 @@
 # Collectr Implementation Plan
 
+> Historical note: this document reflects the earlier X-first implementation plan.
+> The current source of truth for upcoming work is `docs/roadmap/index.md`.
+
 ## Goal
 
 Build a TanStack Start + Convex app where a signed-in user can paste or share tweet links into the app, view the embedded tweet content, and organize saved tweets into folders and nested folders.

@@ -7,7 +7,9 @@ import { useAuthSession } from "@/lib/use-auth-session";
 import { Button } from "@/components/ui/button";
 import { Folder, Inbox, Check, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchTweetMetadata } from "@/lib/tweet-parser";
+import { fetchItemMetadata } from "@/lib/item-metadata";
+import { isMetadataFetchEnabled } from "@/lib/feature-flags";
+import { parseSharedContent, type ParsedUrl } from "@/lib/url-parser";
 
 type ShareSearch = {
   text?: string;
@@ -15,42 +17,22 @@ type ShareSearch = {
   url?: string;
 };
 
-const tweetUrlPattern =
-  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/(\d+))/i;
-
-const normalizeSearchValue = (value: unknown) =>
-  typeof value === "string" && value.trim().length > 0 ? value : undefined;
-
-const extractTweetUrl = ({ text, title, url }: ShareSearch) => {
-  const directUrl = normalizeSearchValue(url);
-  if (directUrl && tweetUrlPattern.test(directUrl)) {
-    return directUrl.match(tweetUrlPattern)?.[1] ?? directUrl;
-  }
-
-  const combined = [normalizeSearchValue(text), normalizeSearchValue(title)]
-    .filter(Boolean)
-    .join(" ");
-
-  return combined.match(tweetUrlPattern)?.[1];
-};
-
-const extractTweetId = (url: string): string | null => {
-  const match = url.match(tweetUrlPattern);
-  return match?.[2] ?? null;
-};
-
 export const Route = createFileRoute("/share-target")({
-  validateSearch: (search): ShareSearch => ({
-    title: normalizeSearchValue(search.title),
-    text: normalizeSearchValue(search.text),
-    url: normalizeSearchValue(search.url),
-  }),
+  validateSearch: (search): ShareSearch => {
+    const normalize = (v: unknown) =>
+      typeof v === "string" && v.trim().length > 0 ? v : undefined;
+    return {
+      title: normalize(search.title),
+      text: normalize(search.text),
+      url: normalize(search.url),
+    };
+  },
   component: ShareTargetPage,
 });
 
 function ShareTargetPage() {
   const search = Route.useSearch();
-  const tweetUrl = extractTweetUrl(search);
+  const parsed = parseSharedContent(search);
   const { session, isPending } = useAuthSession();
   const redirectParams = new URLSearchParams();
 
@@ -74,14 +56,14 @@ function ShareTargetPage() {
     return (
       <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
         <div className="mx-auto max-w-md rounded-xl bg-card p-6 text-center">
-          <h1 className="text-2xl font-semibold">Shared tweet detected</h1>
-          {tweetUrl ? (
+          <h1 className="text-2xl font-semibold">Shared link detected</h1>
+          {parsed ? (
             <p className="mt-2 text-sm text-muted-foreground">
-              <code className="break-all">{tweetUrl}</code>
+              <code className="break-all">{parsed.displayUrl}</code>
             </p>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">
-              No valid tweet URL was found in the shared content.
+              No valid URL was found in the shared content.
             </p>
           )}
           <Button asChild className="mt-6">
@@ -94,13 +76,13 @@ function ShareTargetPage() {
     );
   }
 
-  if (!tweetUrl) {
+  if (!parsed) {
     return (
       <main className="flex min-h-screen items-center justify-center px-4 text-foreground">
         <div className="mx-auto max-w-md rounded-xl bg-card p-6 text-center">
-          <h1 className="text-2xl font-semibold">No tweet URL found</h1>
+          <h1 className="text-2xl font-semibold">No valid URL found</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            The shared content doesn't contain a valid tweet URL.
+            The shared content doesn&apos;t contain a valid URL.
           </p>
           <Button asChild className="mt-6">
             <Link to="/">Go to Saved</Link>
@@ -110,10 +92,10 @@ function ShareTargetPage() {
     );
   }
 
-  return <SaveSharedTweet tweetUrl={tweetUrl} shareText={search.text || search.title} />;
+  return <SaveSharedItem parsed={parsed} shareText={search.text || search.title} />;
 }
 
-function SaveSharedTweet({ tweetUrl, shareText }: { tweetUrl: string; shareText?: string }) {
+function SaveSharedItem({ parsed, shareText }: { parsed: ParsedUrl; shareText?: string }) {
   const router = useRouter();
   const data = useQuery(api.folders.listTree);
   const addTweet = useMutation(api.tweets.addFromUrl);
@@ -127,26 +109,24 @@ function SaveSharedTweet({ tweetUrl, shareText }: { tweetUrl: string; shareText?
     try {
       setIsSaving(true);
       setError(null);
-      const id = await addTweet({ url: tweetUrl, folderId: selectedFolder, shareText });
+      const id = await addTweet({ url: parsed.rawUrl, folderId: selectedFolder, shareText });
       setSaved(true);
 
-      const tweetIdStr = extractTweetId(tweetUrl);
-      if (tweetIdStr) {
+      if (isMetadataFetchEnabled(parsed.source) && parsed.sourceItemId) {
         (async () => {
           try {
-            const meta = await fetchTweetMetadata(tweetUrl);
+            const meta = await fetchItemMetadata(parsed.canonicalUrl, parsed.source);
             await setMetadata({
               tweetId: id,
               status: meta ? "ok" : "unavailable",
               ...meta,
             });
           } catch {
-            // Silently ignore background metadata fetch errors
           }
         })();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save tweet.");
+      setError(err instanceof Error ? err.message : "Failed to save.");
     } finally {
       setIsSaving(false);
     }
@@ -159,9 +139,9 @@ function SaveSharedTweet({ tweetUrl, shareText }: { tweetUrl: string; shareText?
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-highlight/15">
             <Check className="size-6 text-highlight" />
           </div>
-          <h1 className="text-2xl font-semibold">Tweet saved!</h1>
+          <h1 className="text-2xl font-semibold">Saved!</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            <code className="break-all">{tweetUrl}</code>
+            <code className="break-all">{parsed.displayUrl}</code>
           </p>
           <div className="mt-6 flex flex-col gap-3">
             <Button
@@ -190,17 +170,17 @@ function SaveSharedTweet({ tweetUrl, shareText }: { tweetUrl: string; shareText?
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10 text-foreground">
       <div className="mx-auto w-full max-w-md rounded-xl bg-card p-6">
-        <h1 className="text-2xl font-semibold">Save tweet</h1>
+        <h1 className="text-2xl font-semibold">Save item</h1>
 
-        {/* Tweet URL */}
+        {/* URL */}
         <div className="mt-4 rounded-lg bg-muted/50 p-4">
           <div className="flex items-start gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand/12">
               <ExternalLink className="size-5 text-brand" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground">Tweet link detected</p>
-              <p className="mt-1 truncate text-xs text-muted-foreground">{tweetUrl}</p>
+              <p className="text-sm font-medium text-foreground">Link detected</p>
+              <p className="mt-1 truncate text-xs text-muted-foreground">{parsed.displayUrl}</p>
             </div>
           </div>
         </div>
@@ -249,7 +229,7 @@ function SaveSharedTweet({ tweetUrl, shareText }: { tweetUrl: string; shareText?
           onClick={handleSave}
           disabled={isSaving}
         >
-          {isSaving ? "Saving..." : "Save tweet"}
+          {isSaving ? "Saving..." : "Save item"}
         </Button>
       </div>
     </main>

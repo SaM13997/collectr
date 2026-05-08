@@ -1,15 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { requireUserId } from "./helpers";
-
-const TWEET_URL_RE =
-  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/(\w+)\/status\/(\d+))/i;
-
-function extractTweetId(url: string): { cleanUrl: string; tweetId: string } | null {
-  const match = url.match(TWEET_URL_RE);
-  if (!match) return null;
-  return { cleanUrl: match[1], tweetId: match[3] };
-}
+import { parseUrl, type SourceType } from "./urlParser";
 
 export const listInbox = query({
   args: {},
@@ -20,6 +12,18 @@ export const listInbox = query({
       .withIndex("by_user_folder", (q) =>
         q.eq("userId", userId).eq("folderId", null)
       )
+      .order("desc")
+      .collect();
+  },
+});
+
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    return ctx.db
+      .query("tweets")
+      .withIndex("by_user_folder", (q) => q.eq("userId", userId))
       .order("desc")
       .collect();
   },
@@ -44,12 +48,14 @@ export const addFromUrl = mutation({
     url: v.string(),
     folderId: v.union(v.id("folders"), v.null()),
     shareText: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+    note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
-    const parsed = extractTweetId(args.url.trim());
+    const parsed = parseUrl(args.url.trim());
     if (!parsed) {
-      throw new Error("Invalid tweet URL");
+      throw new Error("Invalid URL");
     }
 
     if (args.folderId) {
@@ -59,10 +65,12 @@ export const addFromUrl = mutation({
       }
     }
 
+    const tweetId = parsed.sourceItemId ?? parsed.canonicalUrl;
+
     const existing = await ctx.db
       .query("tweets")
       .withIndex("by_user_tweetId", (q) =>
-        q.eq("userId", userId).eq("tweetId", parsed.tweetId)
+        q.eq("userId", userId).eq("tweetId", tweetId)
       )
       .unique();
 
@@ -76,14 +84,23 @@ export const addFromUrl = mutation({
     const shareText = args.shareText?.trim();
     const hasShareText = shareText && shareText.length > 0;
 
+    const normalizedTags = args.tags
+      ? [...new Set(args.tags.map((t) => t.trim().toLowerCase()).filter(Boolean))]
+      : undefined;
+
     return ctx.db.insert("tweets", {
       userId,
-      tweetId: parsed.tweetId,
-      url: parsed.cleanUrl,
+      tweetId,
+      url: parsed.canonicalUrl,
       folderId: args.folderId,
       createdAt: Date.now(),
-      embedStatus: hasShareText ? "ok" : "pending",
+      embedStatus: parsed.source === "x" ? (hasShareText ? "ok" : "pending") : parsed.source === "instagram" ? "unavailable" : "pending",
+      source: parsed.source,
+      canonicalUrl: parsed.canonicalUrl,
+      sourceItemId: parsed.sourceItemId,
       ...(hasShareText ? { text: shareText } : {}),
+      ...(normalizedTags && normalizedTags.length > 0 ? { tags: normalizedTags } : {}),
+      ...(args.note?.trim() ? { note: args.note.trim() } : {}),
     });
   },
 });
@@ -145,8 +162,10 @@ export const setMetadata = mutation({
     authorName: v.optional(v.string()),
     authorHandle: v.optional(v.string()),
     authorAvatar: v.optional(v.string()),
+    title: v.optional(v.string()),
     text: v.optional(v.string()),
     mediaUrl: v.optional(v.string()),
+    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
@@ -156,5 +175,60 @@ export const setMetadata = mutation({
     }
     const { tweetId, status, ...fields } = args;
     await ctx.db.patch(tweetId, { embedStatus: status, ...fields });
+  },
+});
+
+export const importRedditItems = mutation({
+  args: {
+    items: v.array(
+      v.object({
+        url: v.string(),
+        tweetId: v.string(),
+        source: v.literal("reddit"),
+        canonicalUrl: v.string(),
+        sourceItemId: v.optional(v.string()),
+        title: v.optional(v.string()),
+        authorHandle: v.optional(v.string()),
+        authorName: v.optional(v.string()),
+        tags: v.optional(v.array(v.string())),
+        text: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    let imported = 0;
+
+    for (const item of args.items) {
+      const existing = await ctx.db
+        .query("tweets")
+        .withIndex("by_user_tweetId", (q) =>
+          q.eq("userId", userId).eq("tweetId", item.tweetId)
+        )
+        .unique();
+
+      if (existing) continue;
+
+      await ctx.db.insert("tweets", {
+        userId,
+        tweetId: item.tweetId,
+        url: item.url,
+        folderId: null,
+        createdAt: Date.now(),
+        embedStatus: "pending" as const,
+        source: item.source as SourceType,
+        canonicalUrl: item.canonicalUrl,
+        sourceItemId: item.sourceItemId,
+        ...(item.title ? { title: item.title } : {}),
+        ...(item.authorHandle ? { authorHandle: item.authorHandle } : {}),
+        ...(item.authorName ? { authorName: item.authorName } : {}),
+        ...(item.text ? { text: item.text } : {}),
+        ...(item.tags && item.tags.length > 0 ? { tags: item.tags } : {}),
+      });
+
+      imported++;
+    }
+
+    return { imported };
   },
 });

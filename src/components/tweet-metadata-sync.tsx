@@ -3,7 +3,8 @@ import { useMutation } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
-import { fetchTweetMetadata } from "@/lib/tweet-parser";
+import { fetchItemMetadata } from "@/lib/item-metadata";
+import { isMetadataFetchEnabled } from "@/lib/feature-flags";
 
 export function useTweetMetadataSync(item: Doc<"tweets"> | null | undefined) {
   const setMetadata = useMutation(api.tweets.setMetadata);
@@ -15,14 +16,22 @@ export function useTweetMetadataSync(item: Doc<"tweets"> | null | undefined) {
       return;
     }
 
-    if ((item.text && item.text.trim()) || attemptedRef.current) {
+    if (item.embedStatus !== "pending") {
+      return;
+    }
+
+    if ((item.text && item.text.trim()) || (item.title && item.title.trim()) || attemptedRef.current) {
+      return;
+    }
+
+    if (!isMetadataFetchEnabled(item.source)) {
       return;
     }
 
     attemptedRef.current = true;
 
     const timer = setTimeout(async () => {
-      const meta = await fetchTweetMetadata(item.url);
+      const meta = await fetchItemMetadata(item.url, item.source);
       await setMetadata({
         tweetId: item._id,
         status: meta ? "ok" : "unavailable",
