@@ -71,12 +71,12 @@ export function AnimatedList<T extends { id: string | number }>({
             initial={variants.initial}
             animate={variants.animate}
             exit={variants.exit}
-            transition={{
-              type: "spring",
-              stiffness: 350,
-              damping: 28,
-              layout: { type: "spring", stiffness: 350, damping: 28 },
-            }}
+      transition={{
+        type: "spring",
+        duration: 0.4,
+        bounce: 0.15,
+        layout: { type: "spring", duration: 0.4, bounce: 0.15 },
+      }}
           >
             {renderItem(item, index)}
           </motion.div>

@@ -132,7 +132,7 @@ export function AppShell({
             <nav className="flex flex-col gap-1">
               <Link
                 to="/"
-                className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-foreground transition hover:bg-accent"
+                className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-foreground transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.99] [@media(hover:hover)]:hover:bg-accent"
               >
                 <Bookmark className="size-4" />
                 <span>Saved</span>
@@ -145,7 +145,7 @@ export function AppShell({
             <Button
               type="button"
               variant="ghost"
-              className="h-10 justify-start gap-3 px-3 text-muted-foreground hover:text-foreground"
+              className="h-10 justify-start gap-3 px-3 text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:text-foreground"
               onClick={() => setActivePanel("settings")}
             >
               <Settings className="size-4" />
@@ -172,7 +172,7 @@ export function AppShell({
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-11"
+                className="size-11 transition-colors duration-150 ease-[var(--ease-out)]"
                 onClick={() => setActivePanel("settings")}
                 aria-label="Settings"
               >
@@ -188,7 +188,7 @@ export function AppShell({
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="gap-2 transition-colors duration-150 ease-[var(--ease-out)]"
                 onClick={() => setActivePanel("add")}
               >
                 <Plus className="size-4" />
@@ -246,14 +246,14 @@ function AddLinkDrawer({ onClose }: { onClose: () => void }) {
                 Paste a tweet or X post URL to save it.
               </p>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8 rounded-lg"
-              onClick={onClose}
-              aria-label="Close"
-            >
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-8 rounded-lg transition-colors duration-150 ease-[var(--ease-out)]"
+            onClick={onClose}
+            aria-label="Close"
+          >
               <X className="size-4" />
             </Button>
           </div>
@@ -331,7 +331,7 @@ function AppSheet({
             type="button"
             variant="ghost"
             size="icon"
-            className="size-11 rounded-lg"
+            className="size-11 rounded-lg transition-colors duration-150 ease-[var(--ease-out)]"
             onClick={onClose}
             aria-label="Close"
           >
@@ -356,7 +356,7 @@ export function BackButton({
     <Button
       variant="ghost"
       size="icon"
-      className="size-11"
+      className="size-11 transition-colors duration-150 ease-[var(--ease-out)]"
       onClick={onClick}
       aria-label={ariaLabel}
     >
@@ -408,7 +408,7 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
               key={option.value}
               type="button"
               className={cn(
-                "flex flex-col items-center gap-2 rounded-lg border p-3 text-center transition",
+                "flex flex-col items-center gap-2 rounded-lg border p-3 text-center transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
                 theme === option.value
                   ? "border-foreground bg-foreground text-background"
                   : "border-border hover:border-foreground/20 hover:bg-accent"
@@ -449,7 +449,7 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
         ) : null}
 
         <div className="mt-4 flex gap-2">
-          <Button asChild variant="outline" size="sm" className="flex-1">
+          <Button asChild variant="outline" size="sm" className="flex-1 transition-colors duration-150 ease-[var(--ease-out)]">
             <Link to="/" onClick={onClose}>
               <Bookmark className="size-4" />
               <span>Saved</span>
@@ -460,7 +460,7 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
             type="button"
             variant="outline"
             size="sm"
-            className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="flex-1 text-destructive transition-colors duration-150 ease-[var(--ease-out)] hover:bg-destructive/10 hover:text-destructive"
             onClick={handleSignOut}
           >
             <LogOut className="size-4" />

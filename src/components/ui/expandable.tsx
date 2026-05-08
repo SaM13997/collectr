@@ -17,7 +17,7 @@ import useMeasure from "react-use-measure"
 
 import { cn } from "@/lib/utils"
 
-const springConfig = { stiffness: 200, damping: 25 }
+const springConfig = { stiffness: 300, damping: 30 }
 
 interface ExpandableContextType {
   isExpanded: boolean // Indicates whether the component is expanded
@@ -78,8 +78,8 @@ const Expandable = React.forwardRef<HTMLDivElement, ExpandableProps>(
       children,
       expanded,
       onToggle,
-      transitionDuration = 0.3,
-      easeType = "easeInOut" as const,
+      transitionDuration = 0.25,
+      easeType = "easeOut" as const,
       expandDirection = "vertical",
       expandBehavior = "replace",
       initialDelay = 0,
@@ -178,9 +178,9 @@ const ANIMATION_PRESETS: Record<string, AnimationPreset> = {
     exit: { opacity: 0, x: -20 },
   },
   scale: {
-    initial: { opacity: 0, scale: 0.8 },
+    initial: { opacity: 0, scale: 0.95 },
     animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.8 },
+    exit: { opacity: 0, scale: 0.97 },
   },
   rotate: {
     initial: { opacity: 0, rotate: -10 },

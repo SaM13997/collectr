@@ -106,7 +106,7 @@ function FolderView() {
       {!showNewSubfolder ? (
         <button
           onClick={() => setShowNewSubfolder(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-sm text-muted-foreground transition hover:border-foreground/20 hover:bg-accent hover:text-foreground"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-sm text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:border-foreground/20 hover:bg-accent hover:text-foreground active:scale-[0.99]"
         >
           <Plus className="size-4" />
           <span>New subcollection</span>
@@ -160,9 +160,14 @@ function FolderView() {
           </div>
         ) : tweets.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-card-padding text-center">
-            <Link2 className="mx-auto size-7 text-muted-foreground/50" />
-            <p className="mt-2 text-body text-muted-foreground">
-              No links in this collection yet.
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-muted">
+              <Link2 className="size-6 text-muted-foreground/40" />
+            </div>
+            <p className="mt-3 text-sm font-medium text-foreground">
+              No links in this collection yet
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Add links to organize them here
             </p>
           </div>
         ) : (

@@ -46,7 +46,7 @@ export function UserButton() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-10 rounded-full border border-border/70 bg-background/70 p-0 shadow-sm"
+          className="relative h-10 w-10 rounded-full border border-border/70 bg-background/70 p-0 shadow-sm transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.95]"
         >
           <Avatar className="h-10 w-10">
             <AvatarImage src={user.image ?? ""} alt={user.name ?? "User"} />

@@ -220,8 +220,8 @@ function FamilyDrawerContent({
       animate={{
         height: bounds.height,
         transition: {
-          duration: 0.27,
-          ease: [0.25, 1, 0.5, 1],
+          duration: 0.25,
+          ease: [0.32, 0.72, 0, 1],
         },
       }}
     >
@@ -331,7 +331,7 @@ function FamilyDrawerClose({
     <button
       data-vaul-no-drag=""
       className={clsx(
-        "absolute right-8 top-7 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-transform focus:scale-95 focus-visible:shadow-focus-ring-button active:scale-75 cursor-pointer",
+        "absolute right-8 top-7 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-transform duration-150 ease-[var(--ease-out)] focus:scale-95 focus-visible:shadow-focus-ring-button active:scale-75 cursor-pointer",
         className
       )}
       type="button"
@@ -398,7 +398,7 @@ function FamilyDrawerButton({
     <button
       data-vaul-no-drag=""
       className={clsx(
-        "flex h-12 w-full items-center gap-[15px] rounded-[16px] bg-muted px-4 text-[17px] font-semibold text-foreground transition-transform focus:scale-95 focus-visible:shadow-focus-ring-button active:scale-95 md:font-medium cursor-pointer",
+        "flex h-12 w-full items-center gap-[15px] rounded-[16px] bg-muted px-4 text-[17px] font-semibold text-foreground transition-transform duration-150 ease-[var(--ease-out)] focus:scale-95 focus-visible:shadow-focus-ring-button active:scale-95 md:font-medium cursor-pointer",
         className
       )}
       onClick={onClick}
@@ -433,7 +433,7 @@ function FamilyDrawerSecondaryButton({
       data-vaul-no-drag=""
       type="button"
       className={clsx(
-        "flex h-12 w-full items-center justify-center gap-[15px] rounded-full text-center text-[19px] font-semibold transition-transform focus:scale-95 focus-visible:shadow-focus-ring-button active:scale-95 md:font-medium cursor-pointer",
+        "flex h-12 w-full items-center justify-center gap-[15px] rounded-full text-center text-[19px] font-semibold transition-transform duration-150 ease-[var(--ease-out)] focus:scale-95 focus-visible:shadow-focus-ring-button active:scale-95 md:font-medium cursor-pointer",
         className
       )}
       onClick={onClick}

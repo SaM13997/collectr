@@ -127,15 +127,15 @@ function EntryView() {
       backButton={<BackButton onClick={() => router.history.back()} />}
     >
       {/* Author header */}
-      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
         {tweet.authorAvatar ? (
           <img
             src={tweet.authorAvatar}
             alt={displayName}
-            className="size-12 shrink-0 rounded-full object-cover"
+            className="size-12 shrink-0 rounded-full object-cover transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]"
           />
         ) : (
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]">
             <span className="text-lg font-semibold text-muted-foreground">
               {displayName[0]?.toUpperCase()}
             </span>
@@ -174,7 +174,7 @@ function EntryView() {
           <img
             src={tweet.mediaUrl}
             alt=""
-            className="w-full object-cover"
+            className="w-full object-cover transition-transform duration-300 ease-[var(--ease-out)] hover:scale-[1.01]"
             loading="lazy"
           />
         </div>
@@ -187,7 +187,7 @@ function EntryView() {
           href={tweet.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition hover:bg-accent"
+          className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent active:scale-[0.99]"
         >
           <ExternalLink className="size-4" />
           Open on X
@@ -197,7 +197,7 @@ function EntryView() {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            className="flex-1 gap-2"
+            className="flex-1 gap-2 transition-colors duration-150 ease-[var(--ease-out)]"
             onClick={handleCopyUrl}
           >
             {copied ? (
@@ -210,7 +210,7 @@ function EntryView() {
 
           <Button
             variant="outline"
-            className="flex-1 gap-2"
+            className="flex-1 gap-2 transition-colors duration-150 ease-[var(--ease-out)]"
             onClick={() => setMovingTweetId(tweet._id)}
           >
             <FolderInput className="size-4" />
@@ -219,7 +219,7 @@ function EntryView() {
 
           <Button
             variant="outline"
-            className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="gap-2 text-destructive transition-colors duration-150 ease-[var(--ease-out)] hover:bg-destructive/10 hover:text-destructive"
             onClick={handleDelete}
           >
             <Trash2 className="size-4" />

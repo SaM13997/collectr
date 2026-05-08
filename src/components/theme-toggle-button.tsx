@@ -12,7 +12,7 @@ export function ThemeToggleButton() {
       type="button"
       variant="outline"
       size="icon"
-      className="h-11 w-11 rounded-full border-border/70 bg-background/80 shadow-sm backdrop-blur"
+      className="h-11 w-11 rounded-full border-border/70 bg-background/80 shadow-sm backdrop-blur transition-colors duration-150 ease-[var(--ease-out)]"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}

@@ -220,7 +220,7 @@ export function LoginForm({
             <p className="text-center text-sm text-destructive">{errorMessage}</p>
           ) : null}
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button type="submit" disabled={isSubmitting} className="w-full transition-colors duration-150 ease-[var(--ease-out)]">
             {isSubmitting
               ? "Working..."
               : mode === "signIn"
@@ -234,7 +234,7 @@ export function LoginForm({
             {mode === "signIn" ? "Need an account?" : "Already have an account?"}{" "}
             <button
               type="button"
-              className="font-medium text-foreground underline-offset-2 hover:underline"
+              className="font-medium text-foreground underline-offset-2 transition-colors duration-150 ease-[var(--ease-out)] hover:underline active:opacity-70"
               onClick={() => {
                 setMode(mode === "signIn" ? "signUp" : "signIn");
                 setErrorMessage(null);

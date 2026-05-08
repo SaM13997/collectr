@@ -28,8 +28,8 @@ export function CollectionCard({
       to="/folders/$folderId"
       params={{ folderId: id }}
       className={cn(
-        "group flex shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card transition",
-        "hover:border-foreground/15",
+        "group flex shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors duration-150 ease-[var(--ease-out)]",
+        "active:scale-[0.99] [@media(hover:hover)]:hover:border-foreground/15",
         className
       )}
     >

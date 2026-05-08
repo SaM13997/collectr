@@ -61,10 +61,10 @@ function LandingPage() {
 
         {/* CTA */}
         <div className="mt-section flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button asChild size="lg" className="min-w-40">
+          <Button asChild size="lg" className="min-w-40 transition-colors duration-150 ease-[var(--ease-out)]">
             <Link to="/login">Get started</Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="min-w-40">
+          <Button asChild variant="outline" size="lg" className="min-w-40 transition-colors duration-150 ease-[var(--ease-out)]">
             <Link to="/share-target">Try the share flow</Link>
           </Button>
         </div>
@@ -72,7 +72,7 @@ function LandingPage() {
         {/* Features */}
         <div className="mt-20 grid gap-10 text-left sm:grid-cols-3">
           <div className="flex flex-col gap-4">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-muted">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-muted">
               <Inbox className="size-5 text-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-heading font-heading">Quick capture</p>
@@ -82,7 +82,9 @@ function LandingPage() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <FolderOpen className="size-6 text-foreground" strokeWidth={1.5} />
+            <div className="flex size-10 items-center justify-center rounded-xl bg-muted">
+              <FolderOpen className="size-5 text-foreground" strokeWidth={1.5} />
+            </div>
             <p className="text-heading font-heading">Organize by collection</p>
             <p className="text-body text-muted-foreground">
               Create collections to keep things tidy.
@@ -90,7 +92,7 @@ function LandingPage() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <div className="flex size-9 items-center justify-center rounded-full bg-muted">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-muted">
               <Sparkles className="size-5 text-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-heading font-heading">Mobile-first</p>
@@ -193,7 +195,7 @@ function SavedView() {
             onClick={() => setFilter(tab.value)}
             aria-pressed={filter === tab.value}
             className={cn(
-              "shrink-0 rounded-full border px-4 py-2.5 text-body font-body transition",
+              "shrink-0 rounded-full border px-4 py-2.5 text-body font-body transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
               filter === tab.value
                 ? "border-foreground bg-foreground text-background"
                 : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
@@ -229,9 +231,14 @@ function SavedView() {
             </div>
           ) : inboxTweets.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-card-padding text-center">
-              <Link2 className="mx-auto size-7 text-muted-foreground/50" />
-              <p className="mt-2 text-body text-muted-foreground">
-                No links saved yet.
+              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-muted">
+                <Link2 className="size-6 text-muted-foreground/40" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">
+                No links saved yet
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Paste a tweet URL to get started
               </p>
             </div>
           ) : (

@@ -47,7 +47,7 @@ export function SavedItemCard({
     <>
       <div
         className={cn(
-          "relative overflow-hidden rounded-xl bg-muted",
+          "relative overflow-hidden rounded-xl bg-muted transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
           isList ? "size-14 shrink-0" : "aspect-square"
         )}
       >
@@ -109,9 +109,9 @@ export function SavedItemCard({
         expanded={showActions}
         onToggle={() => setShowActions(!showActions)}
       >
-        <ExpandableTrigger
+          <ExpandableTrigger
           className={cn(
-            "flex items-center justify-center rounded-full text-muted-foreground transition hover:bg-background/90 hover:text-foreground",
+            "flex items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-background/90 hover:text-foreground active:scale-[0.95]",
             isList
               ? "size-8 bg-transparent"
               : "absolute right-2 top-2 size-9 bg-background/50 opacity-100 backdrop-blur-sm"
@@ -130,7 +130,7 @@ export function SavedItemCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 justify-start gap-2 px-2 text-xs"
+              className="h-9 justify-start gap-2 px-2 text-xs transition-colors duration-150 ease-[var(--ease-out)]"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -144,7 +144,7 @@ export function SavedItemCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 justify-start gap-2 px-2 text-xs text-destructive hover:text-destructive"
+              className="h-9 justify-start gap-2 px-2 text-xs text-destructive transition-colors duration-150 ease-[var(--ease-out)] hover:text-destructive"
               onClick={async (e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -172,13 +172,13 @@ export function SavedItemCard({
 
   return (
     <div className={cn("group relative", isList ? "flex items-center gap-2" : "", className)}>
-      <button
+        <button
         type="button"
         onClick={onOpen}
         className={cn(
           "flex gap-3 text-left",
           isList
-            ? "min-w-0 flex-1 items-center rounded-xl border border-border bg-card p-3 transition hover:bg-accent"
+            ? "min-w-0 flex-1 items-center rounded-xl border border-border bg-card p-3 transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.99] [@media(hover:hover)]:hover:bg-accent"
             : "flex-col"
         )}
         aria-label={

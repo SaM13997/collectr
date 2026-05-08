@@ -172,10 +172,10 @@ Indexes:
 
 ## Suggested Next Implementation Order
 
-1. Replace the scaffold home page with the real inbox layout.
-2. Add Convex schema and protected folder/tweet functions.
-3. Implement manual paste-to-save flow.
-4. Implement `/share-target` save flow with auth preservation.
-5. Implement official tweet embed rendering.
-6. Add folder navigation and nested folder UI.
+1. ~~Replace the scaffold home page with the real inbox layout.~~ ✅
+2. ~~Add Convex schema and protected folder/tweet functions.~~ ✅
+3. ~~Implement manual paste-to-save flow.~~ ✅
+4. ~~Implement `/share-target` save flow with auth preservation.~~ ✅
+5. ~~Implement official tweet embed rendering.~~ **SKIPPED** — Sticking with the current custom tweet rendering (`tweet-card` / `saved-item-card` + metadata sync). Official embed widget abandoned.
+6. ~~Add folder navigation and nested folder UI.~~ ✅
 7. Run build/test pass and clean out leftover demo files.

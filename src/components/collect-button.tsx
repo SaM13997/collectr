@@ -182,14 +182,13 @@ export function CollectButton() {
           key="trigger"
           layoutId="collect-popover"
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-4 z-30 flex h-12 items-center gap-2 rounded-2xl border border-border bg-primary px-5 text-sm font-medium text-primary-foreground shadow-lg md:hidden"
+          className="fixed bottom-6 right-4 z-30 flex h-12 items-center gap-2 rounded-2xl border border-border bg-primary px-5 text-sm font-medium text-primary-foreground shadow-lg md:hidden active:scale-[0.97]"
           exit={
             shouldReduceMotion
               ? { opacity: 0, transition: { duration: 0.1 } }
               : { opacity: 0, transition: { duration: 0.2 } }
           }
           whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
           transition={LAYOUT_SPRING}
         >
           <Plus className="size-4" />
@@ -314,7 +313,7 @@ function MainView({
         <button
           type="button"
           onClick={onClose}
-          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.95]"
           aria-label="Close"
         >
           <X className="size-4" />
@@ -333,7 +332,7 @@ function MainView({
         <button
           type="button"
           onClick={onPaste}
-          className="absolute right-6 top-1.5 flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          className="absolute right-6 top-1.5 flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.95]"
           aria-label="Paste from clipboard"
         >
           <ClipboardPaste className="size-4" />
@@ -345,7 +344,7 @@ function MainView({
         <button
           type="button"
           onClick={onOpenCollections}
-          className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.99]"
         >
           <FolderOpen className="size-4 shrink-0" />
           <span className="truncate">
@@ -357,7 +356,7 @@ function MainView({
           type="button"
           onClick={onOpenTags}
           className={cn(
-            "flex flex-1 items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
+            "flex flex-1 items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.99]",
             tags.length > 0
               ? "border-ring/50 bg-accent text-foreground"
               : "border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -408,7 +407,7 @@ function CollectionsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.95]"
           aria-label="Back"
         >
           <ChevronLeft className="size-4" />
@@ -420,16 +419,16 @@ function CollectionsView({
       <div className="max-h-[20vh] overflow-y-auto px-4 pb-2">
         <div className="flex flex-col gap-1">
           {/* None option */}
-          <button
-            type="button"
-            onClick={() => onSelect(null)}
-            className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
-              selectedFolderId === null
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground"
-            )}
-          >
+        <button
+          type="button"
+          onClick={() => onSelect(null)}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.99]",
+            selectedFolderId === null
+              ? "bg-accent text-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          )}
+        >
             <span className="flex-1 text-left">No collection</span>
             {selectedFolderId === null && (
               <Check className="size-4 shrink-0" />
@@ -442,7 +441,7 @@ function CollectionsView({
               type="button"
               onClick={() => onSelect(folder._id)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.99]",
                 selectedFolderId === folder._id
                   ? "bg-accent text-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -514,7 +513,7 @@ function TagsView({
         <button
           type="button"
           onClick={onBack}
-          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.95]"
           aria-label="Back"
         >
           <ChevronLeft className="size-4" />
@@ -535,12 +534,12 @@ function TagsView({
               >
                 <Hash className="size-3" />
                 {tag}
-                <button
-                  type="button"
-                  onClick={() => onRemoveTag(tag)}
-                  className="ml-0.5 flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
-                  aria-label={`Remove ${tag} tag`}
-                >
+        <button
+          type="button"
+          onClick={() => onRemoveTag(tag)}
+          className="ml-0.5 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.95]"
+          aria-label={`Remove ${tag} tag`}
+        >
                   <X className="size-3" />
                 </button>
               </span>

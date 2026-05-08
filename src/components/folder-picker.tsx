@@ -59,7 +59,7 @@ export function FolderPicker({
           <h3 className="text-sm font-medium text-foreground">Move to collection</h3>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+            className="rounded-full p-2 text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.95]"
           >
             <X className="size-4" />
           </button>
@@ -68,7 +68,7 @@ export function FolderPicker({
         <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
           <button
             onClick={() => handleMove(null)}
-            className="flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
+            className="flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.99]"
           >
             <Inbox className="size-4 text-brand" />
             <span>Saved</span>
@@ -79,7 +79,7 @@ export function FolderPicker({
               key={folder._id}
               onClick={() => handleMove(folder._id)}
               className={cn(
-                "flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                "flex min-h-11 w-full items-center gap-2 rounded-[1rem] px-3 py-2 text-sm text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.99]"
               )}
             >
               <Folder className="size-4 text-brand" />
