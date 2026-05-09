@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useAuthSession } from "@/lib/use-auth-session";
-import { AppShell } from "@/components/app-shell";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { CollectionCard } from "@/components/collection-card";
 import { FolderOpen } from "lucide-react";
 
@@ -42,7 +42,7 @@ function CollectionsView() {
   const collections = folderData?.folders ?? [];
 
   return (
-    <AppShell title="Collections">
+    <AppLayout title="Collections">
       {collections.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-muted">
@@ -68,6 +68,6 @@ function CollectionsView() {
           ))}
         </div>
       )}
-    </AppShell>
+    </AppLayout>
   );
 }

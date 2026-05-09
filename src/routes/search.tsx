@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useAuthSession } from "@/lib/use-auth-session";
-import { AppShell } from "@/components/app-shell";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { SavedItemCard } from "@/components/saved-item-card";
 import { FolderPicker } from "@/components/folder-picker";
 import { Input } from "@/components/ui/input";
@@ -107,7 +107,7 @@ function SearchView() {
   const isFiltering = source !== "all" || query.trim().length > 0;
 
   return (
-    <AppShell title="Search">
+    <AppLayout title="Search">
       <div className="relative mb-4">
         <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -116,7 +116,6 @@ function SearchView() {
           placeholder="Search saved links..."
           aria-label="Search saved links"
           className="h-12 rounded-xl bg-surface-raised pl-11 text-sm"
-          autoFocus
         />
       </div>
 
@@ -188,6 +187,6 @@ function SearchView() {
           onClose={() => setMovingTweetId(null)}
         />
       ) : null}
-    </AppShell>
+    </AppLayout>
   );
 }

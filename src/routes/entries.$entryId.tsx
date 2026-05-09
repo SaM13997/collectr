@@ -4,7 +4,8 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useAuthSession } from "@/lib/use-auth-session";
-import { AppShell, BackButton } from "@/components/app-shell";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { BackButton } from "@/components/app-shell";
 import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,7 +88,7 @@ function EntryView() {
 
   if (tweet === undefined) {
     return (
-      <AppShell backButton={<BackButton onClick={() => router.history.back()} />}>
+      <AppLayout backButton={<BackButton onClick={() => router.history.back()} />}>
         <div className="flex flex-col gap-4 animate-pulse">
           <div className="flex items-center gap-3">
             <div className="size-12 rounded-full bg-muted" />
@@ -99,13 +100,13 @@ function EntryView() {
           <div className="h-24 rounded-xl bg-muted" />
           <div className="h-48 rounded-xl bg-muted" />
         </div>
-      </AppShell>
+      </AppLayout>
     );
   }
 
   if (tweet === null) {
     return (
-      <AppShell title="Not found" backButton={<BackButton onClick={() => router.history.back()} />}>
+      <AppLayout title="Not found" backButton={<BackButton onClick={() => router.history.back()} />}>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-lg font-semibold">Entry not found</p>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -115,7 +116,7 @@ function EntryView() {
             <Link to="/">Go back</Link>
           </Button>
         </div>
-      </AppShell>
+      </AppLayout>
     );
   }
 
@@ -140,7 +141,7 @@ function EntryView() {
       : "Content unavailable.";
 
   return (
-    <AppShell
+    <AppLayout
       title={displayHandle ? `@${displayHandle}` : tweet.source === "instagram" ? "Instagram" : "Entry"}
       backButton={<BackButton onClick={() => router.history.back()} />}
     >
@@ -297,7 +298,7 @@ function EntryView() {
           onClose={() => setMovingTweetId(null)}
         />
       ) : null}
-    </AppShell>
+    </AppLayout>
   );
 }
 

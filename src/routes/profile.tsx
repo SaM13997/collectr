@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useAuthSession } from "@/lib/use-auth-session";
-import { AppShell } from "@/components/app-shell";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { ThemeSetting, useTheme } from "@/components/theme-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -83,7 +83,7 @@ function ProfileView() {
   };
 
   return (
-    <AppShell title="Profile">
+    <AppLayout title="Profile">
       {/* User Info */}
       <div className="slide-up flex items-center gap-4 rounded-2xl bg-surface p-5">
         <Avatar className="size-14">
@@ -168,7 +168,7 @@ function ProfileView() {
           <span>Sign out</span>
         </Button>
       </div>
-    </AppShell>
+    </AppLayout>
   );
 }
 
