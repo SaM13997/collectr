@@ -5,6 +5,7 @@ import { useAuthSession } from "@/lib/use-auth-session";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CollectionCard } from "@/components/collection-card";
 import { FolderOpen } from "lucide-react";
+import { PageSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/collections")({
   component: CollectionsPage,
@@ -14,11 +15,7 @@ function CollectionsPage() {
   const { session, isPending } = useAuthSession();
 
   if (isPending) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </main>
-    );
+    return <PageSkeleton />;
   }
 
   if (!session) {
@@ -43,7 +40,22 @@ function CollectionsView() {
 
   return (
     <AppLayout title="Collections">
-      {collections.length === 0 ? (
+      {folderData === undefined ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-[191.6px] animate-pulse rounded-xl border border-border bg-card"
+            >
+              <div className="h-[60%] w-full animate-pulse bg-muted" />
+              <div className="flex items-center justify-between gap-2 p-3">
+                <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+                <div className="h-2.5 w-4 shrink-0 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : collections.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-muted">
             <FolderOpen className="size-5 text-muted-foreground" />

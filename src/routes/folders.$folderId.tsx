@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -8,11 +8,14 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { SavedItemCard } from "@/components/saved-item-card";
 import { CollectionCard } from "@/components/collection-card";
 import { FolderPicker } from "@/components/folder-picker";
+import { BulkSelectionToolbar } from "@/components/bulk-selection-toolbar";
 import { Button } from "@/components/ui/button";
 import { Plus, Link2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { AnimatedList } from "@/components/unlumen-ui/animated-list";
+import { PageSkeleton } from "@/components/skeletons";
+import { cn } from "@/lib/utils";
+import { useUiStore } from "@/store/useUiStore";
 
 export const Route = createFileRoute("/folders/$folderId")({
   component: FolderPage,
@@ -22,11 +25,7 @@ function FolderPage() {
   const { session, isPending } = useAuthSession();
 
   if (isPending) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </main>
-    );
+    return <PageSkeleton />;
   }
 
   if (!session) {
@@ -48,14 +47,54 @@ function FolderPage() {
 function FolderView() {
   const { folderId } = Route.useParams();
   const navigate = useNavigate();
+  const { selectionMode, selectedIds, enterSelectionMode, toggleSelection } = useUiStore();
   const typedFolderId = folderId as Id<"folders">;
-  const tweets = useQuery(api.tweets.listByFolder, { folderId: typedFolderId });
+  const items = useQuery(api.items.listByFolder, { folderId: typedFolderId });
   const folderData = useQuery(api.folders.listTree);
-  const createSubfolder = useMutation(api.folders.create);
+  const createSubfolder = useMutation(api.folders.create).withOptimisticUpdate(
+    (store, args) => {
+      for (const { args: queryArgs, value } of store.getAllQueries(api.folders.listTree)) {
+        if (value) {
+          const tempId = `temp_${Date.now()}` as Id<"folders">;
+          const newFolder = {
+            _id: tempId,
+            _creationTime: Date.now(),
+            userId: "",
+            name: args.name.trim(),
+            parentId: args.parentId,
+            createdAt: Date.now(),
+            itemCount: 0,
+          };
+          store.setQuery(api.folders.listTree, queryArgs, {
+            ...value,
+            folders: [...value.folders, newFolder],
+          });
+        }
+      }
+    }
+  );
+  const reorderItems = useMutation(api.items.reorder).withOptimisticUpdate(
+    (store, args) => {
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listByFolder)) {
+        if (value) {
+          const idToItem = new Map(value.map((t) => [t._id, t]));
+          const reordered = args.orderedIds
+            .map((id) => idToItem.get(id))
+            .filter(Boolean) as typeof value;
+          if (reordered.length === args.orderedIds.length) {
+            store.setQuery(api.items.listByFolder, queryArgs, reordered);
+          }
+        }
+      }
+    }
+  );
 
-  const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
+  const [movingItemId, setMovingItemId] = useState<Id<"items"> | null>(null);
   const [showNewSubfolder, setShowNewSubfolder] = useState(false);
   const [subfolderName, setSubfolderName] = useState("");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+  const dragCounter = useRef(0);
 
   const childFolders =
     folderData?.folders.filter((f) => f.parentId === typedFolderId) ?? [];
@@ -77,6 +116,50 @@ function FolderView() {
     }
   };
 
+  const handleDragStart = useCallback((index: number) => {
+    setDragIndex(index);
+    dragCounter.current = 0;
+  }, []);
+
+  const handleDragEnter = useCallback((index: number) => {
+    dragCounter.current++;
+    setOverIndex(index);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setOverIndex(null);
+    }
+  }, []);
+
+  const handleDrop = useCallback(async (dropIdx: number) => {
+    if (dragIndex === null || dragIndex === dropIdx || !items) {
+      setDragIndex(null);
+      setOverIndex(null);
+      return;
+    }
+
+    const ids = items.map((t) => t._id);
+    const [moved] = ids.splice(dragIndex, 1);
+    ids.splice(dropIdx, 0, moved);
+
+    setDragIndex(null);
+    setOverIndex(null);
+
+    try {
+      await reorderItems({ orderedIds: ids });
+    } catch {
+      toast.error("Failed to reorder");
+    }
+  }, [dragIndex, items, reorderItems]);
+
+  const handleDragEnd = useCallback(() => {
+    setDragIndex(null);
+    setOverIndex(null);
+    dragCounter.current = 0;
+  }, []);
+
   return (
     <AppLayout>
       <div className="p-4 md:p-8 max-w-5xl mx-auto">
@@ -92,7 +175,7 @@ function FolderView() {
                   key={folder._id}
                   id={folder._id}
                   name={folder.name}
-                  itemCount={folder.tweetCount}
+                    itemCount={folder.itemCount}
                 />
               ))}
             </div>
@@ -137,16 +220,33 @@ function FolderView() {
 
         {/* Links */}
         <section className="mt-section">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-heading font-heading tracking-tight">Links</h2>
-            {tweets ? (
-              <span className="text-body text-muted-foreground">
-                {tweets.length} saved
-              </span>
-            ) : null}
-          </div>
+          {selectionMode ? (
+            <BulkSelectionToolbar
+              totalCount={items?.length ?? 0}
+              allIds={items?.map((t) => t._id) ?? []}
+            />
+          ) : (
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-heading font-heading tracking-tight">Links</h2>
+              <div className="flex items-center gap-2">
+                {items && items.length > 0 ? (
+                  <button
+                    onClick={enterSelectionMode}
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors duration-150"
+                  >
+                    Select
+                  </button>
+                ) : null}
+                {items ? (
+                  <span className="text-body text-muted-foreground">
+                    {items.length} saved
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          )}
 
-          {tweets === undefined ? (
+          {items === undefined ? (
             <div className="flex flex-col gap-2">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
@@ -155,7 +255,7 @@ function FolderView() {
                 />
               ))}
             </div>
-          ) : tweets.length === 0 ? (
+          ) : items.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-card-padding text-center">
               <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-muted">
                 <Link2 className="size-6 text-muted-foreground/40" />
@@ -168,26 +268,72 @@ function FolderView() {
               </p>
             </div>
           ) : (
-            <AnimatedList
-              items={tweets.map((t) => ({ ...t, id: t._id }))}
-              renderItem={(tweet) => (
-                <SavedItemCard
-                  item={tweet}
-                  variant="list"
-                  onOpen={() => navigate({ to: "/entries/$entryId", params: { entryId: tweet._id } })}
-                  onMove={(id) => setMovingTweetId(id)}
-                />
-              )}
-              gap={8}
-              animation="scale"
-            />
+            <div className="flex flex-col gap-2">
+              {items.map((item, index) => (
+                <div
+                  key={item._id}
+                  draggable={!selectionMode}
+                  onDragStart={(e) => {
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", String(index));
+                    handleDragStart(index);
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                  }}
+                  onDragEnter={() => handleDragEnter(index)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handleDrop(index);
+                  }}
+                  onDragEnd={handleDragEnd}
+                  className={cn(
+                    "transition-opacity duration-150",
+                    dragIndex === index && "opacity-40",
+                    overIndex === index && dragIndex !== index && "border-t-2 border-primary"
+                  )}
+                >
+                  <SavedItemCard
+                    item={item}
+                    variant="list"
+                    showDragHandle={!selectionMode}
+                    selected={selectedIds.has(item._id)}
+                    onToggleSelection={
+                      selectionMode
+                        ? () => toggleSelection(item._id)
+                        : undefined
+                    }
+                    onLongPress={
+                      !selectionMode
+                        ? () => {
+                            enterSelectionMode();
+                            toggleSelection(item._id);
+                          }
+                        : undefined
+                    }
+                    onOpen={
+                      selectionMode
+                        ? () => toggleSelection(item._id)
+                        : () => navigate({ to: "/entries/$entryId", params: { entryId: item._id } })
+                    }
+                    onMove={
+                      selectionMode
+                        ? undefined
+                        : (id) => setMovingItemId(id)
+                    }
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </section>
 
-        {movingTweetId ? (
+        {movingItemId ? (
           <FolderPicker
-            tweetId={movingTweetId}
-            onClose={() => setMovingTweetId(null)}
+            itemId={movingItemId}
+            onClose={() => setMovingItemId(null)}
           />
         ) : null}
       </div>

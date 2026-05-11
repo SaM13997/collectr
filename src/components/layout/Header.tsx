@@ -9,9 +9,10 @@ import { MobileFolderSheet } from "./MobileFolderSheet";
 interface HeaderProps {
   title?: string;
   backButton?: ReactNode;
+  onSearchClick?: () => void;
 }
 
-export function Header({ title, backButton }: HeaderProps) {
+export function Header({ title, backButton, onSearchClick }: HeaderProps) {
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
 
   return (
@@ -25,7 +26,7 @@ export function Header({ title, backButton }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="size-9"
+              className="size-9 min-h-11 min-w-11"
               onClick={() => setFolderSheetOpen(true)}
               aria-label="Open menu"
             >
@@ -46,11 +47,14 @@ export function Header({ title, backButton }: HeaderProps) {
           <div className="flex items-center flex-1 max-w-md ml-4">
             <div className="relative w-full">
               <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search (Cmd+K)"
-                className="h-9 w-full rounded-md border border-input bg-transparent px-9 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              />
+              <button
+                type="button"
+                onClick={onSearchClick}
+                aria-label="Open search"
+                className="h-9 w-full rounded-md border border-input bg-transparent px-9 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-left text-muted-foreground cursor-text"
+              >
+                Search (Cmd+K)
+              </button>
             </div>
           </div>
         </div>
@@ -78,6 +82,15 @@ export function Header({ title, backButton }: HeaderProps) {
               </div>
             </PopoverContent>
           </Popover>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden size-9 min-h-11 min-w-11"
+            onClick={onSearchClick}
+            aria-label="Open search"
+          >
+            <Search className="size-5" />
+          </Button>
           <UserButton className="size-8 md:size-10" />
         </div>
       </header>

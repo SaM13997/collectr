@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link2 } from "lucide-react";
 import { fetchItemMetadata } from "@/lib/item-metadata";
-
-const TWEET_URL_RE =
-  /(https?:\/\/(?:www\.|mobile\.)?(?:twitter\.com|x\.com)\/[\w_]+\/status\/(\d+))/i;
+import { isMetadataFetchEnabled } from "@/lib/feature-flags";
+import { parseUrl, extractUrlFromText } from "@/lib/url-parser";
 
 export function AddTweetForm({
   folderId,
@@ -20,8 +19,8 @@ export function AddTweetForm({
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const addTweet = useMutation(api.tweets.addFromUrl);
-  const setMetadata = useMutation(api.tweets.setMetadata);
+  const addItem = useMutation(api.items.addFromUrl);
+  const setMetadata = useMutation(api.items.setMetadata);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,22 +32,24 @@ export function AddTweetForm({
       return;
     }
 
-    if (!TWEET_URL_RE.test(trimmed)) {
+    let parsed = parseUrl(trimmed);
+    if (!parsed) {
+      const extracted = extractUrlFromText(trimmed);
+      if (extracted) parsed = parseUrl(extracted);
+    }
+    if (!parsed) {
       setError("That doesn't look like a valid link.");
       return;
     }
 
-    const tweetIdMatch = trimmed.match(TWEET_URL_RE);
-    const tweetIdStr = tweetIdMatch?.[2];
-
     try {
       setIsSaving(true);
-      const docId = await addTweet({ url: trimmed, folderId: folderId ?? null });
+      const docId = await addItem({ url: parsed.rawUrl, folderId: folderId ?? null });
 
-      if (tweetIdStr) {
-        const meta = await fetchItemMetadata(trimmed, "x");
+      if (isMetadataFetchEnabled(parsed.source) && parsed.sourceItemId) {
+        const meta = await fetchItemMetadata(parsed.canonicalUrl, parsed.source);
         await setMetadata({
-          tweetId: docId,
+          itemId: docId,
           status: meta ? "ok" : "unavailable",
           ...meta,
         });

@@ -7,11 +7,28 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { flags, isMetadataFetchEnabled } from "@/lib/feature-flags";
-import { LogOut, Monitor, MoonStar, SunMedium, type LucideIcon } from "lucide-react";
+import {
+  Download,
+  FileJson,
+  FileSpreadsheet,
+  LogOut,
+  Monitor,
+  MoonStar,
+  SunMedium,
+  Upload,
+  type LucideIcon,
+} from "lucide-react";
 import { toast } from "sonner";
-import { useQuery, useAction } from "convex/react";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { PageSkeleton } from "@/components/skeletons";
+import {
+  exportAsJson,
+  exportAsCsv,
+  parseImportJson,
+  type ExportItem,
+} from "@/lib/export-utils";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -33,11 +50,7 @@ function ProfilePage() {
   const { session, isPending } = useAuthSession();
 
   if (isPending) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </main>
-    );
+    return <PageSkeleton />;
   }
 
   if (!session) {
@@ -156,6 +169,9 @@ function ProfileView() {
         {flags.enableRedditOAuthSync && <RedditSyncSection />}
       </section>
 
+      {/* Export / Import */}
+      <ExportImportSection />
+
       {/* Sign Out */}
       <div className="slide-up mt-4" style={{ animationDelay: "100ms" }}>
         <Button
@@ -247,5 +263,152 @@ function RedditSyncSection() {
         </Button>
       )}
     </div>
+  );
+}
+
+function ExportImportSection() {
+  const allItems = useQuery(api.items.listAll);
+  const importItems = useMutation(api.items.importItems);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExportJson = () => {
+    if (!allItems || allItems.length === 0) {
+      toast.error("No items to export");
+      return;
+    }
+    const items: ExportItem[] = allItems.map((item) => ({
+      url: item.url,
+      canonicalUrl: item.canonicalUrl,
+      source: item.source,
+      sourceItemId: item.sourceItemId,
+      title: item.title,
+      description: item.description,
+      note: item.note,
+      tags: item.tags,
+      authorName: item.authorName,
+      authorHandle: item.authorHandle,
+      text: item.text,
+      mediaUrl: item.mediaUrl,
+    }));
+    exportAsJson(items);
+    toast.success(`Exported ${items.length} items as JSON`);
+  };
+
+  const handleExportCsv = () => {
+    if (!allItems || allItems.length === 0) {
+      toast.error("No items to export");
+      return;
+    }
+    const items: ExportItem[] = allItems.map((item) => ({
+      url: item.url,
+      canonicalUrl: item.canonicalUrl,
+      source: item.source,
+      sourceItemId: item.sourceItemId,
+      title: item.title,
+      description: item.description,
+      note: item.note,
+      tags: item.tags,
+      authorName: item.authorName,
+      authorHandle: item.authorHandle,
+      text: item.text,
+      mediaUrl: item.mediaUrl,
+    }));
+    exportAsCsv(items);
+    toast.success(`Exported ${items.length} items as CSV`);
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const items = parseImportJson(text);
+
+      if (items.length === 0) {
+        toast.error("No valid items found in file");
+        return;
+      }
+
+      const result = await importItems({ items });
+      const r = result as { imported: number; skipped: number };
+      toast.success(
+        `Imported ${r.imported} items${r.skipped > 0 ? `, ${r.skipped} duplicates skipped` : ""}`
+      );
+    } catch (err) {
+      toast.error("Failed to import file", {
+        description: err instanceof Error ? err.message : "Invalid file format",
+      });
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  return (
+    <section
+      className="slide-up mt-4 rounded-2xl bg-surface p-5"
+      style={{ animationDelay: "150ms" }}
+    >
+      <p className="text-sm font-semibold">Export / Import</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Export your saved items or import from a JSON file.
+      </p>
+
+      <div className="mt-4 space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="pressable h-11 justify-center gap-2 rounded-xl text-xs"
+            onClick={handleExportJson}
+            disabled={!allItems || allItems.length === 0}
+          >
+            <FileJson className="size-4" />
+            <Download className="size-3.5" />
+            Export JSON
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="pressable h-11 justify-center gap-2 rounded-xl text-xs"
+            onClick={handleExportCsv}
+            disabled={!allItems || allItems.length === 0}
+          >
+            <FileSpreadsheet className="size-4" />
+            <Download className="size-3.5" />
+            Export CSV
+          </Button>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          className="hidden"
+          onChange={handleImportFile}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          className="pressable h-11 w-full justify-center gap-2 rounded-xl text-xs"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isImporting}
+        >
+          <Upload className="size-4" />
+          {isImporting ? "Importing..." : "Import from JSON"}
+        </Button>
+      </div>
+
+      {allItems && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          {allItems.length} item{allItems.length !== 1 ? "s" : ""} in your collection.
+        </p>
+      )}
+    </section>
   );
 }

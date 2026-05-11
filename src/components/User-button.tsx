@@ -56,6 +56,7 @@ export function UserButton({ className }: UserButtonProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          aria-label="User menu"
           className={cn(
             "relative rounded-full border border-border/70 bg-background/70 p-0 shadow-sm transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.95]",
             className

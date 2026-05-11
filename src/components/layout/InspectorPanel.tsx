@@ -1,19 +1,28 @@
+import { useEffect } from "react";
 import { useUiStore } from "@/store/useUiStore";
 import { Drawer } from "vaul";
 import { X, ExternalLink, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { InspectorSkeleton } from "@/components/skeletons";
 
 export function InspectorPanel() {
   const { inspectorOpen, selectedItemId, closeInspector } = useUiStore();
   
   // Try to query the item if we have an ID
-  const item = useQuery(api.tweets.getById, selectedItemId ? { tweetId: selectedItemId as Id<"tweets"> } : "skip");
+  const item = useQuery(api.items.getById, selectedItemId ? { itemId: selectedItemId as Id<"items"> } : "skip");
+  const markAsRead = useMutation(api.items.markAsRead);
+
+  useEffect(() => {
+    if (item && !item.isRead) {
+      markAsRead({ itemId: item._id }).catch(() => {});
+    }
+  }, [item, markAsRead]);
 
   const Content = () => {
-    if (!item) return <div className="p-4 text-muted-foreground">Loading...</div>;
+    if (!item) return <InspectorSkeleton />;
 
     return (
       <div className="flex flex-col h-full">
@@ -28,10 +37,10 @@ export function InspectorPanel() {
             Original Link
           </a>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="size-8">
+            <Button variant="ghost" size="icon" className="size-8 min-h-11 min-w-11" aria-label="More options">
               <MoreVertical className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-8 md:hidden" onClick={closeInspector}>
+            <Button variant="ghost" size="icon" className="size-8 min-h-11 min-w-11 md:hidden" onClick={closeInspector} aria-label="Close inspector">
               <X className="size-4" />
             </Button>
           </div>
@@ -48,6 +57,7 @@ export function InspectorPanel() {
                 className="w-full mt-1 p-2 rounded-md border border-border bg-transparent focus:outline-none focus:ring-2 focus:ring-primary" 
                 rows={4}
                 placeholder="Add some notes..."
+                aria-label="Notes"
               />
             </div>
           </div>
@@ -63,7 +73,7 @@ export function InspectorPanel() {
         <aside className="hidden md:flex w-80 lg:w-96 flex-col border-l border-border bg-background h-screen sticky top-0 shrink-0">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <h3 className="font-semibold">Inspector</h3>
-            <Button variant="ghost" size="icon" onClick={closeInspector} className="size-8">
+            <Button variant="ghost" size="icon" onClick={closeInspector} className="size-8 min-h-11 min-w-11" aria-label="Close inspector">
               <X className="size-4" />
             </Button>
           </div>

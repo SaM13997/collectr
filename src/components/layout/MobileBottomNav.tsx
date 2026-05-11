@@ -40,6 +40,7 @@ export function MobileBottomNav({ onAddClick }: MobileBottomNavProps) {
             <Link
               key={tab.to}
               to={tab.to}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors",
                 isActive ? "text-foreground" : "text-muted-foreground"

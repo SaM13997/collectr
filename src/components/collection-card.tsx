@@ -1,12 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { Id } from "../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
-import Grainient from "@/components/Grainient";
-
-/* Token values mirror --gradient-1/2/3 in styles.css */
-const GRADIENT_1 = "#ffd6fa";
-const GRADIENT_2 = "#c5b6ff";
-const GRADIENT_3 = "#d4a6ff";
 
 interface CollectionCardProps {
   id: Id<"folders">;
@@ -42,11 +36,12 @@ export function CollectionCard({
             loading="lazy"
           />
         ) : (
-          <Grainient
-            color1={GRADIENT_1}
-            color2={GRADIENT_2}
-            color3={GRADIENT_3}
+          <div
             className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(135deg, #ffd6fa 0%, #c5b6ff 50%, #d4a6ff 100%)",
+            }}
           />
         )}
       </div>

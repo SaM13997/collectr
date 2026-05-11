@@ -12,23 +12,23 @@ export const listTree = query({
       .order("asc")
       .collect();
 
-    const tweets = await ctx.db
-      .query("tweets")
+    const items = await ctx.db
+      .query("items")
       .withIndex("by_user_folder", (q) => q.eq("userId", userId))
       .collect();
 
-    const tweetCountByFolder = new Map<string, number>();
-    for (const tweet of tweets) {
-      const key = tweet.folderId ?? "__inbox__";
-      tweetCountByFolder.set(key, (tweetCountByFolder.get(key) ?? 0) + 1);
+    const itemCountByFolder = new Map<string, number>();
+    for (const item of items) {
+      const key = item.folderId ?? "__inbox__";
+      itemCountByFolder.set(key, (itemCountByFolder.get(key) ?? 0) + 1);
     }
 
     return {
       folders: folders.map((f) => ({
         ...f,
-        tweetCount: tweetCountByFolder.get(f._id) ?? 0,
+        itemCount: itemCountByFolder.get(f._id) ?? 0,
       })),
-      inboxCount: tweetCountByFolder.get("__inbox__") ?? 0,
+      inboxCount: itemCountByFolder.get("__inbox__") ?? 0,
     };
   },
 });
@@ -94,15 +94,15 @@ export const deleteIfEmpty = mutation({
       throw new Error("Folder contains subfolders");
     }
 
-    const tweets = await ctx.db
-      .query("tweets")
+    const items = await ctx.db
+      .query("items")
       .withIndex("by_user_folder", (q) =>
         q.eq("userId", userId).eq("folderId", args.folderId)
       )
       .collect();
 
-    if (tweets.length > 0) {
-      throw new Error("Folder contains tweets");
+    if (items.length > 0) {
+      throw new Error("Folder contains items");
     }
 
     await ctx.db.delete(args.folderId);

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Search as SearchIcon, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
+import { PageSkeleton } from "@/components/skeletons";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type SourceFilter = "all" | "x" | "reddit" | "instagram" | "link";
 
@@ -29,11 +31,7 @@ function SearchPage() {
   const { session, isPending } = useAuthSession();
 
   if (isPending) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </main>
-    );
+    return <PageSkeleton />;
   }
 
   if (!session) {
@@ -52,7 +50,7 @@ function SearchPage() {
   return <SearchView />;
 }
 
-function matchItem(item: Doc<"tweets">, q: string, folderMap: Map<string, string>): boolean {
+function matchItem(item: Doc<"items">, q: string, folderMap: Map<string, string>): boolean {
   const handle = item.url.match(/(?:twitter\.com|x\.com)\/([^/]+)\/status\//)?.[1];
   const folderName = item.folderId ? folderMap.get(item.folderId) : undefined;
   return (
@@ -70,15 +68,28 @@ function matchItem(item: Doc<"tweets">, q: string, folderMap: Map<string, string
   );
 }
 
+function useColumnsPerRow() {
+  const [cols, setCols] = useState(2);
 
+  useEffect(() => {
+    const update = () => setCols(window.innerWidth >= 640 ? 3 : 2);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return cols;
+}
 
 function SearchView() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [source, setSource] = useState<SourceFilter>("all");
-  const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
-  const allTweets = useQuery(api.tweets.listAll);
+  const [movingItemId, setMovingItemId] = useState<Id<"items"> | null>(null);
+  const allItems = useQuery(api.items.listAll);
   const folderData = useQuery(api.folders.listTree);
+  const columnsPerRow = useColumnsPerRow();
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const folderMap = useMemo(() => {
     if (!folderData?.folders) return new Map<string, string>();
@@ -90,8 +101,8 @@ function SearchView() {
   }, [folderData?.folders]);
 
   const filtered = useMemo(() => {
-    if (!allTweets) return [];
-    let items = allTweets;
+    if (!allItems) return [];
+    let items = allItems;
     if (source !== "all") {
       items = items.filter((t) => t.source === source);
     }
@@ -100,9 +111,19 @@ function SearchView() {
       items = items.filter((t) => matchItem(t, q, folderMap));
     }
     return items;
-  }, [query, allTweets, source, folderMap]);
+  }, [query, allItems, source, folderMap]);
 
-  const isLoading = allTweets === undefined;
+  const rowCount = Math.ceil(filtered.length / columnsPerRow);
+
+  const virtualizer = useVirtualizer({
+    count: rowCount,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 220,
+    overscan: 4,
+    gap: 12,
+  });
+
+  const isLoading = allItems === undefined;
   const hasNoResults = !isLoading && filtered.length === 0;
   const isFiltering = source !== "all" || query.trim().length > 0;
 
@@ -126,7 +147,7 @@ function SearchView() {
             onClick={() => setSource(tab.value)}
             aria-pressed={source === tab.value}
             className={cn(
-              "shrink-0 rounded-full border px-4 py-2.5 text-body font-body transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
+              "shrink-0 rounded-full border px-4 py-2.5 min-h-11 text-body font-body transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
               source === tab.value
                 ? "border-foreground bg-foreground text-background"
                 : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
@@ -164,27 +185,64 @@ function SearchView() {
             Search your saved items
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Find tweets, links, and posts you've saved.
+            Find links and posts you've saved.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {filtered.map((tweet, i) => (
-            <div key={tweet._id} className="stagger-item" style={{ "--i": i } as React.CSSProperties}>
-              <SavedItemCard
-                item={tweet}
-                onOpen={() => navigate({ to: "/entries/$entryId", params: { entryId: tweet._id } })}
-                onMove={(id) => setMovingTweetId(id)}
-              />
+        <div
+          ref={parentRef}
+          className="overflow-auto"
+          style={{ contain: "strict" }}
+        >
+          <div
+            className="relative w-full"
+            style={{ height: `${virtualizer.getTotalSize()}px` }}
+          >
+            <div
+              className="absolute left-0 top-0 w-full grid grid-cols-2 sm:grid-cols-3 gap-3"
+              style={{
+                transform: `translateY(${virtualizer.getVirtualItems()[0]?.start ?? 0}px)`,
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualRow) => {
+                const rowIndex = virtualRow.index;
+                const rowItems = filtered.slice(
+                  rowIndex * columnsPerRow,
+                  rowIndex * columnsPerRow + columnsPerRow
+                );
+                return (
+                  <div
+                    key={virtualRow.key}
+                    data-index={virtualRow.index}
+                    ref={(node) => virtualizer.measureElement(node)}
+                    className="contents"
+                  >
+                    {rowItems.map((item) => (
+                      <div key={item._id}>
+                        <SavedItemCard
+                          item={item}
+                          onOpen={() =>
+                            navigate({
+                              to: "/entries/$entryId",
+                              params: { entryId: item._id },
+                            })
+                          }
+                          onMove={(id) => setMovingItemId(id)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          </div>
         </div>
       )}
 
-      {movingTweetId ? (
+      {movingItemId ? (
         <FolderPicker
-          tweetId={movingTweetId}
-          onClose={() => setMovingTweetId(null)}
+          itemId={movingItemId}
+          onClose={() => setMovingItemId(null)}
         />
       ) : null}
     </AppLayout>

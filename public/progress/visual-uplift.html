@@ -1,0 +1,2034 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Collectr Visual Uplift</title>
+    <meta
+      name="description"
+      content="Roadmap, moodboard, component library plan, and HTML mock system for evolving Collectr into a slick, motion-led brand."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #c7cfc2;
+        --bg-deep: #b5beb0;
+        --panel: rgba(251, 252, 248, 0.85);
+        --panel-strong: rgba(246, 248, 242, 0.95);
+        --ink: #191816;
+        --muted: #615b54;
+        --line: rgba(31, 27, 24, 0.12);
+        --line-strong: rgba(31, 27, 24, 0.2);
+        --charcoal: #1f1e1c;
+        --charcoal-2: #2a2927;
+        --charcoal-3: #383633;
+        --coral: #fc6b55;
+        --violet: #7b81ff;
+        --butter: #f4ce6a;
+        --sky: #aae8f1;
+        --mint: #d2ddd0;
+        --rose: #f7c4b8;
+        --shadow: 0 24px 80px rgba(28, 23, 18, 0.12);
+        --shadow-strong: 0 30px 120px rgba(28, 23, 18, 0.3);
+        --radius-xl: 38px;
+        --radius-lg: 32px;
+        --radius-md: 24px;
+        --radius-sm: 16px;
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Aptos, "Helvetica Neue", Arial, sans-serif;
+        background:
+          radial-gradient(circle at top left, #eef4eb 0%, var(--bg) 36%, var(--bg-deep) 100%);
+        color: var(--ink);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      ul,
+      li,
+      pre {
+        margin: 0;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      .display,
+      .metric-card strong,
+      .type-sample,
+      .tile strong,
+      .screen-title {
+        font-family: "Arial Narrow", "Aptos Narrow", "Helvetica Neue Condensed", Impact, "Segoe UI", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        font-weight: 700;
+      }
+
+      p,
+      li,
+      td,
+      th {
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 15px;
+      }
+
+      ul {
+        padding-left: 18px;
+        margin-top: 12px;
+      }
+
+      code,
+      pre,
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      .wrap {
+        width: min(1320px, calc(100% - 28px));
+        margin: 0 auto;
+        padding: 26px 0 80px;
+      }
+
+      .hero,
+      .section {
+        position: relative;
+        overflow: hidden;
+        padding: clamp(22px, 3vw, 34px);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-xl);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.64), var(--panel));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .section {
+        margin-top: 18px;
+      }
+
+      .hero::before,
+      .section::before {
+        content: "";
+        position: absolute;
+        left: -40px;
+        bottom: -78px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 125, 103, 0.18), rgba(255, 125, 103, 0));
+        pointer-events: none;
+      }
+
+      .hero::after,
+      .section::after {
+        content: "";
+        position: absolute;
+        right: -70px;
+        top: -70px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(114, 116, 250, 0.14), rgba(114, 116, 250, 0));
+        pointer-events: none;
+      }
+
+      .eyebrow,
+      .section-tag,
+      .phase-label,
+      .pill,
+      .token-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 30px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line-strong);
+        background: rgba(255, 255, 255, 0.52);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .pill.dark,
+      .token-chip.dark {
+        background: rgba(34, 30, 27, 0.92);
+        border-color: rgba(255, 255, 255, 0.08);
+        color: #f5f1eb;
+      }
+
+      .pill.coral,
+      .token-chip.coral {
+        background: var(--coral);
+        border-color: transparent;
+        color: #2a1714;
+      }
+
+      .pill.violet,
+      .token-chip.violet {
+        background: var(--violet);
+        border-color: transparent;
+        color: #f7f5ff;
+      }
+
+      .pill.butter,
+      .token-chip.butter {
+        background: var(--butter);
+        border-color: transparent;
+        color: #312719;
+      }
+
+      .pill.sky,
+      .token-chip.sky {
+        background: var(--sky);
+        border-color: transparent;
+        color: #1f1b18;
+      }
+
+      h1 {
+        margin-top: 16px;
+        max-width: 10ch;
+        font-size: clamp(48px, 7vw, 96px);
+        line-height: 0.92;
+      }
+
+      h2 {
+        margin-top: 14px;
+        max-width: 14ch;
+        font-size: clamp(30px, 4vw, 54px);
+        line-height: 0.94;
+      }
+
+      h3 {
+        font-size: 24px;
+        line-height: 0.98;
+      }
+
+      .main-copy,
+      .section-copy {
+        margin-top: 16px;
+        max-width: 72ch;
+        font-size: 17px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 18px;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.66);
+        font-weight: 700;
+        transition: transform 180ms var(--ease-out), background 180ms var(--ease-out);
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+      }
+
+      .button.primary {
+        border-color: transparent;
+        background: var(--ink);
+        color: #f5f1eb;
+      }
+
+      .hero-grid,
+      .grid-2,
+      .code-wrap,
+      .demo-grid,
+      .screen-grid,
+      .done-grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1.04fr 0.96fr;
+        align-items: stretch;
+      }
+
+      .grid-2,
+      .code-wrap {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero-notes,
+      .mood-grid,
+      .library-grid,
+      .file-targets,
+      .motion-strip,
+      .roadmap,
+      .collection-row,
+      .stat-grid,
+      .demo-nav,
+      .stage-nav,
+      .timeline,
+      .stack-sample {
+        display: grid;
+        gap: 12px;
+      }
+
+      .hero-notes {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 22px;
+      }
+
+      .note-card,
+      .panel,
+      .mood-card,
+      .compare-card,
+      .mini-card,
+      .library-card,
+      .phase-card,
+      .screen-card,
+      .done-card {
+        position: relative;
+        overflow: hidden;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.54);
+      }
+
+      .note-card h3,
+      .mood-card h3,
+      .library-card h3,
+      .phase-card h3,
+      .done-card h3,
+      .screen-card h3 {
+        margin-bottom: 8px;
+      }
+
+      .hero-stage {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1.18fr 0.82fr;
+        gap: 18px;
+        min-height: 720px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: calc(var(--radius-xl) - 6px);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(246, 248, 242, 0.76));
+      }
+
+      .hero-stage::before {
+        content: "";
+        position: absolute;
+        inset: 18px;
+        border-radius: 28px;
+        border: 1px dashed rgba(31, 27, 24, 0.08);
+        pointer-events: none;
+      }
+
+      .stage-board,
+      .demo-browser {
+        overflow: hidden;
+        border-radius: 30px;
+        background: var(--charcoal);
+        color: #f5f1eb;
+        box-shadow: var(--shadow-strong);
+      }
+
+      .stage-board {
+        align-self: stretch;
+        animation: float 7s ease-in-out infinite;
+      }
+
+      .stage-top,
+      .browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .dot,
+      .browser-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .dot.coral {
+        background: var(--coral);
+      }
+
+      .dot.butter {
+        background: var(--butter);
+      }
+
+      .dot.sky {
+        background: var(--sky);
+      }
+
+      .stage-url,
+      .browser-url {
+        flex: 1;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.62);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .stage-body {
+        display: grid;
+        grid-template-columns: 86px 1fr;
+        min-height: 540px;
+      }
+
+      .stage-sidebar {
+        padding: 16px 10px;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .logo-orb,
+      .logo-mark {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+        background: var(--sky);
+        color: var(--ink);
+        font-size: 26px;
+        font-weight: 800;
+      }
+
+      .stage-nav {
+        margin-top: 18px;
+      }
+
+      .nav-pill,
+      .demo-nav a {
+        padding: 11px 12px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 12px;
+      }
+
+      .nav-pill.active,
+      .demo-nav a.active {
+        background: var(--sky);
+        color: var(--ink);
+      }
+
+      .stage-main,
+      .demo-main {
+        display: grid;
+        gap: 16px;
+        align-content: start;
+        padding: 18px;
+      }
+
+      .stage-banner,
+      .demo-banner,
+      .insight-card,
+      .demo-card,
+      .assist-card,
+      .metric-card,
+      .tile,
+      .timeline-item,
+      .collection-tile,
+      .search-band,
+      .mobile-dock,
+      .stack-card {
+        border-radius: 24px;
+      }
+
+      .stage-banner,
+      .demo-banner {
+        padding: 22px;
+      }
+
+      .stage-banner.coral,
+      .demo-banner {
+        background: linear-gradient(135deg, var(--coral), #ff8d78);
+        color: #2a1714;
+      }
+
+      .stage-banner h3,
+      .demo-banner h3 {
+        font-size: clamp(34px, 4vw, 68px);
+        max-width: 8ch;
+      }
+
+      .stage-banner p,
+      .demo-banner p,
+      .metric-card p,
+      .tile p,
+      .screen-card p,
+      .timeline-item p,
+      .collection-tile p {
+        margin-top: 10px;
+      }
+
+      .stage-banner p,
+      .demo-banner p,
+      .metric-card p,
+      .tile p,
+      .timeline-item p,
+      .collection-tile p {
+        color: inherit;
+        opacity: 0.8;
+      }
+
+      .banner-meta,
+      .pill-row,
+      .browser-dots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .stage-blocks {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+
+      .insight-card,
+      .demo-card,
+      .assist-card,
+      .metric-card,
+      .tile,
+      .screen-card,
+      .collection-tile,
+      .timeline-item,
+      .stack-card {
+        padding: 18px;
+      }
+
+      .insight-card.violet,
+      .demo-card.violet,
+      .theme-violet {
+        background: var(--violet);
+        color: #f6f4ff;
+      }
+
+      .insight-card.dark,
+      .demo-card.dark,
+      .assist-card,
+      .theme-charcoal,
+      .search-band,
+      .mobile-dock,
+      .stack-card.dark {
+        background: var(--charcoal-2);
+        color: #f5f1eb;
+      }
+
+      .demo-card.sky,
+      .theme-sky {
+        background: var(--sky);
+        color: #1f1b18;
+      }
+
+      .demo-card.butter,
+      .theme-butter,
+      .stack-card.butter {
+        background: var(--butter);
+        color: #312719;
+      }
+
+      .theme-coral,
+      .stack-card.coral {
+        background: var(--coral);
+        color: #2a1714;
+      }
+
+      .theme-mint,
+      .stack-card.mint {
+        background: var(--mint);
+        color: #1f1b18;
+      }
+
+      .chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        height: 126px;
+        margin-top: 16px;
+      }
+
+      .bar {
+        flex: 1;
+        min-width: 22px;
+        border-radius: 999px 999px 18px 18px;
+        background: rgba(255, 255, 255, 0.82);
+        transform-origin: bottom center;
+        animation: bar-rise 900ms var(--ease-out) both;
+      }
+
+      .demo-card.sky .bar,
+      .theme-mint .bar,
+      .theme-butter .bar,
+      .theme-sky .bar,
+      .stage-banner .bar,
+      .theme-coral .bar {
+        background: rgba(31, 27, 24, 0.78);
+      }
+
+      .bar:nth-child(2) {
+        animation-delay: 80ms;
+      }
+
+      .bar:nth-child(3) {
+        animation-delay: 160ms;
+      }
+
+      .bar:nth-child(4) {
+        animation-delay: 240ms;
+      }
+
+      .bar:nth-child(5) {
+        animation-delay: 320ms;
+      }
+
+      .bar:nth-child(6) {
+        animation-delay: 400ms;
+      }
+
+      .dash-list,
+      .signal-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .list-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 13px;
+      }
+
+      .list-row span:last-child,
+      .signal-list span:last-child {
+        color: rgba(255, 255, 255, 0.56);
+      }
+
+      .phone-column {
+        display: grid;
+        gap: 18px;
+        align-self: center;
+      }
+
+      .phone {
+        position: relative;
+        width: 100%;
+        max-width: 290px;
+        margin-left: auto;
+        padding: 12px;
+        border: 4px solid #4a4f56;
+        border-radius: 46px;
+        background: #32373e;
+        box-shadow: 0 30px 80px rgba(16, 13, 11, 0.4);
+      }
+
+      .phone::before {
+        content: "";
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        width: 100px;
+        height: 26px;
+        border-radius: 999px;
+        background: #000;
+        transform: translateX(-50%);
+        z-index: 10;
+      }
+
+      .phone-screen {
+        position: relative;
+        min-height: 520px;
+        padding: 64px 16px 16px;
+        border-radius: 34px;
+        overflow: hidden;
+      }
+
+      .screen-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .circle-button {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.84);
+      }
+
+      .screen-title,
+      .type-sample {
+        margin-top: 14px;
+        font-size: clamp(30px, 4vw, 54px);
+        line-height: 0.92;
+      }
+
+      .type-sample {
+        color: var(--ink);
+      }
+
+      .search-band {
+        margin-top: 14px;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.66);
+      }
+
+      .tile strong {
+        display: block;
+        font-size: 28px;
+        line-height: 0.94;
+      }
+
+      .mobile-dock {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .dock-dot {
+        height: 18px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .dock-dot.active {
+        background: var(--sky);
+      }
+
+      .mood-grid,
+      .library-grid,
+      .file-targets,
+      .done-grid {
+        margin-top: 18px;
+      }
+
+      .mood-grid,
+      .library-grid,
+      .done-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .file-targets,
+      .motion-strip,
+      .stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .swatch {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .swatch.sage {
+        background: var(--bg);
+      }
+
+      .swatch.charcoal {
+        background: var(--charcoal);
+      }
+
+      .swatch.coral {
+        background: var(--coral);
+      }
+
+      .swatch.violet {
+        background: var(--violet);
+      }
+
+      .swatch.butter {
+        background: var(--butter);
+      }
+
+      .swatch.sky {
+        background: var(--sky);
+      }
+
+      .compare-grid {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .compare-card.current {
+        background: rgba(44, 39, 35, 0.05);
+      }
+
+      .compare-card.target {
+        background: linear-gradient(180deg, rgba(255, 125, 103, 0.16), rgba(255, 255, 255, 0.52));
+      }
+
+      .matrix-wrap {
+        margin-top: 18px;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.56);
+      }
+
+      table {
+        width: 100%;
+        min-width: 780px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 16px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line);
+      }
+
+      th {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .code-card {
+        overflow: hidden;
+        padding: 18px;
+        border-radius: 24px;
+        background: rgba(30, 26, 24, 0.94);
+        color: rgba(245, 242, 237, 0.92);
+      }
+
+      .code-card h3 {
+        margin-bottom: 10px;
+      }
+
+      .code-card p,
+      .code-card li {
+        color: rgba(245, 242, 237, 0.72);
+      }
+
+      .code-card pre {
+        white-space: pre-wrap;
+        line-height: 1.7;
+        font-size: 13px;
+      }
+
+      .roadmap {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        margin-top: 20px;
+      }
+
+      .phase-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .phase-card p {
+        font-size: 14px;
+      }
+
+      .motion-strip {
+        margin-top: 18px;
+      }
+
+      .motion-pill {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(34, 30, 27, 0.94);
+        color: #f5f1eb;
+      }
+
+      .motion-pill span {
+        display: block;
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .motion-pill strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 16px;
+      }
+
+      .demo-browser {
+        margin-top: 20px;
+      }
+
+      .demo-shell {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 740px;
+      }
+
+      .demo-rail {
+        display: grid;
+        align-content: start;
+        gap: 18px;
+        padding: 18px;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .logo-stack {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo-stack p {
+        color: rgba(255, 255, 255, 0.68);
+      }
+
+      .demo-nav {
+        gap: 10px;
+      }
+
+      .assist-card h3,
+      .demo-card h3,
+      .metric-card strong,
+      .screen-card h3,
+      .done-card h3 {
+        color: inherit;
+      }
+
+      .metric-card strong {
+        display: block;
+        font-size: 38px;
+        line-height: 0.92;
+      }
+
+      .demo-banner {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: 1.15fr 0.85fr;
+      }
+
+      .demo-grid {
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+
+      .demo-column {
+        display: grid;
+        gap: 18px;
+      }
+
+      .collection-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 16px;
+      }
+
+      .collection-tile {
+        min-height: 112px;
+        background: rgba(255, 255, 255, 0.22);
+      }
+
+      .timeline {
+        margin-top: 16px;
+      }
+
+      .timeline-item {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .screen-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 20px;
+        align-items: start;
+      }
+
+      .screen-card .phone {
+        max-width: 320px;
+        margin: 0 auto;
+        transform: none;
+      }
+
+      .screen-card p {
+        margin-top: 10px;
+      }
+
+      .done-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-top: 20px;
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        font-size: 14px;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      @keyframes bar-rise {
+        from {
+          transform: scaleY(0.35);
+          opacity: 0.5;
+        }
+        to {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 1180px) {
+        .hero-grid,
+        .grid-2,
+        .code-wrap,
+        .demo-grid,
+        .screen-grid,
+        .done-grid,
+        .roadmap,
+        .motion-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-stage,
+        .demo-shell,
+        .demo-banner {
+          grid-template-columns: 1fr;
+        }
+
+        .mood-grid,
+        .library-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .hero-notes {
+          grid-template-columns: 1fr;
+        }
+
+        .phone-column {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          align-items: start;
+        }
+
+        .phone,
+        .screen-card .phone {
+          max-width: 100%;
+        }
+
+        .phone:first-child,
+        .phone:last-child {
+          transform: none;
+        }
+
+        .demo-rail {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          border-right: 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+      }
+
+      @media (max-width: 760px) {
+        .wrap {
+          width: calc(100% - 16px);
+          padding-top: 18px;
+        }
+
+        .hero,
+        .section {
+          padding: 20px;
+          border-radius: 28px;
+        }
+
+        .hero-stage,
+        .stage-body,
+        .stage-blocks,
+        .phone-column,
+        .mood-grid,
+        .library-grid,
+        .file-targets,
+        .stat-grid,
+        .collection-row,
+        .done-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stage-sidebar {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          border-right: 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .stage-nav,
+        .demo-nav {
+          display: flex;
+          flex-wrap: wrap;
+        }
+
+        .stage-main,
+        .demo-main {
+          padding: 16px;
+        }
+
+        .browser-bar,
+        .stage-top {
+          flex-wrap: wrap;
+        }
+
+        .browser-url,
+        .stage-url {
+          width: 100%;
+        }
+
+        .demo-rail {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Collectr Visual Uplift</span>
+            <h1>Roadmap, moodboard, and mock system for a slick motion-led brand.</h1>
+            <p class="main-copy">
+              Collectr already has the right product skeleton: a clear data model, a solid TanStack shell,
+              shadcn-style primitives, and motion libraries in the stack. What it lacks is a sharp point of
+              view. The target direction is soft-sage negative space, dark ink structure, loud coral and
+              violet utility cards, capsule controls, poster-like mobile screens, and motion that makes the
+              interface feel intentionally choreographed instead of merely functional.
+            </p>
+            <div class="actions">
+              <a class="button primary" href="#roadmap">Open Roadmap</a>
+              <a class="button" href="#library">Component Library Plan</a>
+              <a class="button" href="#demo-page">Jump To Demo Page</a>
+            </div>
+            <div class="hero-notes">
+              <article class="note-card">
+                <h3>Brand Thesis</h3>
+                <p>Operational intelligence meets playful editorial software. Serious workflow, not sterile chrome.</p>
+              </article>
+              <article class="note-card">
+                <h3>Visual Cue</h3>
+                <p>Pale sage canvas, charcoal frames, coral and violet emphasis, butter and sky for utility contrast.</p>
+              </article>
+              <article class="note-card">
+                <h3>Rule</h3>
+                <p>Use third-party kits as raw material only. Every adopted component must be wrapped behind Collectr APIs.</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="hero-stage">
+            <div class="stage-board">
+              <div class="stage-top">
+                <span class="dot coral"></span>
+                <span class="dot butter"></span>
+                <span class="dot sky"></span>
+                <span class="stage-url">collectr / command-center</span>
+              </div>
+              <div class="stage-body">
+                <aside class="stage-sidebar">
+                  <div class="logo-orb">C</div>
+                  <div class="stage-nav">
+                    <div class="nav-pill active">Inbox</div>
+                    <div class="nav-pill">Pulse</div>
+                    <div class="nav-pill">Collections</div>
+                    <div class="nav-pill">People</div>
+                  </div>
+                </aside>
+                <div class="stage-main">
+                  <section class="stage-banner coral">
+                    <div class="banner-meta">
+                      <span class="pill">Curator Mode</span>
+                      <span class="pill dark">07 Priorities</span>
+                    </div>
+                    <h3>Collect signal, not clutter.</h3>
+                    <p>
+                      The first signed-in view should feel like a branded command surface. Search, triage,
+                      and collection management need visible hierarchy before the user reads a single label.
+                    </p>
+                  </section>
+
+                  <div class="stage-blocks">
+                    <article class="insight-card violet">
+                      <span class="pill dark">Weekly Intake</span>
+                      <div class="chart" aria-hidden="true">
+                        <div class="bar" style="height: 42%;"></div>
+                        <div class="bar" style="height: 62%;"></div>
+                        <div class="bar" style="height: 79%;"></div>
+                        <div class="bar" style="height: 56%;"></div>
+                        <div class="bar" style="height: 72%;"></div>
+                        <div class="bar" style="height: 88%;"></div>
+                      </div>
+                      <p>Charts should feel like bright editorial posters instead of generic dashboard filler.</p>
+                    </article>
+
+                    <article class="insight-card dark">
+                      <span class="pill sky">Action Queue</span>
+                      <div class="dash-list">
+                        <div class="list-row"><span>Wrap source badges</span><span>Today</span></div>
+                        <div class="list-row"><span>Upgrade saved-item card</span><span>Next</span></div>
+                        <div class="list-row"><span>Ship animated shell</span><span>Week 2</span></div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+                        <div class="phone-column">
+              <div class="phone" style="transform: translateY(24px) scale(0.95);">
+                <div class="phone-screen theme-charcoal">
+                  <div class="screen-header" style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 999px; margin-top: -12px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <div style="width: 24px; height: 24px; border-radius: 999px; background: var(--coral);"></div>
+                      <span style="font-size: 13px; color: #fff;">Hi, Hanna!</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                      <span class="circle-button" style="width: 32px; height: 32px; background: #fff;"></span>
+                      <span class="circle-button" style="width: 32px; height: 32px; background: #fff;"></span>
+                    </div>
+                  </div>
+                  
+                  <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 16px; border-radius: 999px; margin-bottom: 24px; color: #000; font-weight: 600;">
+                    <span>The Daily Grind, NY</span>
+                    <span style="background: #000; color: #fff; width: 24px; height: 24px; border-radius: 999px; display: flex; align-items: center; justify-content: center;">v</span>
+                  </div>
+
+                  <div class="tile" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 16px; border-radius: 28px; display: flex; gap: 16px; margin-bottom: 16px;">
+                    <div style="width: 48px; height: 48px; background: var(--butter); border-radius: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">!</div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <strong style="font-size: 20px; line-height: 1;">STABILIZING<br>LABOR COST</strong>
+                        <span style="background: #fff; color: #000; width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center;">↗</span>
+                      </div>
+                      <p style="font-size: 12px; line-height: 1.4; color: rgba(255,255,255,0.6);">Approve critical alerts and check Inventory Risk. Shift ends in <span style="color: var(--butter);">2:59:12</span> hours.</p>
+                    </div>
+                  </div>
+
+                  <div class="tile theme-violet" style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                      <strong style="font-size: 28px; line-height: 0.9;">VENUE<br>CAPACITY</strong>
+                      <span class="pill" style="background: rgba(255,255,255,0.2); border: none; color: #fff; font-weight: normal; text-transform: lowercase;">this week v</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 24px; font-size: 11px; font-weight: bold; opacity: 0.8;">
+                      <span>Mon</span><span>Tue</span><span>Wen</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; font-weight: bold;">
+                      <div style="width: 24px; height: 24px; border-radius: 999px; background: #fff; color: var(--violet); display: flex; align-items: center; justify-content: center;">78%</div>
+                      <div style="width: 24px; height: 24px; border-radius: 999px; background: #fff; color: var(--violet); display: flex; align-items: center; justify-content: center;">82%</div>
+                      <div style="width: 24px; height: 24px; border-radius: 999px; background: #000; color: #fff; display: flex; align-items: center; justify-content: center;">91%</div>
+                      <div style="width: 24px; height: 24px; border-radius: 999px; background: #fff; color: var(--violet); display: flex; align-items: center; justify-content: center;">88%</div>
+                      <div style="width: 24px; height: 24px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center;">95%</div>
+                      <div style="width: 24px; height: 24px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center;">93%</div>
+                      <div style="width: 24px; height: 24px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center;">70%</div>
+                    </div>
+
+                    <div style="height: 80px; position: relative; margin-top: 16px; border-bottom: 1px dashed rgba(255,255,255,0.3);">
+                      <svg width="100%" height="100%" viewBox="0 0 200 80" preserveAspectRatio="none">
+                        <path d="M0,60 L30,50 L60,40 L90,10 L120,40 L150,60 L200,50" fill="none" stroke="var(--coral)" stroke-width="3"/>
+                        <circle cx="30" cy="50" r="4" fill="var(--coral)"/>
+                        <circle cx="60" cy="40" r="4" fill="var(--coral)"/>
+                        <circle cx="90" cy="10" r="4" fill="var(--coral)"/>
+                      </svg>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 16px; font-size: 10px; font-weight: bold; opacity: 0.8;">
+                      <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 999px; background: var(--coral);"></span> Astoria</span>
+                      <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 999px; background: var(--butter);"></span> Long Island City</span>
+                    </div>
+                  </div>
+
+                  <div class="mobile-dock" style="background: rgba(255,255,255,0.05); border-radius: 999px; padding: 6px; margin-top: 16px;">
+                    <div style="background: var(--sky); border-radius: 999px; height: 32px; display: flex; align-items: center; justify-content: center;">⌂</div>
+                    <div style="height: 32px; display: flex; align-items: center; justify-content: center; opacity: 0.5;">📈</div>
+                    <div style="height: 32px; display: flex; align-items: center; justify-content: center; opacity: 0.5;">📁</div>
+                    <div style="height: 32px; display: flex; align-items: center; justify-content: center; opacity: 0.5;">⚙</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="phone" style="transform: translateX(-32px) scale(0.95);">
+                <div class="phone-screen theme-coral">
+                  <div class="screen-header" style="justify-content: flex-start; gap: 16px;">
+                    <span class="circle-button" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); color: #000; font-weight: bold;">←</span>
+                    <span class="screen-title" style="margin: 0; font-size: 32px;">WORKERS</span>
+                    <span class="pill" style="margin-left: auto; background: rgba(0,0,0,0.1); border: none; color: #000; font-weight: normal; text-transform: lowercase;">all v</span>
+                  </div>
+                  
+                  <div style="height: 180px; margin: 24px 0; background: url('https://placehold.co/400x300/fc6b55/000?text=ILLUSTRATION') center/cover; border-radius: 20px;"></div>
+
+                  <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                    <div style="flex: 1; background: rgba(0,0,0,0.1); border-radius: 16px; padding: 12px; display: flex; align-items: baseline; gap: 8px;">
+                      <strong style="font-size: 28px; line-height: 1; color: #000;">64</strong>
+                      <span style="font-size: 11px; color: #000; opacity: 0.6; font-weight: bold;">employees</span>
+                    </div>
+                    <div style="flex: 1; background: rgba(0,0,0,0.1); border-radius: 16px; padding: 12px; display: flex; align-items: baseline; gap: 8px;">
+                      <strong style="font-size: 28px; line-height: 1; color: #000;">3</strong>
+                      <span style="font-size: 11px; color: #000; opacity: 0.6; font-weight: bold;">points</span>
+                    </div>
+                  </div>
+
+                  <div style="background: var(--charcoal); margin: 0 -16px -16px; padding: 24px 16px; min-height: 200px; border-radius: 34px 34px 0 0;">
+                    <div class="search-band" style="background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 999px; margin-top: 0; display: flex; align-items: center; justify-content: space-between;">
+                      <span style="display: flex; align-items: center; gap: 8px;">🔍 Search by name or ID</span>
+                      <span>⚙</span>
+                    </div>
+
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.4); margin: 16px 0 12px; text-transform: uppercase; font-weight: bold;">64 employees found</p>
+
+                    <div style="background: rgba(255,255,255,0.05); border-radius: 24px; padding: 16px; display: flex; gap: 16px; position: relative;">
+                      <div style="width: 48px; height: 48px; background: var(--mint); border-radius: 16px; flex-shrink: 0;"></div>
+                      <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <strong style="font-size: 18px; text-transform: uppercase; color: #fff;">Sarah Chen</strong>
+                          <span style="background: #fff; color: #000; width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center; position: absolute; right: 16px; top: 16px;">↗</span>
+                        </div>
+                        <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); color: var(--butter); font-size: 10px; font-weight: bold; margin: 4px 0 8px;">Lead Server</span>
+                        <p style="font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.4; margin: 0 0 8px;">Responsible for guest satisfa...</p>
+                        <p style="font-size: 10px; color: rgba(255,255,255,0.4); margin: 0;">ID: RCD-4482</p>
+                      </div>
+                      <div style="position: absolute; right: 16px; bottom: 16px; width: 32px; height: 32px; border-radius: 999px; background: var(--coral); color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">+</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section grid-2">
+        <article class="panel">
+          <span class="section-tag">Moodboard</span>
+          <h2>Translate the reference into reusable visual rules.</h2>
+          <div class="mood-grid">
+            <article class="mood-card">
+              <h3>Canvas And Contrast</h3>
+              <p>Let the background breathe. The sage field is not decoration. It gives the product room so the dark shell and bright cards land harder.</p>
+              <div class="swatches">
+                <span class="swatch sage"></span>
+                <span class="swatch charcoal"></span>
+                <span class="swatch coral"></span>
+                <span class="swatch violet"></span>
+                <span class="swatch butter"></span>
+                <span class="swatch sky"></span>
+              </div>
+            </article>
+
+            <article class="mood-card">
+              <h3>Typography Voice</h3>
+              <p>Condensed uppercase for major moments, compact humanist body text for detail, and oversized numerics for metrics that deserve stage presence.</p>
+              <div class="type-sample">Operational timing</div>
+            </article>
+
+            <article class="mood-card">
+              <h3>Surface Grammar</h3>
+              <p>Big radii, capsule filters, floating action circles, strong color blocks, and bottom docks that feel tactile instead of flat.</p>
+              <div class="stack-sample">
+                <div class="stack-card coral">Priority Card</div>
+                <div class="stack-card dark">Search Band</div>
+                <div class="stack-card butter">Collection Tile</div>
+              </div>
+            </article>
+
+            <article class="mood-card">
+              <h3>Motion Cues</h3>
+              <p>Slide, settle, stagger, and lift. The motion language should feel smooth and confident, not bouncy or decorative.</p>
+              <div class="pill-row">
+                <span class="token-chip coral">Dock Glide</span>
+                <span class="token-chip violet">Chart Settle</span>
+                <span class="token-chip sky">List Cascade</span>
+                <span class="token-chip dark">Focus Snap</span>
+              </div>
+            </article>
+
+            <article class="mood-card">
+              <h3>Character Layer</h3>
+              <p>Playful illustration moments can appear in reports, empty states, and onboarding. If custom art is out of scope, abstract mascots and punchy icon clusters still support the same tone.</p>
+              <div class="pill-row">
+                <span class="token-chip butter">Mascot Cards</span>
+                <span class="token-chip coral">Witty Empty States</span>
+                <span class="token-chip sky">Data As Poster</span>
+              </div>
+            </article>
+
+            <article class="mood-card">
+              <h3>Interaction Tone</h3>
+              <p>The product should feel fast, opinionated, and always one move ahead. Search, add, triage, and inspect need clear default pathways.</p>
+              <div class="pill-row">
+                <span class="token-chip">Search First</span>
+                <span class="token-chip">Sticky Actions</span>
+                <span class="token-chip">Source Color Logic</span>
+              </div>
+            </article>
+          </div>
+        </article>
+
+        <article class="panel">
+          <span class="section-tag">Current To Target</span>
+          <h2>Move the app from generic utility shell to branded command deck.</h2>
+          <div class="compare-grid">
+            <article class="compare-card current">
+              <h3>Current UI Risk</h3>
+              <ul>
+                <li>The shell reads as standard muted productivity UI, especially in <span class="mono">Sidebar</span> and <span class="mono">Header</span>.</li>
+                <li><span class="mono">SavedItemCard</span> and <span class="mono">CollectionCard</span> are functional but visually interchangeable.</li>
+                <li>The landing page and signed-in product speak different visual dialects.</li>
+                <li>Motion exists, but it is not yet named, prioritized, or tied to content hierarchy.</li>
+              </ul>
+            </article>
+
+            <article class="compare-card target">
+              <h3>Target Product Feel</h3>
+              <ul>
+                <li>The app opens on a branded command center with urgent tasks, search, and collections in one visual frame.</li>
+                <li>Accent colors map to intent: alert, insight, context, or utility.</li>
+                <li>Marketing, onboarding, and signed-in product use the same token system and shapes.</li>
+                <li>Mobile becomes the visual reference point, with desktop acting like an expanded editorial desk.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="file-targets">
+            <article class="mini-card">
+              <h3>Shell</h3>
+              <p><span class="mono">src/components/layout/AppLayout.tsx</span>, <span class="mono">Sidebar.tsx</span>, <span class="mono">Header.tsx</span>, <span class="mono">MobileBottomNav.tsx</span>.</p>
+            </article>
+
+            <article class="mini-card">
+              <h3>Cards</h3>
+              <p><span class="mono">src/components/saved-item-card.tsx</span>, <span class="mono">collection-card.tsx</span>, <span class="mono">bulk-selection-toolbar.tsx</span>.</p>
+            </article>
+
+            <article class="mini-card">
+              <h3>Capture And Search</h3>
+              <p><span class="mono">command-palette.tsx</span>, <span class="mono">MobileAddDrawer.tsx</span>, <span class="mono">folder-picker.tsx</span>.</p>
+            </article>
+
+            <article class="mini-card">
+              <h3>High-Traffic Routes</h3>
+              <p><span class="mono">src/routes/index.tsx</span>, <span class="mono">search.tsx</span>, <span class="mono">folders.$folderId.tsx</span>, <span class="mono">entries.$entryId.tsx</span>.</p>
+            </article>
+          </div>
+        </article>
+      </section>
+
+      <section id="library" class="section">
+        <span class="section-tag">Base Stack</span>
+        <h2>Build an internal library on top of the requested component sources.</h2>
+        <p class="section-copy">
+          The goal is not to expose five external design languages inside Collectr. The goal is to absorb
+          the strongest parts of each source and normalize them behind one internal API, one token system,
+          and one motion grammar.
+        </p>
+
+        <div class="matrix-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Base kit</th>
+                <th>Role inside Collectr</th>
+                <th>First things to adopt</th>
+                <th>Guardrail</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Shadcn</strong></td>
+                <td>Accessibility backbone and primitive control layer.</td>
+                <td>Button, input, sheet, popover, dropdown, tabs, command, separators.</td>
+                <td>Wrap everything so route code imports Collectr primitives, not raw shadcn copies.</td>
+              </tr>
+              <tr>
+                <td><strong>Reactbits</strong></td>
+                <td>Micro-interactions and motion-led wrappers.</td>
+                <td>Text reveal, list stagger, magnetic CTA, cursor-aware accents, hover reveals.</td>
+                <td>Use sparingly and tie motion to hierarchy, not decoration.</td>
+              </tr>
+              <tr>
+                <td><strong>Aceternity</strong></td>
+                <td>Ambient hero patterns and spotlight moments.</td>
+                <td>Background beams, spotlight cards, animated borders, staged marketing sections.</td>
+                <td>Keep the palette on-brand and avoid generic neon-dark defaults.</td>
+              </tr>
+              <tr>
+                <td><strong>Coss UI</strong></td>
+                <td>Operational widgets and dense utility blocks.</td>
+                <td>KPI strips, segmented controls, analytics cards, status chips, data-focused layouts.</td>
+                <td>Retint surfaces and match Collectr spacing, radius, and type before shipping.</td>
+              </tr>
+              <tr>
+                <td><strong>Cult UI</strong></td>
+                <td>Editorial brand flavor and launch surfaces.</td>
+                <td>Poster-style hero modules, statement cards, social proof blocks, expressive badges.</td>
+                <td>Do not let marketing blocks diverge from the signed-in product language.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="library-grid">
+          <article class="library-card">
+            <h3>Foundations</h3>
+            <p>Color tokens, type scale, spacing rhythm, radius, elevation, border logic, and motion curves all live here first.</p>
+          </article>
+          <article class="library-card">
+            <h3>Primitives</h3>
+            <p>Button, pill, filter chip, input, surface, icon tile, avatar, sheet, popover, divider, and empty-state frame.</p>
+          </article>
+          <article class="library-card">
+            <h3>Navigation</h3>
+            <p>Brand sidebar, header command band, mobile bottom dock, action drawer, and source-aware tabs.</p>
+          </article>
+          <article class="library-card">
+            <h3>Signal Cards</h3>
+            <p>Saved item card, collection tile, insight card, people row, report card, source badge, and summary capsule.</p>
+          </article>
+          <article class="library-card">
+            <h3>Scenes</h3>
+            <p>Home command center, collection theater, entry spotlight, onboarding set, marketing hero, and demo gallery.</p>
+          </article>
+          <article class="library-card">
+            <h3>Motion Presets</h3>
+            <p>Page reveal, list cascade, card lift, drawer glide, number tick, chart settle, and focus-snap transitions.</p>
+          </article>
+        </div>
+
+        <div class="code-wrap">
+          <article class="code-card">
+            <h3>Proposed Internal Library Tree</h3>
+            <pre>src/components/system/
+  foundations/
+    color-tokens.ts
+    motion-tokens.ts
+    typography-tokens.ts
+  primitives/
+    button.tsx
+    pill.tsx
+    input.tsx
+    surface.tsx
+    sheet.tsx
+  patterns/
+    brand-sidebar.tsx
+    command-band.tsx
+    signal-card.tsx
+    collection-tile.tsx
+    source-badge.tsx
+  scenes/
+    home-command-center.tsx
+    collections-theater.tsx
+    entry-spotlight.tsx
+    demo-page.tsx
+  motion/
+    reveal.tsx
+    stagger.tsx
+    magnetic.tsx
+    chart-settle.tsx</pre>
+          </article>
+
+          <article class="code-card">
+            <h3>Current Files To Absorb First</h3>
+            <ul>
+              <li><span class="mono">src/styles.css</span> becomes the canonical token layer.</li>
+              <li><span class="mono">src/components/ui/*</span> becomes wrapped primitive inventory.</li>
+              <li><span class="mono">src/components/layout/*</span> becomes the branded shell system.</li>
+              <li><span class="mono">saved-item-card.tsx</span> and <span class="mono">collection-card.tsx</span> become signal-card variants.</li>
+              <li><span class="mono">command-palette.tsx</span> becomes the search command center proof point.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="roadmap" class="section">
+        <span class="section-tag">Roadmap</span>
+        <h2>Six-week path from generic UI to branded motion system.</h2>
+        <p class="section-copy">
+          This roadmap is sequenced to minimize churn. Foundations first, shell second, reusable cards
+          third, demo route fourth, polish and rollout last.
+        </p>
+
+        <div class="roadmap">
+          <article class="phase-card">
+            <span class="phase-label">Week 1</span>
+            <h3>Freeze The Brand DNA</h3>
+            <p>Turn the reference into tokens, surface rules, motion presets, and content color semantics.</p>
+            <ul>
+              <li>Rewrite the design tokens in <span class="mono">src/styles.css</span>.</li>
+              <li>Define source-color mapping and chart palette rules.</li>
+              <li>Use this HTML route as the art-direction source of truth.</li>
+            </ul>
+          </article>
+
+          <article class="phase-card">
+            <span class="phase-label">Week 2</span>
+            <h3>Rebuild The Shell</h3>
+            <p>Give navigation, search, and capture one cohesive command-band language across desktop and mobile.</p>
+            <ul>
+              <li>Upgrade <span class="mono">AppLayout</span>, <span class="mono">Sidebar</span>, and <span class="mono">Header</span>.</li>
+              <li>Restyle <span class="mono">MobileBottomNav</span> and <span class="mono">MobileAddDrawer</span>.</li>
+              <li>Introduce named entrance and drawer motion presets.</li>
+            </ul>
+          </article>
+
+          <article class="phase-card">
+            <span class="phase-label">Weeks 3-4</span>
+            <h3>Ship The Internal Library</h3>
+            <p>Wrap raw external components and create Collectr-owned cards, filters, tiles, and surfaces.</p>
+            <ul>
+              <li>Convert raw primitives into <span class="mono">system/primitives</span>.</li>
+              <li>Refactor <span class="mono">SavedItemCard</span> and <span class="mono">CollectionCard</span>.</li>
+              <li>Create branded empty states, skeletons, and source badges.</li>
+            </ul>
+          </article>
+
+          <article class="phase-card">
+            <span class="phase-label">Week 5</span>
+            <h3>Launch The Demo Page</h3>
+            <p>Build one internal proving ground where marketing and signed-in product language meet.</p>
+            <ul>
+              <li>Create a demo route that shows the home shell, collections, detail view, and command band.</li>
+              <li>Use motion to validate hover, entry, and chart behavior in context.</li>
+              <li>Stress-test the library before broad route migration.</li>
+            </ul>
+          </article>
+
+          <article class="phase-card">
+            <span class="phase-label">Week 6</span>
+            <h3>Polish And Roll Out</h3>
+            <p>Finish accessibility, performance, and adoption rules so the visual reform holds under real usage.</p>
+            <ul>
+              <li>Respect reduced motion and keyboard focus everywhere.</li>
+              <li>Verify core transitions stay smooth on mobile hardware.</li>
+              <li>Block new screens from importing raw third-party blocks directly.</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="motion-strip">
+          <article class="motion-pill"><span>Page reveal</span><strong>280ms</strong></article>
+          <article class="motion-pill"><span>Card lift</span><strong>140ms</strong></article>
+          <article class="motion-pill"><span>Drawer glide</span><strong>360ms</strong></article>
+          <article class="motion-pill"><span>List cascade</span><strong>35ms stagger</strong></article>
+          <article class="motion-pill"><span>Chart settle</span><strong>480ms</strong></article>
+        </div>
+      </section>
+
+      <section id="demo-page" class="section">
+        <span class="section-tag">Demo Page</span>
+        <h2>One branded proving ground before the full route migration.</h2>
+        <p class="section-copy">
+          The demo page should be an internal gallery route that shows the new shell, color logic, motion,
+          and component quality in one scroll. It becomes the fastest place to review polish before the app
+          is migrated screen by screen.
+        </p>
+
+        <div class="demo-browser">
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <span style="background: var(--coral);"></span>
+              <span style="background: var(--butter);"></span>
+              <span style="background: var(--sky);"></span>
+            </div>
+            <div class="browser-url">collectr.local/demo/brand-command-center</div>
+            <span class="pill dark">Motion On</span>
+          </div>
+
+          <div class="demo-shell">
+            <aside class="demo-rail">
+              <div class="logo-stack">
+                <div class="logo-mark">C</div>
+                <div>
+                  <h3>Collectr</h3>
+                  <p>Signal library</p>
+                </div>
+              </div>
+
+              <nav class="demo-nav">
+                <a class="active" href="#demo-page">Command Center</a>
+                <a href="#html-mocks">Collections</a>
+                <a href="#html-mocks">Entry Spotlight</a>
+                <a href="#library">Component Index</a>
+              </nav>
+
+              <article class="assist-card">
+                <span class="pill sky">AI Ops Lead</span>
+                <p style="margin-top: 10px;">Strong summaries, source badges, and action queues should live in the same visual family as the navigation.</p>
+              </article>
+            </aside>
+
+            <div class="demo-main">
+              <section class="demo-banner">
+                <div>
+                  <div class="pill-row">
+                    <span class="pill">Curator Mode</span>
+                    <span class="pill dark">184 Active Saves</span>
+                  </div>
+                  <h3>Collect signal, not clutter.</h3>
+                  <p>
+                    The signed-in product and the marketing face of the app should look like they came from
+                    the same studio: expressive, fast, and unmistakably Collectr.
+                  </p>
+                </div>
+
+                <div class="stat-grid">
+                  <article class="metric-card">
+                    <strong>12</strong>
+                    <p>Hot collections ready for triage.</p>
+                  </article>
+                  <article class="metric-card">
+                    <strong>2m</strong>
+                    <p>Average time to file a saved link.</p>
+                  </article>
+                  <article class="metric-card">
+                    <strong>4</strong>
+                    <p>Source modes with distinct accent behavior.</p>
+                  </article>
+                  <article class="metric-card">
+                    <strong>1</strong>
+                    <p>Shared component language across product and marketing.</p>
+                  </article>
+                </div>
+              </section>
+
+              <div class="demo-grid">
+                <div class="demo-column">
+                  <article class="demo-card violet">
+                    <span class="pill dark">Weekly Capture Rhythm</span>
+                    <div class="chart" aria-hidden="true">
+                      <div class="bar" style="height: 36%;"></div>
+                      <div class="bar" style="height: 58%;"></div>
+                      <div class="bar" style="height: 74%;"></div>
+                      <div class="bar" style="height: 84%;"></div>
+                      <div class="bar" style="height: 66%;"></div>
+                      <div class="bar" style="height: 90%;"></div>
+                    </div>
+                    <p>Animated data blocks should feel bright, clear, and useful, not ornamental.</p>
+                  </article>
+
+                  <article class="demo-card butter">
+                    <span class="pill dark">Collection Clusters</span>
+                    <div class="collection-row">
+                      <div class="collection-tile">
+                        <strong>Design</strong>
+                        <p>Poster references and motion details.</p>
+                      </div>
+                      <div class="collection-tile">
+                        <strong>Ops</strong>
+                        <p>Reports, workflows, and action models.</p>
+                      </div>
+                      <div class="collection-tile">
+                        <strong>People</strong>
+                        <p>Talent, founders, and source notes.</p>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+
+                <div class="demo-column">
+                  <article class="demo-card dark">
+                    <span class="pill coral">Action Queue</span>
+                    <div class="timeline">
+                      <div class="timeline-item">
+                        <strong>Wrap command search</strong>
+                        <p>Make the palette feel like a brand moment, not a utility modal.</p>
+                      </div>
+                      <div class="timeline-item">
+                        <strong>Upgrade collection tiles</strong>
+                        <p>Use color blocks and stronger type to separate intent at a glance.</p>
+                      </div>
+                      <div class="timeline-item">
+                        <strong>Publish demo gallery</strong>
+                        <p>Give the team one stable route for review and iteration.</p>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="demo-card sky">
+                    <span class="pill dark">Source Mix</span>
+                    <div class="pill-row" style="margin-top: 16px;">
+                      <span class="pill dark">X</span>
+                      <span class="pill dark">Reddit</span>
+                      <span class="pill dark">Instagram</span>
+                      <span class="pill dark">Web</span>
+                    </div>
+                    <p>Each source can keep its own metadata model without forcing every card to look identical.</p>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="html-mocks" class="section">
+        <span class="section-tag">HTML Mocks</span>
+        <h2>Three core screen directions for the reform approach.</h2>
+                <div class="screen-grid">
+          <article class="screen-card">
+            <div class="phone">
+              <div class="phone-screen theme-mint">
+                <div class="screen-header" style="justify-content: flex-start; gap: 16px;">
+                  <span class="circle-button" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); color: #000; font-weight: bold;">←</span>
+                  <span class="screen-title" style="margin: 0; font-size: 32px; color: #000;">OPERATIONAL<br>TIMING</span>
+                </div>
+                
+                <div style="position: relative; margin: 40px auto; width: 200px; height: 200px;">
+                  <!-- Clock face background -->
+                  <div style="position: absolute; inset: 0; border-radius: 999px; border: 2px solid rgba(0,0,0,0.1);"></div>
+                  <!-- Markers -->
+                  <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #000;">12</div>
+                  <div style="position: absolute; right: -10px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #000;">3</div>
+                  <div style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #000;">6</div>
+                  <div style="position: absolute; left: -10px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #000;">9</div>
+                  
+                  <!-- Radial charts (SVGs) -->
+                  <svg width="200" height="200" viewBox="0 0 200 200" style="position: absolute; inset: 0; transform: rotate(-90deg);">
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="20" />
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="#fff" stroke-width="20" stroke-dasharray="502" stroke-dashoffset="150" />
+                    
+                    <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="16" />
+                    <circle cx="100" cy="100" r="60" fill="none" stroke="var(--coral)" stroke-width="16" stroke-dasharray="377" stroke-dashoffset="200" />
+                    
+                    <circle cx="100" cy="100" r="44" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="12" />
+                    <circle cx="100" cy="100" r="44" fill="none" stroke="var(--charcoal)" stroke-width="12" stroke-dasharray="276" stroke-dashoffset="100" />
+                  </svg>
+                  
+                  <!-- Center dot and line -->
+                  <div style="position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: #000; border-radius: 999px; transform: translate(-50%, -50%);"></div>
+                  <div style="position: absolute; top: 50%; left: 50%; width: 100px; height: 1px; background: #000; transform-origin: left center; transform: rotate(-30deg);"></div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #000; opacity: 0.6; margin-bottom: 24px;">
+                  <span>UTC-5</span>
+                  <span>12:47:33</span>
+                </div>
+
+                <div style="background: var(--charcoal); margin: 0 -16px -16px; padding: 24px 16px; min-height: 200px; border-radius: 34px 34px 0 0;">
+                  <div style="display: flex; gap: 16px; margin-bottom: 24px; font-size: 11px; font-weight: bold; color: #fff;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span style="width: 10px; height: 10px; border-radius: 999px; background: var(--coral);"></span> Peak
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span style="width: 10px; height: 10px; border-radius: 999px; background: #fff;"></span> Completion
+                    </div>
+                  </div>
+                  
+                  <div style="display: flex; gap: 16px;">
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px;">12:00 pm</div>
+                    <div style="flex: 1; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 16px;">
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <strong style="font-size: 16px; color: #fff; line-height: 1.2;">Pre-Arrival<br>Preparation</strong>
+                        <span style="background: #fff; color: #000; width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center;">↗</span>
+                      </div>
+                      <p style="font-size: 12px; color: rgba(255,255,255,0.4); margin: 8px 0 0;">Compiling a Checklist based on...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h3>Operational Timing</h3>
+            <p>Mint canvas with precision chart elements. Deep contrast bottom sheets to anchor action.</p>
+          </article>
+
+          <article class="screen-card">
+            <div class="phone">
+              <div class="phone-screen theme-charcoal">
+                <div class="screen-header" style="justify-content: flex-start; gap: 16px;">
+                  <span class="circle-button" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); color: #fff; font-weight: bold;">←</span>
+                  <span class="screen-title" style="margin: 0; font-size: 32px; color: #fff;">INTEGRATIONS</span>
+                </div>
+                
+                <div style="display: flex; gap: 8px; margin: 24px 0;">
+                  <span class="pill" style="background: rgba(255,255,255,0.1); border: none; color: #fff; text-transform: lowercase;">all operations v</span>
+                  <span class="pill" style="background: rgba(255,255,255,0.1); border: none; color: #fff; text-transform: lowercase;">all experience v</span>
+                </div>
+
+                <div style="display: grid; gap: 12px;">
+                  <div style="background: var(--coral); border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transform: rotate(-2deg);">
+                    <div>
+                      <strong style="font-size: 20px; color: #000; text-transform: uppercase;">QUICKBOOKS</strong>
+                      <div style="font-size: 10px; color: #000; opacity: 0.6; font-weight: bold; margin-top: 4px;">Unconnected</div>
+                    </div>
+                    <div style="width: 48px; height: 48px; background: rgba(0,0,0,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #000;">qb</div>
+                  </div>
+
+                  <div style="background: var(--butter); border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong style="font-size: 20px; color: #000; text-transform: uppercase;">XERO</strong>
+                      <div style="font-size: 10px; color: #000; font-weight: bold; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                        <span style="width: 12px; height: 12px; background: #000; color: var(--butter); border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 8px;">✓</span> Connected
+                      </div>
+                    </div>
+                    <div style="width: 48px; height: 48px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: #fff;">xero</div>
+                  </div>
+
+                  <div style="background: var(--sky); border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transform: rotate(2deg);">
+                    <div>
+                      <strong style="font-size: 20px; color: #000; text-transform: uppercase;">HOMEBASE</strong>
+                      <div style="font-size: 10px; color: #000; font-weight: bold; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                        <span style="width: 12px; height: 12px; background: #000; color: var(--sky); border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 8px;">✓</span> Connected
+                      </div>
+                    </div>
+                    <div style="width: 48px; height: 48px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #fff;">h</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h3>Integrations List</h3>
+            <p>Playful, chunky card stacks with slight rotation for a less rigid feel on settings screens.</p>
+          </article>
+
+          <article class="screen-card">
+            <div class="phone">
+              <div class="phone-screen theme-mint">
+                <div class="screen-header" style="justify-content: flex-start; gap: 16px;">
+                  <span class="circle-button" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); color: #000; font-weight: bold;">←</span>
+                  <span class="screen-title" style="margin: 0; font-size: 32px; color: #000;">REPORTS</span>
+                  <span class="pill" style="margin-left: auto; background: rgba(0,0,0,0.1); border: none; color: #000; font-weight: normal; text-transform: lowercase;">all v</span>
+                </div>
+                
+                <div style="height: 180px; margin: 24px 0; background: url('https://placehold.co/400x300/d2ddd0/000?text=ILLUSTRATION') center/cover; border-radius: 20px;"></div>
+
+                <div style="background: var(--charcoal); margin: 0 -16px -16px; padding: 24px 16px; min-height: 250px; border-radius: 34px 34px 0 0;">
+                  <div class="search-band" style="background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 999px; margin-top: 0; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="display: flex; align-items: center; gap: 8px;">🔍 Search by name or type</span>
+                    <span>⚙</span>
+                  </div>
+
+                  <p style="font-size: 11px; color: rgba(255,255,255,0.4); margin: 16px 0 12px; text-transform: uppercase; font-weight: bold;">101 reports found</p>
+
+                  <div style="background: rgba(255,255,255,0.05); border-radius: 24px; padding: 16px; display: flex; gap: 16px; position: relative;">
+                    <div style="width: 48px; height: 48px; background: var(--coral); border-radius: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #000;">📄</div>
+                    <div>
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="font-size: 18px; text-transform: uppercase; color: #fff;">Prime Cost<br>Report</strong>
+                        <span style="background: #fff; color: #000; width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center; position: absolute; right: 16px; top: 16px;">↗</span>
+                      </div>
+                      <p style="font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.4; margin: 8px 0;">The Cost of Goods Sold (Food & Beverage Cost) an...</p>
+                      
+                      <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <span style="padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); color: var(--butter); font-size: 10px; font-weight: bold;">P&L Statement</span>
+                        <span style="padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); color: var(--violet); font-size: 10px; font-weight: bold;">Management</span>
+                      </div>
+                    </div>
+                    <div style="position: absolute; right: 16px; bottom: 16px; width: 32px; height: 32px; border-radius: 999px; background: var(--butter); color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">+</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h3>Reports Index</h3>
+            <p>Illustration anchors the top view, with a dense, highly structured charcoal bottom sheet.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-tag">Definition Of Done</span>
+        <h2>The uplift is complete when the product is unmistakably Collectr at first glance.</h2>
+        <div class="done-grid">
+          <article class="done-card">
+            <h3>Unified Language</h3>
+            <p>Landing, onboarding, and signed-in product share the same type, color, motion, and surface rules.</p>
+          </article>
+          <article class="done-card">
+            <h3>Wrapped Components</h3>
+            <p>No route imports raw third-party building blocks directly. Everything flows through the internal library.</p>
+          </article>
+          <article class="done-card">
+            <h3>Motion Discipline</h3>
+            <p>Every transition has a named purpose. Nothing bounces for no reason. Reduced motion remains complete.</p>
+          </article>
+          <article class="done-card">
+            <h3>Mobile Priority</h3>
+            <p>Phone screens look like intentional posters, and desktop feels like a scaled editorial workstation, not a stretched list.</p>
+          </article>
+        </div>
+
+        <div class="actions">
+          <a class="button primary" href="/progress.html">Back To Progress</a>
+          <a class="button" href="/progress/architecture.html">Architecture Guide</a>
+          <a class="button" href="/">Open App</a>
+        </div>
+
+        <p class="footer-note">
+          Static internal artifact. Edit <span class="mono">public/progress/visual-uplift.html</span> to evolve the roadmap, moodboard, and mock directions.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -19,7 +19,7 @@ export function Sidebar() {
         <Link
           to="/"
           className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-accent text-sm font-medium transition-colors"
-          activeProps={{ className: "bg-accent/50" }}
+          activeProps={{ className: "bg-accent/50", "aria-current": "page" as const }}
         >
           <div className="flex items-center gap-3">
             <Inbox className="size-4 text-muted-foreground" />
@@ -34,7 +34,7 @@ export function Sidebar() {
         <Link
           to="/search"
           className="flex items-center px-3 py-2 rounded-md hover:bg-accent text-sm font-medium transition-colors"
-          activeProps={{ className: "bg-accent/50" }}
+          activeProps={{ className: "bg-accent/50", "aria-current": "page" as const }}
         >
           <div className="flex items-center gap-3">
             <Library className="size-4 text-muted-foreground" />
@@ -54,7 +54,7 @@ export function Sidebar() {
               to="/folders/$folderId"
               params={{ folderId: folder._id }}
               className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-accent text-sm font-medium transition-colors"
-              activeProps={{ className: "bg-accent/50" }}
+              activeProps={{ className: "bg-accent/50", "aria-current": "page" as const }}
             >
               <div className="flex items-center gap-3">
                 <FolderOpen className="size-4 text-muted-foreground" />

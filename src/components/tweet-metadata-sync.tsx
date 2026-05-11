@@ -1,22 +1,41 @@
 import { useEffect, useRef } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { fetchItemMetadata } from "@/lib/item-metadata";
-import { isMetadataFetchEnabled } from "@/lib/feature-flags";
+import { isMetadataFetchEnabled, flags } from "@/lib/feature-flags";
 
-export function useTweetMetadataSync(item: Doc<"tweets"> | null | undefined) {
-  const setMetadata = useMutation(api.tweets.setMetadata);
+export function useTweetMetadataSync(item: Doc<"items"> | null | undefined) {
+  const setMetadata = useMutation(api.items.setMetadata);
+  const enrichItem = useAction(api.aiEnrichment.enrichItem);
   const attemptedRef = useRef(false);
+  const enrichmentAttemptedRef = useRef(false);
 
   useEffect(() => {
     if (!item) {
       attemptedRef.current = false;
+      enrichmentAttemptedRef.current = false;
       return;
     }
 
     if (item.embedStatus !== "pending") {
+      // Metadata already loaded — trigger enrichment if enabled and not done
+      if (
+        flags.enableAiEnrichment &&
+        !item.summary &&
+        !enrichmentAttemptedRef.current &&
+        (item.text || item.title)
+      ) {
+        enrichmentAttemptedRef.current = true;
+        enrichItem({
+          itemId: item._id,
+          url: item.url,
+          title: item.title,
+          text: item.text,
+          source: item.source,
+        }).catch(() => {});
+      }
       return;
     }
 
@@ -33,12 +52,12 @@ export function useTweetMetadataSync(item: Doc<"tweets"> | null | undefined) {
     const timer = setTimeout(async () => {
       const meta = await fetchItemMetadata(item.url, item.source);
       await setMetadata({
-        tweetId: item._id,
+        itemId: item._id,
         status: meta ? "ok" : "unavailable",
         ...meta,
       }).catch(() => {});
     }, Math.random() * 1200);
 
     return () => clearTimeout(timer);
-  }, [item, setMetadata]);
+  }, [item, setMetadata, enrichItem]);
 }

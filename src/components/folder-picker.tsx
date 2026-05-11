@@ -6,33 +6,41 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRef } from "react";
 import { useDialogFocus } from "@/lib/use-dialog-focus";
+import { FolderPickerSkeleton } from "@/components/skeletons";
 
 export function FolderPicker({
-  tweetId,
+  itemId,
   onClose,
 }: {
-  tweetId: Id<"tweets">;
+  itemId: Id<"items">;
   onClose: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   useDialogFocus(true, containerRef);
 
   const data = useQuery(api.folders.listTree);
-  const moveTweet = useMutation(api.tweets.move);
+  const moveItem = useMutation(api.items.move).withOptimisticUpdate(
+    (store, args) => {
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listInbox)) {
+        if (value) {
+          store.setQuery(api.items.listInbox, queryArgs, value.filter((t) => t._id !== args.itemId));
+        }
+      }
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listByFolder)) {
+        if (value) {
+          store.setQuery(api.items.listByFolder, queryArgs, value.filter((t) => t._id !== args.itemId));
+        }
+      }
+    }
+  );
 
   if (!data) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]">
-        <div className="w-full max-w-sm rounded-[1.5rem] border border-border/70 bg-card/90 p-4 shadow-xl">
-          <p className="text-sm text-muted-foreground">Loading collections...</p>
-        </div>
-      </div>
-    );
+    return <FolderPickerSkeleton />;
   }
 
   const handleMove = async (folderId: Id<"folders"> | null) => {
     try {
-      await moveTweet({ tweetId, folderId });
+      await moveItem({ itemId, folderId });
       onClose();
     } catch (err) {
       toast.error("Failed to move", {
@@ -59,6 +67,7 @@ export function FolderPicker({
           <h3 className="text-sm font-medium text-foreground">Move to collection</h3>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="rounded-full p-2 text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent hover:text-foreground active:scale-[0.95]"
           >
             <X className="size-4" />

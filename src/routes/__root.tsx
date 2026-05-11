@@ -48,19 +48,23 @@ export const Route = createRootRouteWithContext<{
 }>()({
   head: () => ({
     meta: [
-      {
-        charSet: "utf-8",
-      },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1",
-      },
-
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Collectr — Save Links. Organize Later." },
       {
         name: "description",
         content:
-          "Collectr saves tweet links from paste or the share sheet and organizes them into folders.",
+          "Save links from X, Reddit, Instagram, and the web. Organize into collections with tags and notes. Free PWA.",
       },
+      { name: "theme-color", content: "#e11d48" },
+      { property: "og:title", content: "Collectr — Save Links. Organize Later." },
+      { property: "og:description", content: "Save links from X, Reddit, Instagram, and the web. Organize into collections with tags and notes." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://collectr.app" },
+      { property: "og:image", content: "/og-image.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Collectr — Save Links. Organize Later." },
+      { name: "twitter:description", content: "Save links from X, Reddit, Instagram, and the web. Organize into collections." },
     ],
     links: [
       { rel: "preconnect", href: "https://api.fontshare.com" },
@@ -69,6 +73,23 @@ export const Route = createRootRouteWithContext<{
       { rel: "icon", href: "/favicon.ico" },
       { rel: "manifest", href: "/manifest.json" },
       { rel: "apple-touch-icon", href: "/logo192.png" },
+      { rel: "canonical", href: "https://collectr.app" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Collectr",
+          url: "https://collectr.app",
+          description:
+            "Save links from X, Reddit, Instagram, and the web. Organize into collections with tags and notes.",
+          applicationCategory: "UtilitiesApplication",
+          operatingSystem: "Any",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        }),
+      },
     ],
   }),
   beforeLoad: async (ctx) => {

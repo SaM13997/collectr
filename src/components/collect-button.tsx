@@ -53,7 +53,7 @@ export function CollectButton() {
   const shouldReduceMotion = useReducedMotion()
 
   const folderData = useQuery(api.folders.listTree)
-  const addTweet = useMutation(api.tweets.addFromUrl)
+  const addItem = useMutation(api.items.addFromUrl)
   const createFolder = useMutation(api.folders.create)
 
   const collections = folderData?.folders ?? []
@@ -122,7 +122,7 @@ export function CollectButton() {
 
     try {
       setIsSaving(true)
-      await addTweet({ url: parsed.rawUrl, folderId: selectedFolderId, tags: tags.length > 0 ? tags : undefined })
+      await addItem({ url: parsed.rawUrl, folderId: selectedFolderId, tags: tags.length > 0 ? tags : undefined })
       toast.success("Saved")
       close()
     } catch (err) {
@@ -395,7 +395,7 @@ function CollectionsView({
   onNewFolderNameChange,
   onCreateFolder,
 }: {
-  collections: Array<{ _id: Id<"folders">; name: string; tweetCount: number }>
+  collections: Array<{ _id: Id<"folders">; name: string; itemCount: number }>
   selectedFolderId: Id<"folders"> | null
   onSelect: (id: Id<"folders"> | null) => void
   onBack: () => void
@@ -453,7 +453,7 @@ function CollectionsView({
               <FolderOpen className="size-4 shrink-0" />
               <span className="flex-1 text-left truncate">{folder.name}</span>
               <span className="text-xs text-muted-foreground shrink-0">
-                {folder.tweetCount}
+                {folder.itemCount}
               </span>
               {selectedFolderId === folder._id && (
                 <Check className="size-4 shrink-0" />

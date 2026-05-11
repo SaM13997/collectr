@@ -11,12 +11,13 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_parent", ["userId", "parentId"]),
 
-  tweets: defineTable({
+  items: defineTable({
     userId: v.string(),
-    tweetId: v.string(),
+    itemId: v.string(),
     url: v.string(),
     folderId: v.union(v.id("folders"), v.null()),
     createdAt: v.number(),
+    order: v.optional(v.number()),
     embedStatus: v.union(
       v.literal("pending"),
       v.literal("ok"),
@@ -40,7 +41,9 @@ export default defineSchema({
     authorAvatar: v.optional(v.string()),
     text: v.optional(v.string()),
     mediaUrl: v.optional(v.string()),
+    isRead: v.optional(v.boolean()),
+    summary: v.optional(v.string()),
   })
     .index("by_user_folder", ["userId", "folderId"])
-    .index("by_user_tweetId", ["userId", "tweetId"]),
+    .index("by_user_itemId", ["userId", "itemId"]),
 });

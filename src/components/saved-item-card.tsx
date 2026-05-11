@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
@@ -6,13 +6,16 @@ import { Button } from "@/components/ui/button";
 import {
   ExternalLink,
   FolderInput,
+  GripVertical,
   MoreHorizontal,
   Trash2,
   Hash,
   Globe,
   Camera,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getFaviconUrl } from "@/lib/favicon";
 import { toast } from "sonner";
 import {
   Expandable,
@@ -20,11 +23,16 @@ import {
   ExpandableContent,
 } from "@/components/ui/expandable";
 interface SavedItemCardProps {
-  item: Doc<"tweets">;
+  item: Doc<"items">;
   onOpen?: () => void;
-  onMove?: (id: Id<"tweets">) => void;
+  onMove?: (id: Id<"items">) => void;
   className?: string;
   variant?: "grid" | "list";
+  showDragHandle?: boolean;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  selected?: boolean;
+  onToggleSelection?: () => void;
+  onLongPress?: () => void;
 }
 
 export function SavedItemCard({
@@ -33,9 +41,28 @@ export function SavedItemCard({
   onMove,
   className,
   variant = "grid",
+  showDragHandle = false,
+  dragHandleProps,
+  selected = false,
+  onToggleSelection,
+  onLongPress,
 }: SavedItemCardProps) {
   const [showActions, setShowActions] = useState(false);
-  const removeTweet = useMutation(api.tweets.remove);
+  const removeItem = useMutation(api.items.remove).withOptimisticUpdate(
+    (store, args) => {
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listInbox)) {
+        if (value) {
+          store.setQuery(api.items.listInbox, queryArgs, value.filter((t) => t._id !== args.itemId));
+        }
+      }
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listAll)) {
+        if (value) {
+          store.setQuery(api.items.listAll, queryArgs, value.filter((t) => t._id !== args.itemId));
+        }
+      }
+    }
+  );
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sourceDomains: Record<string, string> = {
     x: "x.com",
@@ -54,7 +81,7 @@ export function SavedItemCard({
         ? `@${item.authorHandle}`
         : handle
           ? `@${handle}`
-          : `Post ${item.tweetId}`);
+          : "Saved item");
 
   const secondaryLabel = item.source === "reddit"
     ? (item.title || item.text?.trim() || "Reddit post")
@@ -65,6 +92,21 @@ export function SavedItemCard({
   const handleOpenExternal = (e: React.MouseEvent) => {
     e.stopPropagation();
     window.open(item.url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleTouchStart = () => {
+    if (!onLongPress) return;
+    longPressTimerRef.current = setTimeout(() => {
+      onLongPress();
+      longPressTimerRef.current = null;
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
   };
 
   const cardContent = (
@@ -102,9 +144,14 @@ export function SavedItemCard({
               </svg>
             ) : item.source === "instagram" ? (
               <Camera className={cn("text-foreground/80", isList ? "size-5" : "size-8")} />
-            ) : (
-              <Globe className={cn("text-foreground/80", isList ? "size-5" : "size-8")} />
-            )}
+            ) : (() => {
+              const faviconUrl = getFaviconUrl(item.url, isList ? 24 : 48);
+              return faviconUrl ? (
+                <img src={faviconUrl} alt="" className={cn("rounded-sm", isList ? "size-6" : "size-10")} />
+              ) : (
+                <Globe className={cn("text-foreground/80", isList ? "size-5" : "size-8")} />
+              );
+            })()}
             {!isList && (
               <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {domain}
@@ -114,14 +161,17 @@ export function SavedItemCard({
         )}
         <button
           onClick={handleOpenExternal}
-          className="absolute bottom-1 right-1 flex size-6 items-center justify-center rounded-full bg-background/80 text-muted-foreground/60 transition hover:bg-background hover:text-foreground"
+          className="absolute bottom-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-full bg-background/80 text-muted-foreground/60 transition hover:bg-background hover:text-foreground"
           aria-label="Open original link"
         >
           <ExternalLink className="size-3" />
         </button>
       </div>
       <div className={cn("min-w-0 overflow-hidden", isList ? "flex-1" : "px-0.5")}>
-        <p className="truncate text-xs font-medium text-foreground">
+        <p className={cn("truncate text-xs text-foreground", item.isRead ? "font-medium" : "font-bold")}>
+          {!item.isRead && (
+            <span className="mr-1.5 inline-block size-1.5 rounded-full bg-blue-500 align-middle" />
+          )}
           {primaryLabel}
         </p>
         <p className="truncate text-[11px] text-muted-foreground">
@@ -158,10 +208,10 @@ export function SavedItemCard({
       >
           <ExpandableTrigger
           className={cn(
-            "flex items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-background/90 hover:text-foreground active:scale-[0.95]",
+            "flex items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-background/90 hover:text-foreground active:scale-[0.95] min-h-11 min-w-11",
             isList
-              ? "size-8 bg-transparent"
-              : "absolute right-2 top-2 size-9 bg-background/50 opacity-100 backdrop-blur-sm"
+              ? "bg-transparent"
+              : "absolute right-2 top-2 bg-background/50 opacity-100 backdrop-blur-sm"
           )}
         >
           <MoreHorizontal className="size-4" />
@@ -177,7 +227,7 @@ export function SavedItemCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 justify-start gap-2 px-2 text-xs transition-colors duration-150 ease-[var(--ease-out)]"
+              className="min-h-11 justify-start gap-2 px-2 text-xs transition-colors duration-150 ease-[var(--ease-out)]"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -191,12 +241,12 @@ export function SavedItemCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-9 justify-start gap-2 px-2 text-xs text-destructive transition-colors duration-150 ease-[var(--ease-out)] hover:text-destructive"
+              className="min-h-11 justify-start gap-2 px-2 text-xs text-destructive transition-colors duration-150 ease-[var(--ease-out)] hover:text-destructive"
               onClick={async (e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 try {
-                  await removeTweet({ tweetId: item._id });
+                  await removeItem({ itemId: item._id });
                 } catch (err) {
                   toast.error("Failed to remove", {
                     description:
@@ -219,9 +269,39 @@ export function SavedItemCard({
 
   return (
     <div className={cn("group relative", isList ? "flex items-center gap-2" : "", className)}>
+        {showDragHandle && isList && (
+          <div
+            {...dragHandleProps}
+            className="flex shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground/40 transition-colors duration-150 hover:text-muted-foreground active:cursor-grabbing min-h-11 min-w-6"
+            aria-label="Drag to reorder"
+          >
+            <GripVertical className="size-4" />
+          </div>
+        )}
+        {onToggleSelection && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelection();
+            }}
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded-lg border-2 transition-all duration-150 min-h-11 min-w-11",
+              selected
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-background text-transparent hover:border-primary/50"
+            )}
+            aria-label={selected ? "Deselect item" : "Select item"}
+          >
+            <Check className="size-4" />
+          </button>
+        )}
         <button
         type="button"
         onClick={onOpen}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         className={cn(
           "flex gap-3 text-left",
           isList

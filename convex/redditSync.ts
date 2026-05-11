@@ -101,7 +101,7 @@ export const importRedditSaves = action({
 
     const items: Array<{
       url: string;
-      tweetId: string;
+      itemId: string;
       source: "reddit";
       canonicalUrl: string;
       sourceItemId?: string;
@@ -128,7 +128,7 @@ export const importRedditSaves = action({
 
       items.push({
         url: parsed.canonicalUrl,
-        tweetId: parsed.sourceItemId ?? parsed.canonicalUrl,
+        itemId: parsed.sourceItemId ?? parsed.canonicalUrl,
         source: "reddit",
         canonicalUrl: parsed.canonicalUrl,
         sourceItemId: parsed.sourceItemId,
@@ -140,7 +140,7 @@ export const importRedditSaves = action({
       });
     }
 
-    const result = await ctx.runMutation(api.tweets.importRedditItems, {
+    const result = await ctx.runMutation(api.items.importRedditItems, {
       items,
     });
 

@@ -174,6 +174,7 @@ export function MobileFolderSheet({
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="New collection"
+                    aria-label="New collection name"
                     className="h-10"
                     disabled={isCreating}
                   />
@@ -181,6 +182,7 @@ export function MobileFolderSheet({
                     type="submit"
                     disabled={isCreating}
                     className="h-10 px-3"
+                    aria-label="Create collection"
                   >
                     <Plus className="size-4" />
                   </Button>

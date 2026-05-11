@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Collectr Progress</title>
+    <meta
+      name="description"
+      content="Internal progress board for Collectr covering changelog updates, milestones, and architecture notes."
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0b0f;
+        --panel: #15151b;
+        --panel-2: #1d1d25;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --accent: #ff5a36;
+        --border: rgba(255, 255, 255, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #1d1020 0%, var(--bg) 45%);
+        color: var(--text);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .wrap {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 64px;
+      }
+
+      .hero,
+      .panel {
+        border: 1px solid var(--border);
+        background: rgba(21, 21, 27, 0.94);
+        backdrop-filter: blur(12px);
+      }
+
+      .hero {
+        padding: 32px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 10px;
+        border: 1px solid rgba(255, 90, 54, 0.35);
+        color: #ffc9bc;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(34px, 5vw, 56px);
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+      }
+
+      .hero p {
+        max-width: 720px;
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.6;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .button.primary {
+        border-color: transparent;
+        background: var(--accent);
+        color: #130908;
+      }
+
+      .meta-grid,
+      .log-grid {
+        display: grid;
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      .meta-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .log-grid {
+        grid-template-columns: 1.6fr 1fr;
+        align-items: start;
+      }
+
+      .panel {
+        padding: 24px;
+      }
+
+      .panel h2 {
+        margin-bottom: 16px;
+        font-size: 22px;
+      }
+
+      .stat {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .stat strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-size: 28px;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 14px;
+      }
+
+      .entry {
+        padding: 16px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .entry time {
+        display: block;
+        margin-bottom: 8px;
+        color: #ffc9bc;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .entry h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      .entry p,
+      .notes li,
+      .checklist li {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      ul {
+        margin: 12px 0 0;
+        padding-left: 18px;
+      }
+
+      .route {
+        display: block;
+        margin-top: 10px;
+        color: #ffc9bc;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+      }
+
+      .footer {
+        margin-top: 24px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 840px) {
+        .log-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero,
+        .panel {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <span class="eyebrow">Collectr Progress</span>
+        <h1>Development changelog, milestones, and implementation notes.</h1>
+        <p>
+          This page is a lightweight internal progress board for the app. Use it to keep a running
+          changelog as Collectr evolves, and jump into the architecture explainer for a high-level map
+          of how the codebase fits together.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="/progress/architecture.html">Open Architecture Guide</a>
+          <a class="button" href="/progress/visual-uplift.html">Open Visual Uplift Guide</a>
+          <a class="button" href="/">Open App</a>
+        </div>
+      </section>
+
+      <section class="meta-grid">
+        <article class="panel stat">
+          <strong>vNext</strong>
+          Active working version for ongoing changes and notes.
+        </article>
+        <article class="panel stat">
+          <strong>33 Tasks</strong>
+          Major product, UX, performance, and marketing improvements completed.
+        </article>
+        <article class="panel stat">
+          <strong>3 Docs Routes</strong>
+          Static routes for progress tracking and codebase explainers.
+        </article>
+      </section>
+
+      <section class="log-grid">
+        <article class="panel">
+          <h2>Changelog</h2>
+          <div class="timeline">
+            <section class="entry">
+              <time>2026-05-09</time>
+              <h3>Multi-source app foundation shipped</h3>
+              <p>
+                Collectr now supports source-aware saved items for X, Reddit, Instagram, and generic
+                links, while keeping the app organized around folders, tags, notes, and search.
+              </p>
+              <ul>
+                <li>Expanded item model with source, canonical URL, metadata, notes, tags, summary, and read state.</li>
+                <li>Added Reddit ingestion, Instagram URL-only support, AI enrichment, export/import, and offline support.</li>
+                <li>Shipped command palette, bulk actions, drag-and-drop reorder, virtualized lists, and optimistic UI updates.</li>
+              </ul>
+            </section>
+
+            <section class="entry">
+              <time>2026-05-09</time>
+              <h3>UI cleanup and landing page refresh</h3>
+              <p>
+                The app copy now reads as a general saved-link organizer instead of an X-only tool, and
+                the unauthenticated experience has a clearer marketing landing page.
+              </p>
+              <ul>
+                <li>Removed dead code and heavy decorative shader dependencies.</li>
+                <li>Improved accessibility with larger touch targets, ARIA labels, and better loading skeletons.</li>
+                <li>Added marketing copy, SEO metadata, and a dedicated landing experience.</li>
+              </ul>
+            </section>
+
+            <section class="entry">
+              <time>Next Entry Template</time>
+              <h3>Add future updates here</h3>
+              <p>
+                Copy this block for each new release or milestone. Keep entries short and outcome-focused:
+                what changed, why it mattered, and what area of the app was affected.
+              </p>
+            </section>
+          </div>
+        </article>
+
+        <aside class="panel">
+          <h2>How To Use This</h2>
+          <ul class="checklist">
+            <li>Add one entry per milestone, release, or meaningful product change.</li>
+            <li>Keep dates at the top of each card so the page reads like a timeline.</li>
+            <li>Link deeper notes, PRs, or tickets if the team wants a paper trail later.</li>
+            <li>Use the architecture route for onboarding and codebase orientation.</li>
+          </ul>
+
+          <h2 style="margin-top: 24px;">Linked Explainers</h2>
+          <p>
+            The architecture page documents the app structure, data flow, route map, and how linking
+            works across the product.
+            <span class="route">/progress/architecture.html</span>
+          </p>
+          <p style="margin-top: 14px;">
+            The visual uplift guide packages the roadmap, moodboard, component library plan, and HTML
+            mocks for the next design pass.
+            <span class="route">/progress/visual-uplift.html</span>
+          </p>
+
+          <h2 style="margin-top: 24px;">Suggested Sections</h2>
+          <ul class="notes">
+            <li>Product milestones</li>
+            <li>Technical migrations</li>
+            <li>Performance wins</li>
+            <li>UX and accessibility improvements</li>
+            <li>Launch and marketing updates</li>
+          </ul>
+        </aside>
+      </section>
+
+      <p class="footer">
+        Static internal docs route. Edit `public/progress.html` to keep the changelog current.
+      </p>
+    </main>
+  </body>
+</html>

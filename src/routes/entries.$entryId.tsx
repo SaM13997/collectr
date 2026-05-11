@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useAuthSession } from "@/lib/use-auth-session";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { BackButton } from "@/components/app-shell";
+
 import { FolderPicker } from "@/components/folder-picker";
 import { Button } from "@/components/ui/button";
 import {
+  ChevronLeft,
   ExternalLink,
   FolderInput,
   Trash2,
@@ -18,8 +19,10 @@ import {
   Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getFaviconUrl } from "@/lib/favicon";
 import { toast } from "sonner";
 import { useTweetMetadataSync } from "@/components/tweet-metadata-sync";
+import { PageSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/entries/$entryId")({
   component: EntryPage,
@@ -29,11 +32,7 @@ function EntryPage() {
   const { session, isPending } = useAuthSession();
 
   if (isPending) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </main>
-    );
+    return <PageSkeleton />;
   }
 
   if (!session) {
@@ -54,19 +53,68 @@ function EntryPage() {
 
 function EntryView() {
   const { entryId } = Route.useParams();
-  const typedEntryId = entryId as Id<"tweets">;
+  const typedEntryId = entryId as Id<"items">;
   const router = useRouter();
-  const tweet = useQuery(api.tweets.getById, { tweetId: typedEntryId });
-  const removeTweet = useMutation(api.tweets.remove);
-  useTweetMetadataSync(tweet);
+  const item = useQuery(api.items.getById, { itemId: typedEntryId });
+  const removeItem = useMutation(api.items.remove).withOptimisticUpdate(
+    (store, args) => {
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listInbox)) {
+        if (value) {
+          store.setQuery(api.items.listInbox, queryArgs, value.filter((t) => t._id !== args.itemId));
+        }
+      }
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listAll)) {
+        if (value) {
+          store.setQuery(api.items.listAll, queryArgs, value.filter((t) => t._id !== args.itemId));
+        }
+      }
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listByFolder)) {
+        if (value) {
+          store.setQuery(api.items.listByFolder, queryArgs, value.filter((t) => t._id !== args.itemId));
+        }
+      }
+    }
+  );
+  const markAsRead = useMutation(api.items.markAsRead).withOptimisticUpdate(
+    (store, args) => {
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listInbox)) {
+        if (value) {
+          store.setQuery(api.items.listInbox, queryArgs, value.map((t) =>
+            t._id === args.itemId ? { ...t, isRead: true } : t
+          ));
+        }
+      }
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listAll)) {
+        if (value) {
+          store.setQuery(api.items.listAll, queryArgs, value.map((t) =>
+            t._id === args.itemId ? { ...t, isRead: true } : t
+          ));
+        }
+      }
+      for (const { args: queryArgs, value } of store.getAllQueries(api.items.listByFolder)) {
+        if (value) {
+          store.setQuery(api.items.listByFolder, queryArgs, value.map((t) =>
+            t._id === args.itemId ? { ...t, isRead: true } : t
+          ));
+        }
+      }
+    }
+  );
+  useTweetMetadataSync(item);
 
-  const [movingTweetId, setMovingTweetId] = useState<Id<"tweets"> | null>(null);
+  useEffect(() => {
+    if (item && !item.isRead) {
+      markAsRead({ itemId: item._id }).catch(() => {});
+    }
+  }, [item, markAsRead]);
+
+  const [movingItemId, setMovingItemId] = useState<Id<"items"> | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleCopyUrl = async () => {
-    if (!tweet) return;
+    if (!item) return;
     try {
-      await navigator.clipboard.writeText(tweet.url);
+      await navigator.clipboard.writeText(item.url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -75,9 +123,9 @@ function EntryView() {
   };
 
   const handleDelete = async () => {
-    if (!tweet) return;
+    if (!item) return;
     try {
-      await removeTweet({ tweetId: tweet._id });
+      await removeItem({ itemId: item._id });
       router.navigate({ to: "/" });
     } catch (err) {
       toast.error("Failed to remove", {
@@ -86,7 +134,7 @@ function EntryView() {
     }
   };
 
-  if (tweet === undefined) {
+  if (item === undefined) {
     return (
       <AppLayout backButton={<BackButton onClick={() => router.history.back()} />}>
         <div className="flex flex-col gap-4 animate-pulse">
@@ -104,7 +152,7 @@ function EntryView() {
     );
   }
 
-  if (tweet === null) {
+  if (item === null) {
     return (
       <AppLayout title="Not found" backButton={<BackButton onClick={() => router.history.back()} />}>
         <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -120,48 +168,55 @@ function EntryView() {
     );
   }
 
-  const handle = extractHandle(tweet.url);
-  const displayName = tweet.source === "instagram"
-    ? (tweet.authorName || "Instagram")
-    : (tweet.authorName || handle || "Unknown");
-  const displayHandle = tweet.authorHandle || handle;
+  const handle = extractHandle(item.url);
+  const displayName = item.source === "instagram"
+    ? (item.authorName || "Instagram")
+    : (item.authorName || handle || "Unknown");
+  const displayHandle = item.authorHandle || handle;
 
   const sourceLabels: Record<string, string> = {
-    x: "Open original",
+    x: "Open on X",
     reddit: "Open on Reddit",
     instagram: "Open on Instagram",
     link: "Open link",
   };
-  const openLabel = sourceLabels[tweet.source] || "Open link";
+  const openLabel = sourceLabels[item.source] || "Open link";
 
-  const fallbackText = tweet.source === "reddit"
+  const fallbackText = item.source === "reddit"
     ? "No post content."
-    : tweet.source === "instagram"
+    : item.source === "instagram"
       ? "Instagram post"
       : "Content unavailable.";
 
   return (
     <AppLayout
-      title={displayHandle ? `@${displayHandle}` : tweet.source === "instagram" ? "Instagram" : "Entry"}
+      title={displayHandle ? `@${displayHandle}` : item.source === "instagram" ? "Instagram" : "Entry"}
       backButton={<BackButton onClick={() => router.history.back()} />}
     >
       {/* Author header */}
         <div className="flex items-center gap-3">
-        {tweet.authorAvatar ? (
+        {item.authorAvatar ? (
           <img
-            src={tweet.authorAvatar}
+            src={item.authorAvatar}
             alt={displayName}
             className="size-12 shrink-0 rounded-full object-cover transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]"
           />
         ) : (
           <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]">
-            {tweet.source === "instagram" && !tweet.authorName ? (
+            {item.source === "instagram" && !item.authorName ? (
               <Camera className="size-6 text-muted-foreground" />
-            ) : (
-              <span className="text-lg font-semibold text-muted-foreground">
-                {displayName[0]?.toUpperCase()}
-              </span>
-            )}
+            ) : (() => {
+              const faviconUrl = item.source !== "x" && item.source !== "reddit" && item.source !== "instagram"
+                ? getFaviconUrl(item.url, 48)
+                : null;
+              return faviconUrl ? (
+                <img src={faviconUrl} alt="" className="size-7 rounded-sm" />
+              ) : (
+                <span className="text-lg font-semibold text-muted-foreground">
+                  {displayName[0]?.toUpperCase()}
+                </span>
+              );
+            })()}
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -176,17 +231,17 @@ function EntryView() {
         </div>
       </div>
 
-      {tweet.title?.trim() && (
-        <h2 className="mt-4 text-lg font-semibold text-foreground">{tweet.title}</h2>
+      {item.title?.trim() && (
+        <h2 className="mt-4 text-lg font-semibold text-foreground">{item.title}</h2>
       )}
 
-      {tweet.text?.trim() ? (
-        <div className={cn("rounded-xl border border-border bg-card p-card-padding", tweet.title?.trim() ? "mt-2" : "mt-4")}>
+      {item.text?.trim() ? (
+        <div className={cn("rounded-xl border border-border bg-card p-card-padding", item.title?.trim() ? "mt-2" : "mt-4")}>
           <p className="whitespace-pre-wrap text-body text-foreground leading-relaxed">
-            {tweet.text}
+            {item.text}
           </p>
         </div>
-      ) : !tweet.title?.trim() ? (
+      ) : !item.title?.trim() ? (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-card p-card-padding">
           <p className="text-body text-muted-foreground">
             {fallbackText}
@@ -195,10 +250,10 @@ function EntryView() {
       ) : null}
 
       {/* Media preview */}
-      {tweet.mediaUrl ? (
+      {item.mediaUrl ? (
         <div className="mt-4 overflow-hidden rounded-xl border border-border">
           <img
-            src={tweet.mediaUrl}
+            src={item.mediaUrl}
             alt=""
             className="w-full object-cover transition-transform duration-300 ease-[var(--ease-out)] hover:scale-[1.01]"
             loading="lazy"
@@ -206,10 +261,30 @@ function EntryView() {
         </div>
       ) : null}
 
+      {/* Summary */}
+      {item.summary?.trim() ? (
+        <div className="mt-4 rounded-xl border border-border bg-card p-card-padding">
+          <p className="text-xs font-medium text-muted-foreground mb-1">Summary</p>
+          <p className="whitespace-pre-wrap text-body text-foreground leading-relaxed">
+            {item.summary}
+          </p>
+        </div>
+      ) : null}
+
+      {/* Note */}
+      {item.note?.trim() ? (
+        <div className="mt-4 rounded-xl border border-border bg-card p-card-padding">
+          <p className="text-xs font-medium text-muted-foreground mb-1">Note</p>
+          <p className="whitespace-pre-wrap text-body text-foreground leading-relaxed">
+            {item.note}
+          </p>
+        </div>
+      ) : null}
+
       {/* Tags */}
-      {tweet.tags && tweet.tags.length > 0 ? (
+      {item.tags && item.tags.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {tweet.tags.map((tag) => (
+          {item.tags.map((tag) => (
             <span
               key={tag}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs text-foreground"
@@ -225,7 +300,7 @@ function EntryView() {
       <div className="mt-6 flex flex-col gap-2">
         {/* Open original */}
         <a
-          href={tweet.url}
+          href={item.url}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-accent active:scale-[0.99]"
@@ -252,7 +327,7 @@ function EntryView() {
           <Button
             variant="outline"
             className="flex-1 gap-2 transition-colors duration-150 ease-[var(--ease-out)]"
-            onClick={() => setMovingTweetId(tweet._id)}
+            onClick={() => setMovingItemId(item._id)}
           >
             <FolderInput className="size-4" />
             Move
@@ -273,18 +348,18 @@ function EntryView() {
         <div className="space-y-2 text-xs text-muted-foreground">
           <div className="flex justify-between">
             <span>Added</span>
-            <span>{new Date(tweet.createdAt).toLocaleDateString()}</span>
+            <span>{new Date(item.createdAt).toLocaleDateString()}</span>
           </div>
           <div className="flex justify-between">
             <span>Status</span>
             <span className={cn(
-              tweet.embedStatus === "ok" ? "text-green-500" :
-              tweet.embedStatus === "pending" ? "text-yellow-500" :
+              item.embedStatus === "ok" ? "text-green-500" :
+              item.embedStatus === "pending" ? "text-yellow-500" :
               "text-muted-foreground"
             )}>
-              {tweet.embedStatus === "ok" ? "Loaded" :
-               tweet.embedStatus === "pending" ? "Loading..." :
-               tweet.embedStatus === "unavailable" ? "Unavailable" :
+              {item.embedStatus === "ok" ? "Loaded" :
+               item.embedStatus === "pending" ? "Loading..." :
+               item.embedStatus === "unavailable" ? "Unavailable" :
                "Failed"}
             </span>
           </div>
@@ -292,10 +367,10 @@ function EntryView() {
       </div>
 
       {/* Folder picker modal */}
-      {movingTweetId ? (
+      {movingItemId ? (
         <FolderPicker
-          tweetId={movingTweetId}
-          onClose={() => setMovingTweetId(null)}
+          itemId={movingItemId}
+          onClose={() => setMovingItemId(null)}
         />
       ) : null}
     </AppLayout>
@@ -309,4 +384,24 @@ function extractHandle(url: string): string | null {
   } catch {
     return null;
   }
+}
+
+function BackButton({
+  onClick,
+  "aria-label": ariaLabel = "Go back",
+}: {
+  onClick: () => void;
+  "aria-label"?: string;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-11 transition-colors duration-150 ease-[var(--ease-out)]"
+      onClick={onClick}
+      aria-label={ariaLabel}
+    >
+      <ChevronLeft className="size-5" />
+    </Button>
+  );
 }

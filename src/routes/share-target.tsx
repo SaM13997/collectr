@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { fetchItemMetadata } from "@/lib/item-metadata";
 import { isMetadataFetchEnabled } from "@/lib/feature-flags";
 import { parseSharedContent, type ParsedUrl } from "@/lib/url-parser";
+import { PageSkeleton } from "@/components/skeletons";
 
 type ShareSearch = {
   text?: string;
@@ -45,11 +46,7 @@ function ShareTargetPage() {
     : "/share-target";
 
   if (isPending) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </main>
-    );
+    return <PageSkeleton />;
   }
 
   if (!session) {
@@ -98,8 +95,8 @@ function ShareTargetPage() {
 function SaveSharedItem({ parsed, shareText }: { parsed: ParsedUrl; shareText?: string }) {
   const router = useRouter();
   const data = useQuery(api.folders.listTree);
-  const addTweet = useMutation(api.tweets.addFromUrl);
-  const setMetadata = useMutation(api.tweets.setMetadata);
+  const addItem = useMutation(api.items.addFromUrl);
+  const setMetadata = useMutation(api.items.setMetadata);
   const [selectedFolder, setSelectedFolder] = useState<Id<"folders"> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -109,7 +106,7 @@ function SaveSharedItem({ parsed, shareText }: { parsed: ParsedUrl; shareText?: 
     try {
       setIsSaving(true);
       setError(null);
-      const id = await addTweet({ url: parsed.rawUrl, folderId: selectedFolder, shareText });
+      const id = await addItem({ url: parsed.rawUrl, folderId: selectedFolder, shareText });
       setSaved(true);
 
       if (isMetadataFetchEnabled(parsed.source) && parsed.sourceItemId) {
@@ -117,7 +114,7 @@ function SaveSharedItem({ parsed, shareText }: { parsed: ParsedUrl; shareText?: 
           try {
             const meta = await fetchItemMetadata(parsed.canonicalUrl, parsed.source);
             await setMetadata({
-              tweetId: id,
+              itemId: id,
               status: meta ? "ok" : "unavailable",
               ...meta,
             });
