@@ -42,16 +42,16 @@ export function Header({ title, backButton, onSearchClick }: HeaderProps) {
         <div className="hidden md:flex items-center gap-4 flex-1">
           {backButton}
           {title ? (
-            <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
+            <h1 className="text-[17px] font-bold tracking-tight text-ink dark:text-primary">{title}</h1>
           ) : null}
           <div className="flex items-center flex-1 max-w-md ml-4">
             <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+              <Search className="absolute left-3.5 top-2.5 size-4 text-muted-foreground" />
               <button
                 type="button"
                 onClick={onSearchClick}
                 aria-label="Open search"
-                className="h-9 w-full rounded-md border border-input bg-transparent px-9 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-left text-muted-foreground cursor-text"
+                className="h-9 w-full rounded-full border border-line bg-panel dark:bg-charcoal px-10 text-sm shadow-sm transition-colors hover:border-line-strong hover:bg-white dark:hover:bg-charcoal-2 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-left text-muted-foreground cursor-text"
               >
                 Search (Cmd+K)
               </button>
@@ -59,10 +59,10 @@ export function Header({ title, backButton, onSearchClick }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 ml-auto">
+        <div className="flex items-center gap-2 ml-auto">
           <Popover>
             <PopoverTrigger asChild>
-              <Button size="sm" className="hidden md:flex gap-2">
+              <Button size="sm" className="hidden md:flex gap-2 rounded-full bg-ink text-sage-deep hover:bg-ink/90 dark:bg-primary dark:text-primary-foreground font-semibold">
                 <Plus className="size-4" />
                 Add
               </Button>

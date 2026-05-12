@@ -1,4 +1,4 @@
-import { MoonStar, SunMedium } from "lucide-react";
+import { MoonStar, SunMedium, Settings, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";
 
@@ -26,7 +25,7 @@ export function UserButton({ className }: UserButtonProps) {
 
   if (isPending) {
     return (
-      <div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
+      <div className="size-10 animate-pulse rounded-full bg-muted" />
     );
   }
 
@@ -58,11 +57,11 @@ export function UserButton({ className }: UserButtonProps) {
           variant="ghost"
           aria-label="User menu"
           className={cn(
-            "relative rounded-full border border-border/70 bg-background/70 p-0 shadow-sm transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.95]",
+            "relative min-h-0 min-w-0 overflow-hidden rounded-full border border-border/70 bg-background/70 p-0 shadow-sm transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.95]",
             className
           )}
         >
-          <Avatar className={cn("h-10 w-10", className)}>
+          <Avatar className="size-full">
             <AvatarImage src={user.image ?? ""} alt={user.name ?? "User"} />
             <AvatarFallback className="bg-brand/12 text-brand">
               {initials}
@@ -90,6 +89,14 @@ export function UserButton({ className }: UserButtonProps) {
             <MoonStar className="mr-2 size-4" />
           )}
           <span>{isDark ? "Light mode" : "Dark mode"}</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => router.navigate({ to: "/settings" })}
+          className="cursor-pointer"
+        >
+          <Settings className="mr-2 size-4" />
+          <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

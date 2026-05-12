@@ -18,20 +18,30 @@ export function MobileBottomNav({ onAddClick }: MobileBottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background border-t border-border pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around h-14">
-        {tabs.map((tab) => {
+    <nav className="fixed bottom-6 left-1/2 z-50 w-[90%] max-w-sm -translate-x-1/2 md:hidden">
+      <div className="flex h-16 items-center justify-around rounded-full border border-line bg-panel/78 px-2 shadow-strong backdrop-blur-xl dark:border-line-strong dark:bg-charcoal/78">
+        {tabs.map((tab, index) => {
           const isActive = tab.to && pathname === tab.to;
+          
+          // Assign unique colors to tabs
+          const colors = [
+            "text-coral group-hover:text-coral/80", 
+            "text-sky group-hover:text-sky/80", 
+            "text-butter group-hover:text-butter/80", 
+            "text-sage group-hover:text-sage/80"
+          ];
+          const colorClass = colors[index % colors.length];
 
           if (tab.to === null) {
             return (
               <button
                 key={tab.label}
                 onClick={tab.onClick}
-                className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-muted-foreground"
+                className="group flex flex-col items-center justify-center gap-1 flex-1 h-full text-muted-foreground transition-transform active:scale-95"
               >
-                <tab.icon className="size-5" />
-                <span className="text-[10px]">{tab.label}</span>
+                <div className="flex items-center justify-center size-10 rounded-full transition-colors bg-ink dark:bg-panel text-panel dark:text-ink">
+                  <tab.icon className="size-5" />
+                </div>
               </button>
             );
           }
@@ -42,12 +52,16 @@ export function MobileBottomNav({ onAddClick }: MobileBottomNavProps) {
               to={tab.to}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors",
-                isActive ? "text-foreground" : "text-muted-foreground"
+                "group flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all active:scale-95",
+                isActive ? colorClass : "text-muted-foreground"
               )}
             >
-              <tab.icon className="size-5" />
-              <span className="text-[10px]">{tab.label}</span>
+              <div className={cn(
+                "flex items-center justify-center size-10 rounded-full transition-colors",
+                isActive ? "bg-ink/5 dark:bg-white/10" : "hover:bg-ink/5 dark:hover:bg-white/5"
+              )}>
+                <tab.icon className="size-5" />
+              </div>
             </Link>
           );
         })}

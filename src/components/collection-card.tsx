@@ -22,8 +22,8 @@ export function CollectionCard({
       to="/folders/$folderId"
       params={{ folderId: id }}
       className={cn(
-        "group flex shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors duration-150 ease-[var(--ease-out)]",
-        "active:scale-[0.99] [@media(hover:hover)]:hover:border-foreground/15",
+        "group flex shrink-0 flex-col overflow-hidden rounded-[var(--radius-md)] border border-line bg-panel transition-colors duration-150 ease-[var(--ease-out)] dark:border-dark-border dark:bg-charcoal",
+        "active:scale-[0.99] [@media(hover:hover)]:hover:bg-surface-raised dark:[@media(hover:hover)]:hover:bg-charcoal-2",
         className
       )}
     >
@@ -37,16 +37,12 @@ export function CollectionCard({
           />
         ) : (
           <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, #ffd6fa 0%, #c5b6ff 50%, #d4a6ff 100%)",
-            }}
+            className="absolute inset-0 bg-violet/20 dark:bg-violet/10"
           />
         )}
       </div>
       <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-        <p className="min-w-0 truncate text-body font-body text-foreground">{name}</p>
+        <p className="min-w-0 truncate text-body font-body text-ink dark:text-dark-text">{name}</p>
         <p className="shrink-0 text-xs text-muted-foreground">
           {itemCount}
         </p>

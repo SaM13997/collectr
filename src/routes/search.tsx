@@ -129,6 +129,7 @@ function SearchView() {
 
   return (
     <AppLayout title="Search">
+      <div className="p-4 md:p-8 max-w-5xl mx-auto w-full">
       <div className="relative mb-4">
         <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -245,6 +246,7 @@ function SearchView() {
           onClose={() => setMovingItemId(null)}
         />
       ) : null}
+    </div>
     </AppLayout>
   );
 }

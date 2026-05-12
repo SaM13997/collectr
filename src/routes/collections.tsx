@@ -40,6 +40,7 @@ function CollectionsView() {
 
   return (
     <AppLayout title="Collections">
+      <div className="p-4 md:p-8 max-w-5xl mx-auto w-full">
       {folderData === undefined ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -80,6 +81,7 @@ function CollectionsView() {
           ))}
         </div>
       )}
+          </div>
     </AppLayout>
   );
 }

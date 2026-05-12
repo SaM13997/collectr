@@ -3,7 +3,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useUiStore } from "@/store/useUiStore";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/system/primitives/button";
+import { Surface } from "@/components/system/primitives/surface";
 import { FolderInput, Trash2, X, CheckSquare, Inbox, Folder } from "lucide-react";
 import { toast } from "sonner";
 
@@ -100,11 +101,11 @@ export function BulkSelectionToolbar({ totalCount, allIds }: BulkSelectionToolba
 
   return (
     <>
-      <div className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-sm">
+      <div className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-line bg-panel/95 dark:border-dark-border dark:bg-charcoal/95 px-4 py-2 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             onClick={exitSelectionMode}
             aria-label="Exit selection"
           >
@@ -127,7 +128,7 @@ export function BulkSelectionToolbar({ totalCount, allIds }: BulkSelectionToolba
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             onClick={() => setShowFolderPicker(true)}
             disabled={count === 0}
             aria-label="Move selected"
@@ -136,7 +137,7 @@ export function BulkSelectionToolbar({ totalCount, allIds }: BulkSelectionToolba
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             onClick={handleDelete}
             disabled={count === 0 || isDeleting}
             aria-label="Delete selected"
@@ -174,12 +175,8 @@ function BulkFolderPicker({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-[1.5rem] border border-border/70 bg-card/92 p-4 shadow-xl"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Move selected items to collection"
-        onClick={(e) => e.stopPropagation()}
-      >
+        className="w-full max-w-sm">
+        <Surface variant="overlay" radius="xl" padding="lg" role="dialog" aria-modal="true" aria-label="Move selected items to collection" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-foreground">Move to collection</h3>
           <button
@@ -211,6 +208,7 @@ function BulkFolderPicker({
             </button>
           ))}
         </div>
+      </Surface>
       </div>
     </div>
   );

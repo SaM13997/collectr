@@ -16,7 +16,8 @@ type Folder = {
   _id: string;
   name: string;
   parentId: string | null;
-  tweetCount: number;
+  tweetCount?: number;
+  itemCount?: number;
 };
 
 function FolderTreeItem({
@@ -45,9 +46,9 @@ function FolderTreeItem({
           <FolderOpen className="size-4 text-muted-foreground shrink-0" />
           <span className="truncate">{folder.name}</span>
         </div>
-        {folder.tweetCount > 0 && (
+        {((folder.tweetCount ?? 0) > 0 || (folder.itemCount ?? 0) > 0) && (
           <span className="text-muted-foreground text-xs shrink-0 ml-2">
-            {folder.tweetCount}
+            {folder.tweetCount ?? folder.itemCount ?? 0}
           </span>
         )}
       </Link>
@@ -119,10 +120,10 @@ export function MobileFolderSheet({
       <Drawer.Root open={open} onOpenChange={onOpenChange}>
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-          <Drawer.Content className="bg-background flex flex-col rounded-t-[10px] h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-50">
-            <div className="p-4 bg-background rounded-t-[10px] flex-1 overflow-hidden flex flex-col">
+          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-hidden rounded-t-[32px] bg-background">
+            <div className="rounded-t-[32px] bg-background p-4">
               <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted mb-4" />
-              <div className="flex-1 overflow-y-auto">
+              <div className="max-h-[min(60vh,28rem)] overflow-y-auto pr-1">
                 <nav className="flex flex-col gap-1 mb-4">
                   <Link
                     to="/"
@@ -181,7 +182,7 @@ export function MobileFolderSheet({
                   <Button
                     type="submit"
                     disabled={isCreating}
-                    className="h-10 px-3"
+                    className="size-10 min-h-0 min-w-0 shrink-0 rounded-full p-0"
                     aria-label="Create collection"
                   >
                     <Plus className="size-4" />

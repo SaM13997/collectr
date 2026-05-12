@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { PwaInstallBanner } from "./pwa-install-banner";
 
 export function PwaRegistrar() {
   useEffect(() => {
@@ -7,5 +8,5 @@ export function PwaRegistrar() {
     }
   }, []);
 
-  return null;
+  return <PwaInstallBanner />;
 }

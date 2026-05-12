@@ -1,19 +1,29 @@
-import { AppLayout } from "@/components/layout/AppLayout";
-
 export function PageSkeleton() {
   return (
-    <AppLayout>
-      <div className="p-4 md:p-8 max-w-5xl mx-auto">
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-20 animate-pulse rounded-xl bg-muted"
-            />
-          ))}
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Desktop sidebar placeholder */}
+      <div className="hidden md:block w-64 shrink-0 border-r border-border bg-muted/20" />
+
+      {/* Main area */}
+      <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
+        {/* Header placeholder */}
+        <div className="h-14 border-b border-border bg-background flex items-center justify-between px-4 shrink-0">
+          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
         </div>
+
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-5xl mx-auto w-full">
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-20 animate-pulse rounded-xl bg-muted"
+              />
+            ))}
+          </div>
+        </main>
       </div>
-    </AppLayout>
+    </div>
   );
 }
 

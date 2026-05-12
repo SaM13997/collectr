@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/system/primitives/button";
+import { Pill } from "@/components/system/primitives/pill";
 import {
   ExternalLink,
   FolderInput,
@@ -113,7 +114,7 @@ export function SavedItemCard({
     <>
       <div
         className={cn(
-          "relative overflow-hidden rounded-xl bg-muted transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
+          "relative overflow-hidden rounded-[var(--radius-sm)] bg-panel-strong dark:bg-charcoal-2 transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]",
           isList ? "size-14 shrink-0" : "aspect-square"
         )}
       >
@@ -125,7 +126,7 @@ export function SavedItemCard({
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-gradient-to-br from-muted to-background p-2">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-panel-strong dark:bg-charcoal-2 p-2">
             {item.source === "x" ? (
               <svg
                 viewBox="0 0 24 24"
@@ -153,9 +154,9 @@ export function SavedItemCard({
               );
             })()}
             {!isList && (
-              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <Pill variant="default" size="sm" className="mt-1 opacity-80">
                 {domain}
-              </span>
+              </Pill>
             )}
           </div>
         )}
@@ -182,7 +183,7 @@ export function SavedItemCard({
             {item.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-0.5 rounded-full border border-border px-1.5 py-0 text-[10px] text-muted-foreground"
+                className="inline-flex items-center gap-0.5 rounded-full border border-line px-1.5 py-0 text-[10px] text-ink/70 dark:border-dark-border dark:text-dark-muted-text bg-white/50 dark:bg-charcoal/50"
               >
                 <Hash className="size-2.5" />
                 {tag}
@@ -305,7 +306,7 @@ export function SavedItemCard({
         className={cn(
           "flex gap-3 text-left",
           isList
-            ? "min-w-0 flex-1 items-center rounded-xl border border-border bg-card p-3 transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.99] [@media(hover:hover)]:hover:bg-accent"
+            ? "min-w-0 flex-1 items-center rounded-[var(--radius-md)] border border-line bg-panel p-3 transition-colors duration-150 ease-[var(--ease-out)] active:scale-[0.99] [@media(hover:hover)]:hover:bg-surface-raised dark:border-dark-border dark:bg-charcoal dark:hover:bg-charcoal-2"
             : "flex-col"
         )}
         aria-label={

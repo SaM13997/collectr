@@ -137,6 +137,7 @@ function EntryView() {
   if (item === undefined) {
     return (
       <AppLayout backButton={<BackButton onClick={() => router.history.back()} />}>
+        <div className="p-4 md:p-8 max-w-2xl mx-auto w-full">
         <div className="flex flex-col gap-4 animate-pulse">
           <div className="flex items-center gap-3">
             <div className="size-12 rounded-full bg-muted" />
@@ -148,6 +149,7 @@ function EntryView() {
           <div className="h-24 rounded-xl bg-muted" />
           <div className="h-48 rounded-xl bg-muted" />
         </div>
+        </div>
       </AppLayout>
     );
   }
@@ -155,6 +157,7 @@ function EntryView() {
   if (item === null) {
     return (
       <AppLayout title="Not found" backButton={<BackButton onClick={() => router.history.back()} />}>
+        <div className="p-4 md:p-8 max-w-2xl mx-auto w-full">
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-lg font-semibold">Entry not found</p>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -163,6 +166,7 @@ function EntryView() {
           <Button asChild variant="outline" className="mt-6">
             <Link to="/">Go back</Link>
           </Button>
+        </div>
         </div>
       </AppLayout>
     );
@@ -193,6 +197,7 @@ function EntryView() {
       title={displayHandle ? `@${displayHandle}` : item.source === "instagram" ? "Instagram" : "Entry"}
       backButton={<BackButton onClick={() => router.history.back()} />}
     >
+      <div className="p-4 md:p-8 max-w-2xl mx-auto w-full">
       {/* Author header */}
         <div className="flex items-center gap-3">
         {item.authorAvatar ? (
@@ -373,6 +378,7 @@ function EntryView() {
           onClose={() => setMovingItemId(null)}
         />
       ) : null}
+    </div>
     </AppLayout>
   );
 }

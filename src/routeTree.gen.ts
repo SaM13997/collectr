@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShareTargetRouteImport } from './routes/share-target'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
@@ -22,6 +23,11 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 const ShareTargetRoute = ShareTargetRouteImport.update({
   id: '/share-target',
   path: '/share-target',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/share-target': typeof ShareTargetRoute
   '/entries/$entryId': typeof EntriesEntryIdRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/share-target': typeof ShareTargetRoute
   '/entries/$entryId': typeof EntriesEntryIdRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/share-target': typeof ShareTargetRoute
   '/entries/$entryId': typeof EntriesEntryIdRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/profile'
     | '/search'
+    | '/settings'
     | '/share-target'
     | '/entries/$entryId'
     | '/folders/$folderId'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/profile'
     | '/search'
+    | '/settings'
     | '/share-target'
     | '/entries/$entryId'
     | '/folders/$folderId'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/profile'
     | '/search'
+    | '/settings'
     | '/share-target'
     | '/entries/$entryId'
     | '/folders/$folderId'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRoute
   ShareTargetRoute: typeof ShareTargetRoute
   EntriesEntryIdRoute: typeof EntriesEntryIdRoute
   FoldersFolderIdRoute: typeof FoldersFolderIdRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/share-target'
       fullPath: '/share-target'
       preLoaderRoute: typeof ShareTargetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRoute,
   ShareTargetRoute: ShareTargetRoute,
   EntriesEntryIdRoute: EntriesEntryIdRoute,
   FoldersFolderIdRoute: FoldersFolderIdRoute,

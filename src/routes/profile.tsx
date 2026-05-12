@@ -97,6 +97,7 @@ function ProfileView() {
 
   return (
     <AppLayout title="Profile">
+      <div className="p-4 md:p-8 max-w-3xl mx-auto w-full">
       {/* User Info */}
       <div className="slide-up flex items-center gap-4 rounded-2xl bg-surface p-5">
         <Avatar className="size-14">
@@ -183,6 +184,7 @@ function ProfileView() {
           <LogOut className="size-4" />
           <span>Sign out</span>
         </Button>
+      </div>
       </div>
     </AppLayout>
   );

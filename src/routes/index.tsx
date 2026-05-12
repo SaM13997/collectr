@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { useAuthSession } from "@/lib/use-auth-session";
 import { fetchItemMetadata } from "@/lib/item-metadata";
 import { isMetadataFetchEnabled } from "@/lib/feature-flags";
@@ -17,6 +17,11 @@ import { cn } from "@/lib/utils";
 import { VirtualizedList } from "@/components/virtualized-list";
 import { useUiStore } from "@/store/useUiStore";
 import { PageSkeleton } from "@/components/skeletons";
+
+// Keep previous query results across route remounts to prevent skeleton flashing on navigation
+type FolderData = { folders: (Doc<"folders"> & { itemCount: number })[]; inboxCount: number };
+let cachedInboxItems: Doc<"items">[] | undefined = undefined;
+let cachedFolderData: FolderData | undefined = undefined;
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -142,7 +147,7 @@ function LandingPage() {
                 title: "Works Everywhere",
                 desc: "Install as a PWA. Share from any app on any device.",
               },
-            ].map((f, i) => (
+            ].map((f) => (
               <div
                 key={f.title}
                 className="flex flex-col gap-5 p-6 border-2 border-foreground bg-card shadow-[6px_6px_0px_0px_var(--color-foreground)] hover:-translate-y-1.5 hover:shadow-[10px_10px_0px_0px_var(--color-primary)] transition-all duration-300"
@@ -295,6 +300,14 @@ function SavedView() {
 
   const inboxItems = useQuery(api.items.listInbox);
   const folderData = useQuery(api.folders.listTree);
+
+  // Cache results so remounts after navigation don't flash skeletons
+  if (inboxItems !== undefined) cachedInboxItems = inboxItems;
+  if (folderData !== undefined) cachedFolderData = folderData;
+
+  const displayInboxItems = inboxItems ?? cachedInboxItems;
+  const displayFolderData = folderData ?? cachedFolderData;
+
   const setMetadata = useMutation(api.items.setMetadata);
   const markAllAsRead = useMutation(api.items.markAllAsRead).withOptimisticUpdate(
     (store) => {
@@ -312,7 +325,7 @@ function SavedView() {
   );
   const attemptedRef = useRef<Set<string>>(new Set());
 
-  const unreadCount = inboxItems?.filter((t) => !t.isRead).length ?? 0;
+  const unreadCount = displayInboxItems?.filter((t) => !t.isRead).length ?? 0;
 
   useEffect(() => {
     if (!inboxItems) return;
@@ -342,8 +355,8 @@ function SavedView() {
     };
   }, [inboxItems, setMetadata]);
 
-  const collections = folderData?.folders ?? [];
-  const inboxCount = folderData?.inboxCount ?? 0;
+  const collections = displayFolderData?.folders ?? [];
+  const inboxCount = displayFolderData?.inboxCount ?? 0;
 
   const showCollections = filter === "all" || filter === "collections";
   const showLinks = filter === "all" || filter === "links";
@@ -359,9 +372,9 @@ function SavedView() {
       <div className="p-4 md:p-8 max-w-5xl mx-auto">
         {/* Collections Section */}
       {showCollections ? (
-        <section>
-          <div className="no-scrollbar flex overflow-x-auto gap-3 pb-4 snap-x snap-mandatory [scroll-padding-inline:var(--spacing-page-x)]">
-            {folderData === undefined
+        <section className="-mx-4 md:-mx-8">
+          <div className="no-scrollbar flex overflow-x-auto gap-3 pb-4 snap-x snap-mandatory px-4 md:px-8 [scroll-padding-inline:1rem] md:[scroll-padding-inline:2rem]">
+            {folderData === undefined && cachedFolderData === undefined
               ? Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
@@ -411,8 +424,8 @@ function SavedView() {
         <section className="mt-section">
           {selectionMode ? (
             <BulkSelectionToolbar
-              totalCount={inboxItems?.length ?? 0}
-              allIds={inboxItems?.map((t) => t._id) ?? []}
+              totalCount={displayInboxItems?.length ?? 0}
+              allIds={displayInboxItems?.map((t) => t._id) ?? []}
             />
           ) : (
             <div className="mb-2 flex items-center justify-between">
@@ -420,7 +433,7 @@ function SavedView() {
                 {filter === "links" ? "All links" : "Recent links"}
               </h2>
               <div className="flex items-center gap-2">
-                {inboxItems && inboxItems.length > 0 ? (
+                {displayInboxItems && displayInboxItems.length > 0 ? (
                   <button
                     onClick={enterSelectionMode}
                     className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors duration-150"
@@ -445,7 +458,7 @@ function SavedView() {
             </div>
           )}
 
-          {inboxItems === undefined ? (
+          {displayInboxItems === undefined ? (
             <div className="flex flex-col gap-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
@@ -454,7 +467,7 @@ function SavedView() {
                 />
               ))}
             </div>
-          ) : inboxItems.length === 0 ? (
+          ) : displayInboxItems.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-card-padding text-center">
               <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-muted">
                 <Link2 className="size-6 text-muted-foreground/40" />
@@ -468,7 +481,7 @@ function SavedView() {
             </div>
           ) : (
             <VirtualizedList
-              items={inboxItems.map((t) => ({ ...t, id: t._id }))}
+              items={displayInboxItems.map((t) => ({ ...t, id: t._id }))}
               renderItem={(item) => (
                 <SavedItemCard
                   item={item}
@@ -495,7 +508,7 @@ function SavedView() {
                   onMove={
                     selectionMode
                       ? undefined
-                      : (id) => setMovingTweetId(id)
+                      : (id) => setMovingItemId(id)
                   }
                 />
               )}
@@ -507,10 +520,10 @@ function SavedView() {
         </section>
       ) : null}
 
-      {movingTweetId ? (
+      {movingItemId ? (
         <FolderPicker
-          tweetId={movingTweetId}
-          onClose={() => setMovingTweetId(null)}
+          itemId={movingItemId}
+          onClose={() => setMovingItemId(null)}
         />
       ) : null}
         </div>
