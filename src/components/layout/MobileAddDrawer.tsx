@@ -13,7 +13,7 @@ export function MobileAddDrawer({ open, onOpenChange }: MobileAddDrawerProps) {
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
           <Drawer.Content className="bg-background flex flex-col rounded-t-[32px] h-auto max-h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-50">
-            <div className="p-4 bg-background rounded-t-[32px] overflow-y-auto flex flex-col">
+            <div className="p-4 bg-background rounded-t-[32px] overflow-visible flex flex-col">
               <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted mb-4" />
               <div className="mb-4">
                 <h2 className="text-lg font-semibold">Add Link</h2>
@@ -21,7 +21,7 @@ export function MobileAddDrawer({ open, onOpenChange }: MobileAddDrawerProps) {
                   Save a new link to your collection.
                 </p>
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-visible p-1">
                 <AddTweetForm onAdded={() => onOpenChange(false)} />
               </div>
             </div>
