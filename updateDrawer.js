@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+const fs = require('fs');
+
+const code = `import { useState, useEffect } from "react";
 import { Drawer } from "vaul";
 import { AnimatePresence, motion } from "framer-motion";
 import { AddTweetForm } from "@/components/add-tweet-form";
 import { Folder, Hash, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 
 interface MobileAddDrawerProps {
@@ -37,7 +39,7 @@ export function MobileAddDrawer({ open, onOpenChange }: MobileAddDrawerProps) {
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
           <Drawer.Content className="bg-background flex flex-col rounded-t-[32px] h-auto max-h-[85vh] mt-24 fixed bottom-0 left-0 right-0 z-50 outline-none">
-            <div className="p-4 bg-background rounded-t-[32px] overflow-hidden flex flex-col transition-all duration-300 ease-in-out">
+            <div className="p-4 bg-background rounded-t-[32px] overflow-hidden flex flex-col">
               <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted mb-4" />
               
               <AnimatePresence mode="wait" initial={false}>
@@ -72,7 +74,7 @@ export function MobileAddDrawer({ open, onOpenChange }: MobileAddDrawerProps) {
                         <Folder className="size-4" />
                         <span className="truncate">
                           {folderId && foldersData?.folders 
-                            ? foldersData.folders.find((f: any) => f._id === folderId)?.name || 'Collection'
+                            ? foldersData.folders.find(f => f._id === folderId)?.name || 'Collection'
                             : 'Collection'}
                         </span>
                       </Button>
@@ -119,7 +121,7 @@ export function MobileAddDrawer({ open, onOpenChange }: MobileAddDrawerProps) {
                         <Folder className="size-4" />
                         Saved (Inbox)
                       </button>
-                      {foldersData?.folders.map((folder: any) => (
+                      {foldersData?.folders.map((folder) => (
                         <button
                           key={folder._id}
                           onClick={() => {
@@ -164,14 +166,14 @@ export function MobileAddDrawer({ open, onOpenChange }: MobileAddDrawerProps) {
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         value={tags.join(', ')}
                         onChange={(e) => {
-                          const val = e.target.value;
-                          setTags(val ? val.split(',').map(t=>t.trimStart()) : []);
+                          const newTags = e.target.value
+                            .split(',')
+                            .map(t => t.trim())
+                            .filter(t => t.length > 0);
+                          setTags(newTags);
                         }}
                       />
-                      <Button className="w-full" onClick={() => {
-                        setTags(tags.filter(t => t.length > 0));
-                        setView('main');
-                      }}>
+                      <Button className="w-full" onClick={() => setView('main')}>
                         Done
                       </Button>
                     </div>
@@ -185,3 +187,6 @@ export function MobileAddDrawer({ open, onOpenChange }: MobileAddDrawerProps) {
     </div>
   );
 }
+`;
+
+fs.writeFileSync('src/components/layout/MobileAddDrawer.tsx', code);

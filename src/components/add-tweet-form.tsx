@@ -11,9 +11,11 @@ import { parseUrl, extractUrlFromText } from "@/lib/url-parser";
 
 export function AddTweetForm({
   folderId,
+  tags,
   onAdded,
 }: {
   folderId?: Id<"folders"> | null;
+  tags?: string[];
   onAdded?: () => void;
 }) {
   const [url, setUrl] = useState("");
@@ -44,7 +46,11 @@ export function AddTweetForm({
 
     try {
       setIsSaving(true);
-      const docId = await addItem({ url: parsed.rawUrl, folderId: folderId ?? null });
+      const docId = await addItem({ 
+        url: parsed.rawUrl, 
+        folderId: folderId ?? null,
+        tags: tags && tags.length > 0 ? tags : undefined
+      });
 
       if (isMetadataFetchEnabled(parsed.source) && parsed.sourceItemId) {
         const meta = await fetchItemMetadata(parsed.canonicalUrl, parsed.source);
