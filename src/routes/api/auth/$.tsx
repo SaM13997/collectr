@@ -1,11 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Agent } from "undici";
 
-const insecureDevAgent = new Agent({
-  connect: {
-    rejectUnauthorized: false,
-  },
-});
+const getDevDispatcher = async () => {
+  if (process.env.NODE_ENV === "production") {
+    return undefined;
+  }
+
+  const { Agent } = await import("undici");
+
+  return new Agent({
+    connect: {
+      rejectUnauthorized: false,
+    },
+  });
+};
 
 export const getProxyHeaders = (requestHeaders: Headers) => {
   const headers = new Headers(requestHeaders);
@@ -47,13 +54,15 @@ const proxyAuthRequest = async (request: Request) => {
   const headers = getProxyHeaders(request.headers);
 
   try {
+    const dispatcher = await getDevDispatcher();
+
     const response = await fetch(nextUrl, {
       method: request.method,
       headers,
       redirect: "manual",
       body: request.body,
       // @ts-expect-error undici-specific fetch option for dev TLS workaround
-      dispatcher: process.env.NODE_ENV === "production" ? undefined : insecureDevAgent,
+      dispatcher,
       duplex: "half",
     });
 
