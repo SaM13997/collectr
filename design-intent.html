@@ -812,19 +812,20 @@
     position: fixed;
     bottom: 24px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) skewX(-12deg);
     width: 90%;
     max-width: 400px;
-    height: 60px;
+    height: 44px;
     background: var(--color-panel);
     border: 2px solid var(--color-ink);
-    box-shadow: 6px 6px 0px 0px var(--color-ink);
+    box-shadow: 3px 3px 0px 0px var(--color-coral);
     display: none;
     align-items: center;
-    justify-content: space-around;
+    padding: 8px 16px;
+    gap: 8px;
     z-index: 50;
   }
-  .dark .mobile-nav { background: var(--color-charcoal); border-color: var(--fg); box-shadow: 6px 6px 0px 0px var(--fg); }
+  .dark .mobile-nav { background: var(--color-charcoal); border-color: var(--fg); box-shadow: 3px 3px 0px 0px var(--color-coral); }
 
   .mobile-nav-item {
     display: flex;
@@ -836,6 +837,7 @@
     height: 100%;
     color: var(--muted);
     transition: color 150ms var(--ease-out);
+    transform: skewX(12deg);
   }
   .mobile-nav-item.active { color: var(--color-coral); }
   .mobile-nav-item span {
@@ -1264,19 +1266,16 @@ function showSection(id) {
 <!-- Mobile Bottom Nav -->
 <nav class="mobile-nav">
   <a href="#" class="mobile-nav-item active">
-    <svg class="icon-svg-lg" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-    <span>Inbox</span>
+    <svg class="icon-svg-lg" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
   </a>
   <a href="#" class="mobile-nav-item" style="color:var(--color-sky)">
     <svg class="icon-svg-lg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
     <span>Search</span>
   </a>
-  <button class="mobile-add-btn">
-    <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-  </button>
   <a href="#" class="mobile-nav-item" style="color:var(--color-sage-deep)">
     <svg class="icon-svg-lg" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-    <span>Folders</span>
+    <span>Collections</span>
   </a>
 </nav>
 </section>

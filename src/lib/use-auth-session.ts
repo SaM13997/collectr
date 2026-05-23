@@ -47,5 +47,5 @@ export function useAuthSession() {
     }
   }, [error]);
 
-  return { session, isPending: shouldShowPending };
+  return { session, isPending: shouldShowPending, hasCachedSession: hasResolvedSession };
 }

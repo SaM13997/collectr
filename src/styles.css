@@ -77,29 +77,6 @@
   --color-surface-raised: var(--surface-raised);
   --color-surface-overlay: var(--surface-overlay);
 
-  /* Visual Uplift Tokens */
-  --color-sage: var(--color-sage);
-  --color-sage-deep: var(--color-sage-deep);
-  --color-charcoal: var(--color-charcoal);
-  --color-charcoal-2: var(--color-charcoal-2);
-  --color-charcoal-3: var(--color-charcoal-3);
-  --color-coral: var(--color-coral);
-  --color-violet: var(--color-violet);
-  --color-butter: var(--color-butter);
-  --color-sky: var(--color-sky);
-  --color-mint: var(--color-mint);
-  --color-rose: var(--color-rose);
-  --color-ink: var(--color-ink);
-  --color-panel: var(--color-panel);
-  --color-panel-strong: var(--color-panel-strong);
-  --color-line: var(--color-line);
-  --color-line-strong: var(--color-line-strong);
-
-  --color-accent-alert: var(--color-accent-alert);
-  --color-accent-insight: var(--color-accent-insight);
-  --color-accent-context: var(--color-accent-context);
-  --color-accent-utility: var(--color-accent-utility);
-
   /* Typography — Raycast design system */
   --font-size-title: 1.5rem;
   --font-size-heading: 1.125rem;

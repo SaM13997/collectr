@@ -30,10 +30,10 @@ export const Route = createFileRoute("/")({
 type FilterTab = "all" | "collections" | "links";
 
 function HomePage() {
-  const { session, isPending } = useAuthSession();
+  const { session, isPending, hasCachedSession } = useAuthSession();
 
   if (isPending) {
-    return <PageSkeleton />;
+    return hasCachedSession ? <PageSkeleton /> : <LandingPage />;
   }
 
   if (!session) {
@@ -334,10 +334,14 @@ function SavedView() {
     const fetchable = itemsWithoutContent.filter((t) => isMetadataFetchEnabled(t.source));
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    fetchable.forEach((item, index) => {
+    const MAX_BATCH = 10;
+    const MAX_STAGGER_MS = 2000;
+
+    fetchable.slice(0, MAX_BATCH).forEach((item, index) => {
       if (attemptedRef.current.has(item._id)) return;
       attemptedRef.current.add(item._id);
 
+      const delay = Math.min(index * 400, MAX_STAGGER_MS) + Math.random() * 200;
       const timer = setTimeout(async () => {
         const meta = await fetchItemMetadata(item.url, item.source);
         await setMetadata({
@@ -345,7 +349,7 @@ function SavedView() {
           status: meta ? "ok" : "unavailable",
           ...meta,
         }).catch(() => {});
-      }, index * 400 + Math.random() * 200);
+      }, delay);
 
       timers.push(timer);
     });
